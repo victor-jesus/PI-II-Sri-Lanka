@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "allegro5.h": "c",
+        "game.h": "c",
+        "allegro_primitives.h": "c",
+        "player.h": "c",
+        "allegro_font.h": "c"
+    }
+}

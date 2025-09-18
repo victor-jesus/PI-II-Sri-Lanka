@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/AllegroApp.dir/src/main.c.o -o AllegroApp  -lallegro_font -lallegro_primitives -lallegro 

@@ -1,0 +1,3 @@
+/home/victor-gustavo/Programação/POC_01/build/CMakeFiles/POC.dir
+/home/victor-gustavo/Programação/POC_01/build/CMakeFiles/edit_cache.dir
+/home/victor-gustavo/Programação/POC_01/build/CMakeFiles/rebuild_cache.dir
