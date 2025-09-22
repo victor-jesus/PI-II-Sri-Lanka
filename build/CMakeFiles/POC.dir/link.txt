@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/POC.dir/src/main.c.o CMakeFiles/POC.dir/src/game.c.o CMakeFiles/POC.dir/src/player.c.o CMakeFiles/POC.dir/src/entity.c.o CMakeFiles/POC.dir/src/enemy.c.o CMakeFiles/POC.dir/src/battle.c.o CMakeFiles/POC.dir/src/dice.c.o -o POC  -lallegro_font -lallegro_primitives -lallegro 
