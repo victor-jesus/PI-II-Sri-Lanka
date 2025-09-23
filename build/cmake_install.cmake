@@ -1,4 +1,4 @@
-# Install script for directory: /home/victor-gustavo/Programação/POC_01
+# Install script for directory: /home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/victor-gustavo/Programação/POC_01/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

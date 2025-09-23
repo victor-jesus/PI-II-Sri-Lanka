@@ -1,12 +1,27 @@
 #include "entity.h"
 #include "allegro5/allegro_primitives.h"
 
-void init_entity(Entity* entity, int x, int y, int vx, int hp){
+void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp){
+    for(int i = 0; i < QUANT_ANIMATIONS; i++){
+        entity->sprite[i] = NULL;
+    }
+
+    entity->anim_state = ANIM_IDLE;
     entity->x = x;
     entity->y = y;
     entity->vx = vx;
+    entity->vy = vy;
     entity->hp = hp;
+    entity->flip = 0;
     entity->isActive = true;
+}
+
+void toggle_entity_active(Entity* entity, bool change){
+    entity->isActive = change;
+}
+
+void set_entity_sprite(Entity* entity, AnimationState state, Sprite* sprite){
+    entity->sprite[state] = sprite;
 }
 
 void update_entity(Entity* entity, const char* key){
@@ -23,5 +38,9 @@ void take_damage(Entity* entity, int amount){
 }
 
 void draw_entity(Entity* entity){
-    al_draw_filled_circle(entity->x, entity->y, 15, al_map_rgb(255, 255, 0));
+    float dx = entity->x;
+    float dy = entity->y;
+
+    Sprite* current = entity->sprite[entity->anim_state];
+    draw_sprite(current, dx, dy, entity->flip);
 }

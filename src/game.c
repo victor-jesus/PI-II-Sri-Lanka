@@ -6,10 +6,11 @@
 Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
-    game->player = malloc(sizeof(Player));
-    init_player(game->player, pos_x_player, pos_y_player, vx_player, hp_player);
-
+    game->player = malloc(sizeof(Player));    
     game->enemy = malloc(sizeof(Enemy));
+
+
+    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 0, 0, 0, 0);
     init_enemy(game->enemy, 600, 720/2, 5, 100);
 
     game->battle = NULL;
@@ -30,16 +31,17 @@ void check_battle(Game* game){
     }
 }
 
-void update_game(Game* game, const char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy){
+void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt){
     check_battle(game);
 
     if(game->state == GAME_EXPLORING){
-        update_player(game->player, key);
+        update_player(game->player, key, dt);
     }
 
-    if(game->state == GAME_BATTLE){
+    if(game->state == GAME_BATTLE && game->battle){
         if(game->battle->state == BATTLE_END) {
             game->state = GAME_EXPLORING;
+            game->battle = NULL;
             destroy_battle(game->battle);
             return;
         }
@@ -50,7 +52,7 @@ void update_game(Game* game, const char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER
 }
 
 void draw_game(Game* game){
-    if(game->state == GAME_BATTLE){
+    if(game->state == GAME_BATTLE && game->battle){
         al_draw_text(game->game_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "BATALHA!");
 
         if(game->battle->turn_state == TURN_PLAYER)
