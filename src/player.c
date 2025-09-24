@@ -1,31 +1,17 @@
 #include "player.h"
 #include "allegro5/allegro5.h"
 
-const char* path_idle = "assets/sprites/samurai/idle.png";
-const char* path_run = "assets/sprites/samurai/run.png";
-const char* path_attack = "assets/sprites/samurai/attack.png";
-const char* path_hit = "assets/sprites/samurai/hurt.png";
+
 
 void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
     init_entity(&player->entity, x, y, vx, vy, max_hp);
     player->iniciative = 10;
+}
 
-    Sprite* idle   = malloc(sizeof(Sprite));
-    Sprite* run    = malloc(sizeof(Sprite));
-    Sprite* attack = malloc(sizeof(Sprite));
-    Sprite* hit = malloc(sizeof(Sprite));
-
-    // ajusta frame_time de cada animação
-    create_sprite(idle, path_idle, 10, 1, 0.1f);
-    create_sprite(run, path_run, 16, 1, 0.06f);
-    create_sprite(attack, path_attack, 4, 1, 0.1f);
-    create_sprite(hit, path_hit, 1, 1, 0.5f);
-
-    set_entity_sprite(&player->entity, ANIM_IDLE, idle);
-    set_entity_sprite(&player->entity, ANIM_RUN, run);
-    set_entity_sprite(&player->entity, ANIM_ATTACK, attack);
-    set_entity_sprite(&player->entity, ANIM_HIT, hit);
-
+void set_player_sprite(Player* player, const char* path, AnimationState animation_type, int cols, int rows, float frame_time){
+    Sprite* anim = malloc(sizeof(Sprite));
+    create_sprite(anim, path, cols, rows, frame_time);
+    set_entity_sprite(&player->entity, animation_type, anim);
 }
 
 void update_player(Player* player, unsigned char* key, float dt){
