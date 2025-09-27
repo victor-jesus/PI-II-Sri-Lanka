@@ -1,0 +1,20 @@
+# --- Arquivos temporários do CMake ---
+build/CMakeFiles/
+build/CMakeCache.txt
+build/cmake_install.cmake
+build/Makefile
+
+# --- Compilados ---
+src/*.o
+src/*.obj
+src/*.exe
+src/*.dll
+src/*.so
+src/*.a
+src/*.lib
+src/*.out
+
+# --- OS generated files ---
+.DS_Store
+Thumbs.db
+desktop.ini

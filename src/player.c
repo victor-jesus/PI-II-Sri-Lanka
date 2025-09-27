@@ -1,20 +1,73 @@
 #include "player.h"
+#include "battle.h"
 #include "allegro5/allegro5.h"
+#include <stdio.h>
 
-
-
-void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
+void init_player(Player* player, int max_hp, int x, int y, int vx, int vy){
     init_entity(&player->entity, x, y, vx, vy, max_hp);
     player->iniciative = 10;
 }
 
-void set_player_sprite(Player* player, const char* path, AnimationState animation_type, int cols, int rows, float frame_time){
-    Sprite* anim = malloc(sizeof(Sprite));
-    create_sprite(anim, path, cols, rows, frame_time);
-    set_entity_sprite(&player->entity, animation_type, anim);
+
+// ISSO TRVA O GAME <BATTLE>
+void update_player_battle(Battle* battle, float dt){
+
+    if(battle->player->entity.anim_state == ANIM_HIT){
+        Sprite* hit = battle->player->entity.sprite[ANIM_HIT];
+        update_sprite(hit, dt);
+
+        if(hit->current_frame == hit->cols - 1){
+            battle->player->entity.anim_state = ANIM_IDLE;
+            hit->current_frame = 0;
+            hit->elapsed = 0;
+        }
+        return;
+    }
+
+    if(battle->player->entity.anim_state == ANIM_ATTACK){
+        Sprite* attack = battle->player->entity.sprite[ANIM_ATTACK];
+
+        do{
+            update_sprite(attack, dt);
+        }
+        while(attack->current_frame == attack->cols - 1);
+        battle->player->entity.anim_state = ANIM_IDLE;
+        attack->current_frame = 0;
+        attack->elapsed = 0;
+        
+        return;
+    }
+
+    Sprite* current = battle->player->entity.sprite[battle->player->entity.anim_state];
+    update_sprite(current, dt);
 }
 
 void update_player(Player* player, unsigned char* key, float dt){
+    player->moving = false;
+
+    if(player->entity.anim_state == ANIM_HIT){
+        Sprite* hit = player->entity.sprite[ANIM_HIT];
+        update_sprite(hit, dt);
+
+        if(hit->current_frame == hit->cols - 1){
+            player->entity.anim_state = ANIM_IDLE;
+            hit->current_frame = 0;
+            hit->elapsed = 0;
+        }
+        return;
+    }
+
+    if(player->entity.anim_state == ANIM_ATTACK){
+        
+        Sprite* attack = player->entity.sprite[ANIM_ATTACK];
+        update_sprite(attack, dt);
+        if(attack->current_frame == attack->cols - 1){
+            player->entity.anim_state = ANIM_IDLE;
+            attack->current_frame = 0;
+            attack->elapsed = 0;
+            return;
+        }
+    }
 
     if (key[ALLEGRO_KEY_A] || key[ALLEGRO_KEY_LEFT]) { 
         player->entity.x -= player->entity.vx; 
@@ -26,7 +79,7 @@ void update_player(Player* player, unsigned char* key, float dt){
         player->entity.flip = 0;
         player->moving = true; 
     }
-
+    
     if(player->moving){
         player->entity.anim_state = ANIM_RUN;
     } else {

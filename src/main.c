@@ -84,9 +84,9 @@ int main(){
             case ALLEGRO_EVENT_KEY_DOWN:
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
-                if(game->state == GAME_BATTLE){
-                    if(key[ALLEGRO_KEY_SPACE]) {
-                        game->battle->turn_choice = ATTACK;
+                if(key[ALLEGRO_KEY_SPACE]) {
+                    if(game->state == GAME_BATTLE && game->battle->turn_state == TURN_PLAYER){
+                        game->player->turn_choice = TURN_ATTACK;
                     }
                 }
 

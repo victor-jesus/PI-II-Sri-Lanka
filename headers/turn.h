@@ -7,7 +7,7 @@ typedef enum{
 } Turn_state;
 
 typedef enum{
-    ATTACK,
-    NONE
+    TURN_ATTACK,
+    TURN_NONE
 } Turn_choice;
 #endif
