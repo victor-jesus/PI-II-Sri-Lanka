@@ -82,7 +82,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             // update_enemy(&game->enemy->entity, dt);
         }
         manage_battle(game->battle, event, timer_enemy);
-        update_player_battle(game->player, dt);
+        update_player_battle(&game->player, dt);
     }
 }
 
