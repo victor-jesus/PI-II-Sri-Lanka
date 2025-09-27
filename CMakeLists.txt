@@ -29,12 +29,12 @@ if(WIN32)
     link_directories(${ALLEGRO_LIB_DIR})
 
     target_link_libraries(game 
-        allegro-5 
-        allegro_primitives-5 
-        allegro_font-5 
-        allegro-ttf-5
-        allegro_image-5 
-        allegro_main-5
+        "C:/Allegro/lib/liballegro.dll.a"
+        "C:/Allegro/lib/liballegro_primitives.dll.a"
+        "C:/Allegro/lib/liballegro_font.dll.a"
+        "C:/Allegro/lib/liballegro_ttf.dll.a"
+        "C:/Allegro/lib/liballegro_image.dll.a"
+        "C:/Allegro/lib/liballegro_main.dll.a"
     )
 
 else()
