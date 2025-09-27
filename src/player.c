@@ -1,5 +1,4 @@
 #include "player.h"
-#include "battle.h"
 #include "allegro5/allegro5.h"
 #include <stdio.h>
 
@@ -10,35 +9,35 @@ void init_player(Player* player, int max_hp, int x, int y, int vx, int vy){
 
 
 // ISSO TRVA O GAME <BATTLE>
-void update_player_battle(Battle* battle, float dt){
+void update_player_battle(Player* player, float dt){
 
-    if(battle->player->entity.anim_state == ANIM_HIT){
-        Sprite* hit = battle->player->entity.sprite[ANIM_HIT];
+    if(player->entity.anim_state == ANIM_HIT){
+        Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
 
         if(hit->current_frame == hit->cols - 1){
-            battle->player->entity.anim_state = ANIM_IDLE;
+            player->entity.anim_state = ANIM_IDLE;
             hit->current_frame = 0;
             hit->elapsed = 0;
         }
         return;
     }
 
-    if(battle->player->entity.anim_state == ANIM_ATTACK){
-        Sprite* attack = battle->player->entity.sprite[ANIM_ATTACK];
+    if(player->entity.anim_state == ANIM_ATTACK){
+        Sprite* attack = player->entity.sprite[ANIM_ATTACK];
 
         do{
             update_sprite(attack, dt);
         }
         while(attack->current_frame == attack->cols - 1);
-        battle->player->entity.anim_state = ANIM_IDLE;
+        player->entity.anim_state = ANIM_IDLE;
         attack->current_frame = 0;
         attack->elapsed = 0;
         
         return;
     }
 
-    Sprite* current = battle->player->entity.sprite[battle->player->entity.anim_state];
+    Sprite* current = player->entity.sprite[player->entity.anim_state];
     update_sprite(current, dt);
 }
 
