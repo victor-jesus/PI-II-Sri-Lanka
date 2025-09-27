@@ -7,7 +7,7 @@
 #include "enemy.h"
 #include <allegro5/allegro5.h>
 
-typedef struct{
+typedef struct Battle{
     Player* player;
     Enemy* enemy;
     Battle_state state;

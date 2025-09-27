@@ -4,6 +4,7 @@
         "game.h": "c",
         "allegro_primitives.h": "c",
         "player.h": "c",
-        "allegro_font.h": "c"
+        "allegro_font.h": "c",
+        "dice.h": "c"
     }
 }

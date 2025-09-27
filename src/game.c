@@ -1,4 +1,5 @@
 #include "game.h"
+#include "entity.h"
 #include "battle.h"
 #include "screen.h"
 #include "allegro5/allegro5.h"
@@ -11,20 +12,31 @@ const char* path_run = "assets/sprites/samurai/run.png";
 const char* path_attack = "assets/sprites/samurai/attack.png";
 const char* path_hit = "assets/sprites/samurai/hurt.png";
 
+// Mesma coisa para o enemy, por enquanto
+const char* path_skeleton_idle = "assets/sprites/skeleton/idle.png";
+const char* path_skeleton_run = "assets/sprites/skeleton/run.png";
+const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
+const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
+
+
 Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->player = malloc(sizeof(Player));    
     game->enemy = malloc(sizeof(Enemy));
 
-    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 0, 0, 0, 0);
+    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5);
 
-    set_player_sprite(game->player, path_idle, ANIM_IDLE, 10, 1, 0.1f);
-    set_player_sprite(game->player, path_run, ANIM_RUN, 16, 1, 0.06f);
-    set_player_sprite(game->player, path_attack, ANIM_ATTACK, 7, 1, 0.1f);
-    set_player_sprite(game->player, path_hit, ANIM_HIT, 4, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 10, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 16, 1, 0.06f);
+    set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 7, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
 
     init_enemy(game->enemy, 600, 720/2, 5, 100);
+    set_entity_anim(&game->enemy->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 13, 1, 0.06f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.1f);
 
     game->battle = NULL;
 
@@ -35,10 +47,12 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
 
 void check_battle(Game* game){
     if(!game->enemy->entity.isActive) return;
+    if(game->state == GAME_BATTLE && game->battle) return;
 
     int dist = game->player->entity.x - game->enemy->entity.x;
 
-    if(dist >= -300){
+    if(dist >= -300 && dist <= 300){
+        if(dist < 0) game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
         game->state = GAME_BATTLE;
         game->battle = start_battle(game->player, game->enemy);
     }
@@ -49,7 +63,11 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
 
     if(game->state == GAME_EXPLORING){
         update_player(game->player, key, dt);
-    }
+        if(game->enemy->entity.isActive)
+        // update_enemy(&game->enemy->entity, dt);
+        update_entity(&game->enemy->entity, dt);
+        return;
+    } 
 
     if(game->state == GAME_BATTLE && game->battle){
         if(game->battle->state == BATTLE_END) {
@@ -58,9 +76,13 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             destroy_battle(game->battle);
             return;
         }
-
+        
+        if(game->enemy->entity.isActive){
+            update_entity(&game->enemy->entity, dt);
+            // update_enemy(&game->enemy->entity, dt);
+        }
         manage_battle(game->battle, event, timer_enemy);
-
+        update_player_battle(game->player, dt);
     }
 }
 

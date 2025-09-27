@@ -19,8 +19,9 @@ typedef struct {
 
 void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp);
 void set_entity_sprite(Entity* entity, AnimationState state, Sprite* sprite);
+void set_entity_anim(Entity* entity, const char* path, AnimationState animation_type, int cols, int rows, float frame_time);
 void toggle_entity_active(Entity* entity, bool change);
-void update_entity(Entity* entity, const char* key);
+void update_entity(Entity* entity, float dt);
 void take_damage(Entity* entity, int amount);
 void draw_entity(Entity* entity);
 
