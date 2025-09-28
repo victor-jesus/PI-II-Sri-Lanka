@@ -37,6 +37,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
     set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 13, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.1f);
+    game->enemy->entity.isActive = false;
 
     game->battle = NULL;
 
