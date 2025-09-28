@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/victor-gustavo/Programação/POC_01
+CMAKE_SOURCE_DIR = "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/victor-gustavo/Programação/POC_01/build
+CMAKE_BINARY_DIR = "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/victor-gustavo/Programação/POC_01/build/CMakeFiles /home/victor-gustavo/Programação/POC_01/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build/CMakeFiles" "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build//CMakeFiles/progress.marks"
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/victor-gustavo/Programação/POC_01/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -117,24 +117,37 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named POC
+# Target rules for targets named game
 
 # Build rule for target.
-POC: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 POC
-.PHONY : POC
+game: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 game
+.PHONY : game
 
 # fast build rule for target.
-POC/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/build
-.PHONY : POC/fast
+game/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/build
+.PHONY : game/fast
+
+#=============================================================================
+# Target rules for targets named run
+
+# Build rule for target.
+run: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run
+.PHONY : run
+
+# fast build rule for target.
+run/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
+.PHONY : run/fast
 
 src/battle.o: src/battle.c.o
 .PHONY : src/battle.o
 
 # target to build an object file
 src/battle.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/battle.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/battle.c.o
 .PHONY : src/battle.c.o
 
 src/battle.i: src/battle.c.i
@@ -142,7 +155,7 @@ src/battle.i: src/battle.c.i
 
 # target to preprocess a source file
 src/battle.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/battle.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/battle.c.i
 .PHONY : src/battle.c.i
 
 src/battle.s: src/battle.c.s
@@ -150,7 +163,7 @@ src/battle.s: src/battle.c.s
 
 # target to generate assembly for a file
 src/battle.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/battle.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/battle.c.s
 .PHONY : src/battle.c.s
 
 src/dice.o: src/dice.c.o
@@ -158,7 +171,7 @@ src/dice.o: src/dice.c.o
 
 # target to build an object file
 src/dice.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/dice.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/dice.c.o
 .PHONY : src/dice.c.o
 
 src/dice.i: src/dice.c.i
@@ -166,7 +179,7 @@ src/dice.i: src/dice.c.i
 
 # target to preprocess a source file
 src/dice.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/dice.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/dice.c.i
 .PHONY : src/dice.c.i
 
 src/dice.s: src/dice.c.s
@@ -174,7 +187,7 @@ src/dice.s: src/dice.c.s
 
 # target to generate assembly for a file
 src/dice.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/dice.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/dice.c.s
 .PHONY : src/dice.c.s
 
 src/enemy.o: src/enemy.c.o
@@ -182,7 +195,7 @@ src/enemy.o: src/enemy.c.o
 
 # target to build an object file
 src/enemy.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/enemy.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/enemy.c.o
 .PHONY : src/enemy.c.o
 
 src/enemy.i: src/enemy.c.i
@@ -190,7 +203,7 @@ src/enemy.i: src/enemy.c.i
 
 # target to preprocess a source file
 src/enemy.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/enemy.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/enemy.c.i
 .PHONY : src/enemy.c.i
 
 src/enemy.s: src/enemy.c.s
@@ -198,7 +211,7 @@ src/enemy.s: src/enemy.c.s
 
 # target to generate assembly for a file
 src/enemy.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/enemy.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/enemy.c.s
 .PHONY : src/enemy.c.s
 
 src/entity.o: src/entity.c.o
@@ -206,7 +219,7 @@ src/entity.o: src/entity.c.o
 
 # target to build an object file
 src/entity.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/entity.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/entity.c.o
 .PHONY : src/entity.c.o
 
 src/entity.i: src/entity.c.i
@@ -214,7 +227,7 @@ src/entity.i: src/entity.c.i
 
 # target to preprocess a source file
 src/entity.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/entity.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/entity.c.i
 .PHONY : src/entity.c.i
 
 src/entity.s: src/entity.c.s
@@ -222,7 +235,7 @@ src/entity.s: src/entity.c.s
 
 # target to generate assembly for a file
 src/entity.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/entity.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/entity.c.s
 .PHONY : src/entity.c.s
 
 src/game.o: src/game.c.o
@@ -230,7 +243,7 @@ src/game.o: src/game.c.o
 
 # target to build an object file
 src/game.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/game.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/game.c.o
 .PHONY : src/game.c.o
 
 src/game.i: src/game.c.i
@@ -238,7 +251,7 @@ src/game.i: src/game.c.i
 
 # target to preprocess a source file
 src/game.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/game.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/game.c.i
 .PHONY : src/game.c.i
 
 src/game.s: src/game.c.s
@@ -246,7 +259,7 @@ src/game.s: src/game.c.s
 
 # target to generate assembly for a file
 src/game.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/game.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/game.c.s
 .PHONY : src/game.c.s
 
 src/main.o: src/main.c.o
@@ -254,7 +267,7 @@ src/main.o: src/main.c.o
 
 # target to build an object file
 src/main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/main.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/main.c.o
 .PHONY : src/main.c.o
 
 src/main.i: src/main.c.i
@@ -262,7 +275,7 @@ src/main.i: src/main.c.i
 
 # target to preprocess a source file
 src/main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/main.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/main.c.i
 .PHONY : src/main.c.i
 
 src/main.s: src/main.c.s
@@ -270,7 +283,7 @@ src/main.s: src/main.c.s
 
 # target to generate assembly for a file
 src/main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/main.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/main.c.s
 .PHONY : src/main.c.s
 
 src/player.o: src/player.c.o
@@ -278,7 +291,7 @@ src/player.o: src/player.c.o
 
 # target to build an object file
 src/player.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/player.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/player.c.o
 .PHONY : src/player.c.o
 
 src/player.i: src/player.c.i
@@ -286,7 +299,7 @@ src/player.i: src/player.c.i
 
 # target to preprocess a source file
 src/player.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/player.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/player.c.i
 .PHONY : src/player.c.i
 
 src/player.s: src/player.c.s
@@ -294,8 +307,32 @@ src/player.s: src/player.c.s
 
 # target to generate assembly for a file
 src/player.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/POC.dir/build.make CMakeFiles/POC.dir/src/player.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/player.c.s
 .PHONY : src/player.c.s
+
+src/sprite.o: src/sprite.c.o
+.PHONY : src/sprite.o
+
+# target to build an object file
+src/sprite.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/sprite.c.o
+.PHONY : src/sprite.c.o
+
+src/sprite.i: src/sprite.c.i
+.PHONY : src/sprite.i
+
+# target to preprocess a source file
+src/sprite.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/sprite.c.i
+.PHONY : src/sprite.c.i
+
+src/sprite.s: src/sprite.c.s
+.PHONY : src/sprite.s
+
+# target to generate assembly for a file
+src/sprite.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/sprite.c.s
+.PHONY : src/sprite.c.s
 
 # Help Target
 help:
@@ -305,7 +342,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... POC"
+	@echo "... run"
+	@echo "... game"
 	@echo "... src/battle.o"
 	@echo "... src/battle.i"
 	@echo "... src/battle.s"
@@ -327,6 +365,9 @@ help:
 	@echo "... src/player.o"
 	@echo "... src/player.i"
 	@echo "... src/player.s"
+	@echo "... src/sprite.o"
+	@echo "... src/sprite.i"
+	@echo "... src/sprite.s"
 .PHONY : help
 
 

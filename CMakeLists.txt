@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(POC LANGUAGES C)
+project(Game LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Arquivos fonte
 set(SRC
     src/main.c
     src/game.c
@@ -13,36 +12,48 @@ set(SRC
     src/enemy.c
     src/battle.c
     src/dice.c
+    src/sprite.c
 )
 
-# Cria o executável
-add_executable(${PROJECT_NAME} ${SRC})
+include_directories(
+    headers
+)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/headers)
+add_executable(game ${SRC})
 
-# ==========================
-# Linux (usa pkg-config)
-# ==========================
-if(UNIX)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(ALLEGRO REQUIRED allegro-5 allegro_font-5 allegro_primitives-5)
-
-    target_include_directories(${PROJECT_NAME} PRIVATE ${ALLEGRO_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${ALLEGRO_LIBRARIES})
-endif()
-
-# ==========================
-# Windows (paths manuais)
-# ==========================
 if(WIN32)
-    set(ALLEGRO_ROOT "C:/Allegro")
+    set(ALLEGRO_INCLUDE_DIR "C:/Allegro/include")
+    set(ALLEGRO_LIB_DIR "C:/Allegro/lib")
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${ALLEGRO_ROOT}/include)
-    target_link_directories(${PROJECT_NAME} PRIVATE ${ALLEGRO_ROOT}/lib)
+    include_directories(${ALLEGRO_INCLUDE_DIR})
+    link_directories(${ALLEGRO_LIB_DIR})
 
-    target_link_libraries(${PROJECT_NAME}
-        allegro-5
-        allegro_font-5
-        allegro_primitives-5
+    target_link_libraries(game 
+        "C:/Allegro/lib/liballegro.dll.a"
+        "C:/Allegro/lib/liballegro_primitives.dll.a"
+        "C:/Allegro/lib/liballegro_font.dll.a"
+        "C:/Allegro/lib/liballegro_ttf.dll.a"
+        "C:/Allegro/lib/liballegro_image.dll.a"
+        "C:/Allegro/lib/liballegro_main.dll.a"
     )
+
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ALLEGRO REQUIRED allegro-5 allegro_primitives-5 allegro_font-5 allegro_ttf-5 allegro_image-5 allegro_main-5)
+
+    include_directories(${ALLEGRO_INCLUDE_DIRS})
+    link_directories(${ALLEGRO_LIBRARY_DIRS})
+    target_link_libraries(game ${ALLEGRO_LIBRARIES})
 endif()
+
+if(MSVC)
+    target_compile_options(game PRIVATE /W4 /WX)
+else()
+    target_compile_options(game PRIVATE -Wall -Wextra -pedantic -g)
+endif()
+
+add_custom_target(run
+    COMMAND $<TARGET_FILE:game>
+    DEPENDS game
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} 
+)

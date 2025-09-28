@@ -3,6 +3,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
 #include "game.h"
 #include "time.h"
 #include "screen.h"
@@ -41,6 +42,7 @@ int main(){
     must_init(al_install_keyboard(), "keyboard");
     must_init(al_init_primitives_addon(), "primitives");
     must_init(al_init_font_addon(), "font");
+    must_init(al_init_image_addon(), "image");
 
     ALLEGRO_DISPLAY* display = al_create_display(SCREEN_W, SCREEN_H);
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
@@ -71,7 +73,7 @@ int main(){
         switch (event.type){
             case ALLEGRO_EVENT_TIMER:
                 
-                update_game(game, key, event, timer_enemy);
+                update_game(game, key, event, timer_enemy, (1.0/60));
 
                 for (int i = 0; i < ALLEGRO_KEY_MAX; i++)
                     key[i] &= ~KEY_SEEN;
@@ -82,9 +84,9 @@ int main(){
             case ALLEGRO_EVENT_KEY_DOWN:
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
-                if(game->state == GAME_BATTLE){
-                    if(key[ALLEGRO_KEY_SPACE]) {
-                        game->battle->turn_choice = ATTACK;
+                if(key[ALLEGRO_KEY_SPACE]) {
+                    if(game->state == GAME_BATTLE && game->battle->turn_state == TURN_PLAYER){
+                        game->player->turn_choice = TURN_ATTACK;
                     }
                 }
 
