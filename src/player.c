@@ -25,15 +25,14 @@ void update_player_battle(Player* player, float dt){
 
     if(player->entity.anim_state == ANIM_ATTACK){
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
+        update_sprite(attack, dt);
 
-        do{
-            update_sprite(attack, dt);
+        if(attack->current_frame == attack->cols - 1){
+            player->turn_choice = TURN_ATTACK;
+            player->entity.anim_state = ANIM_IDLE;
+            attack->current_frame = 0;
+            attack->elapsed = 0;
         }
-        while(attack->current_frame == attack->cols - 1);
-        player->entity.anim_state = ANIM_IDLE;
-        attack->current_frame = 0;
-        attack->elapsed = 0;
-        
         return;
     }
 

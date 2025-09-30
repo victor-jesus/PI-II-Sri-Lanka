@@ -86,7 +86,7 @@ int main(){
 
                 if(key[ALLEGRO_KEY_SPACE]) {
                     if(game->state == GAME_BATTLE && game->battle->turn_state == TURN_PLAYER){
-                        game->player->turn_choice = TURN_ATTACK;
+                        game->player->entity.anim_state = ANIM_ATTACK;
                     }
                 }
 

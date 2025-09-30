@@ -25,6 +25,9 @@ Battle* start_battle(Player* player, Enemy* enemy){
     int enemy_iniciative = enemy->iniciative + dice_enemy;
     printf("\nEnemy iniciative: %d\n", enemy_iniciative);
 
+    battle->player->entity.anim_state = ANIM_IDLE;
+    battle->enemy->entity.anim_state = ANIM_IDLE;
+
     if(player_iniciative >= enemy_iniciative){
         battle->turn_state = TURN_PLAYER;
     } else {
@@ -45,11 +48,12 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
         Turn_choice choice = enemy_choice(battle);
         if(event.timer.source == timer_enemy){
             if(choice == TURN_ATTACK){
-                take_damage(&battle->player->entity, 10);
+                battle->enemy->entity.anim_state = ANIM_ATTACK;
                 battle->enemy->turn_choice = TURN_NONE;
                 battle->turn_state = TURN_PLAYER;
                 al_stop_timer(timer_enemy);
                 al_set_timer_count(timer_enemy, 0);
+                take_damage(&battle->player->entity, 10);
             }
             return;
         }
@@ -58,7 +62,6 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
 
     if(battle->turn_state == TURN_PLAYER){
         if(battle->player->turn_choice == TURN_ATTACK){
-            battle->player->entity.anim_state = ANIM_ATTACK;
             take_damage(&battle->enemy->entity, 10);
             battle->turn_state = TURN_ENEMY;
             battle->player->turn_choice = TURN_NONE;
