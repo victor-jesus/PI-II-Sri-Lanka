@@ -25,7 +25,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
     game->player = malloc(sizeof(Player));    
     game->enemy = malloc(sizeof(Enemy));
 
-    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5);
+    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 43, 14, 30, 30);
 
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 16, 1, 0.06f);
@@ -103,7 +103,7 @@ void draw_game(Game* game){
         al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, SCREEN_H / 2 - 290, ALLEGRO_ALIGN_RIGHT, "HP: %d", game->enemy->entity.hp);
     }
 
-    al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->player->entity.x, game->player->entity.y - 30, ALLEGRO_ALIGN_CENTER, "Player");
+    al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->player->entity.box.x + game->player->entity.box.w, game->player->entity.box.y, ALLEGRO_ALIGN_CENTER, "Player");
     draw_entity(&game->player->entity);
 
     if(game->enemy->entity.isActive){

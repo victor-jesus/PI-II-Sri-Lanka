@@ -4,12 +4,14 @@
 #include <sprite.h>
 #include <animation_state.h>
 #include <stdbool.h>
+#include "box.h"
 
 #define QUANT_ANIMATIONS 5
 
 typedef struct {
     Sprite* sprite[QUANT_ANIMATIONS];
     AnimationState anim_state;
+    Box box;
     int x, y, vx, vy;
     int flip;
     int hp;
@@ -19,9 +21,11 @@ typedef struct {
 
 void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp);
 void set_entity_sprite(Entity* entity, AnimationState state, Sprite* sprite);
+void set_hit_box(Entity* entity, int offset_up, int offset_down, int offset_left, int offset_right);
 void set_entity_anim(Entity* entity, const char* path, AnimationState animation_type, int cols, int rows, float frame_time);
 void toggle_entity_active(Entity* entity, bool change);
 void update_entity(Entity* entity, float dt);
+void update_hit_box(Entity* entity);
 void take_damage(Entity* entity, int amount);
 void draw_entity(Entity* entity);
 
