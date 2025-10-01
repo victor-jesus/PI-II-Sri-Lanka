@@ -2,15 +2,14 @@
 #include "allegro5/allegro5.h"
 #include <stdio.h>
 
-void init_player(Player* player, int max_hp, int x, int y, int vx, int vy){
+void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
     init_entity(&player->entity, x, y, vx, vy, max_hp);
     player->iniciative = 10;
+
+    set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
 }
 
-
-// ISSO TRVA O GAME <BATTLE>
 void update_player_battle(Player* player, float dt){
-
     if(player->entity.anim_state == ANIM_HIT){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
@@ -25,15 +24,14 @@ void update_player_battle(Player* player, float dt){
 
     if(player->entity.anim_state == ANIM_ATTACK){
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
+        update_sprite(attack, dt);
 
-        do{
-            update_sprite(attack, dt);
+        if(attack->current_frame == attack->cols - 1){
+            player->turn_choice = TURN_ATTACK;
+            player->entity.anim_state = ANIM_IDLE;
+            attack->current_frame = 0;
+            attack->elapsed = 0;
         }
-        while(attack->current_frame == attack->cols - 1);
-        player->entity.anim_state = ANIM_IDLE;
-        attack->current_frame = 0;
-        attack->elapsed = 0;
-        
         return;
     }
 
@@ -42,6 +40,7 @@ void update_player_battle(Player* player, float dt){
 }
 
 void update_player(Player* player, unsigned char* key, float dt){
+    update_hit_box(&player->entity);
     player->moving = false;
 
     if(player->entity.anim_state == ANIM_HIT){
