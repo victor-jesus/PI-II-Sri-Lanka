@@ -63,8 +63,8 @@ void update_player(Player* player, unsigned char* key, float dt){
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
             attack->elapsed = 0;
-            return;
         }
+        return;
     }
 
     if (key[ALLEGRO_KEY_A] || key[ALLEGRO_KEY_LEFT]) { 

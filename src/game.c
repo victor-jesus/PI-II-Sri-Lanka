@@ -25,7 +25,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
     game->player = malloc(sizeof(Player));    
     game->enemy = malloc(sizeof(Enemy));
 
-    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 43, 14, 30, 30);
+    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 50, 14, 30, 30);
 
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 16, 1, 0.06f);
@@ -88,6 +88,11 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
 }
 
 void draw_game(Game* game){
+
+    if(game->state == GAME_MENU){
+        draw_menu(game);
+    }
+
     if(game->state == GAME_BATTLE && game->battle){
         al_draw_text(game->game_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "BATALHA!");
 
