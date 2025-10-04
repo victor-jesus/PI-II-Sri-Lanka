@@ -3,10 +3,12 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include "game.h"
 #include "time.h"
 #include "screen.h"
+
 
 #define KEY_SEEN 1
 #define KEY_DOWN 2
@@ -21,32 +23,18 @@ void must_init(bool test, char* description){
 int main(){
     srand(time(NULL));
 
-    /*
-        1° Inicialização 
-            Obrigatórios
-                - Allegro
-                - Display (Ponteiros)
-                - Timer (FPS) (Ponteiro)
-                - Font (Ponteiro)
-                - Fila de eventos (Ponteiro)
-            Essenciais/Opcionais
-                - Teclado, Mouse, Controle (Tudo que precisa para conseguir jogar...)
-                    - Entrar na fila de eventos
-        2° Loop principal do jogo
-            - Lógica
-            - Renderização
-        3° Liberação de memória (Destroyers)
-    */
-
     must_init(al_init(), "allegro");
     must_init(al_install_keyboard(), "keyboard");
     must_init(al_init_primitives_addon(), "primitives");
     must_init(al_init_font_addon(), "font");
+    must_init(al_init_ttf_addon(), "ttf");
     must_init(al_init_image_addon(), "image");
+
 
     ALLEGRO_DISPLAY* display = al_create_display(SCREEN_W, SCREEN_H);
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
     ALLEGRO_FONT* font = al_create_builtin_font();
+    ALLEGRO_FONT* title = al_load_ttf_font("assets/fonts/fonte_titulo.ttf", 32, 0);
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
 
     ALLEGRO_TIMER* timer_enemy = al_create_timer(3.0);
@@ -63,7 +51,8 @@ int main(){
 
     al_start_timer(fps);
 
-    Game* game = create_game(GAME_EXPLORING, font, 200, SCREEN_H / 2, 5, 100);
+    Game* game = create_game(GAME_MENU, font, title, 200, SCREEN_H / 2, 5, 100);
+    
 
     unsigned char key[ALLEGRO_KEY_MAX];
     memset(key, 0, sizeof(key));
@@ -119,6 +108,7 @@ int main(){
 
     al_destroy_display(display);
     al_destroy_font(font);
+    al_destroy_font(title);
     al_destroy_timer(fps);
     al_destroy_timer(timer_enemy);
     al_destroy_event_queue(queue);

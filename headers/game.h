@@ -21,9 +21,10 @@ typedef struct {
     Enemy* enemy;
     Battle* battle;
     ALLEGRO_FONT* game_font;
+    ALLEGRO_FONT* title_font;
 } Game;
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int pos_y_player, int vx_player, int hp_player);
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player);
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt);
 void draw_menu(Game* game);
 void draw_game(Game* game);

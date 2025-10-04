@@ -19,7 +19,7 @@ const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
 const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->player = malloc(sizeof(Player));    
@@ -42,6 +42,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
     game->battle = NULL;
 
     game->game_font = font;
+    game->title_font = title_font;
 
     return game;
 }
@@ -87,10 +88,22 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     }
 }
 
+void draw_menu(Game* game){
+    ALLEGRO_BITMAP* menu = al_load_bitmap("assets/Menu_Design.png");
+    al_draw_scaled_bitmap(
+        menu,
+        0, 0, 1312, 736, // origem e tamanho original
+        0, 0, 1280, 720,    // destino e tamanho novo
+        0                   // flags
+    );
+
+}
+
 void draw_game(Game* game){
 
     if(game->state == GAME_MENU){
-        draw_menu(game);
+         draw_menu(game);
+         return;
     }
 
     if(game->state == GAME_BATTLE && game->battle){
