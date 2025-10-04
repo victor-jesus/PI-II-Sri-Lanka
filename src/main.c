@@ -85,6 +85,8 @@ int main(){
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
                 if(key[ALLEGRO_KEY_SPACE]) {
+                    game->player->entity.anim_state = ANIM_ATTACK;
+
                     if(game->state == GAME_BATTLE && game->battle->turn_state == TURN_PLAYER){
                         game->player->turn_choice = TURN_ATTACK;
                     }
