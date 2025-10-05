@@ -3,6 +3,8 @@
 #include "battle.h"
 #include "screen.h"
 #include "allegro5/allegro5.h"
+#include "allegro5/allegro_primitives.h"
+#include <stdio.h>
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -19,7 +21,7 @@ const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
 const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->player = malloc(sizeof(Player));    
@@ -42,9 +44,40 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, int pos_x_player, int po
     game->battle = NULL;
 
     game->game_font = font;
+    game->title_font = title_font;
+    game->subtitle_font = subtitle_font;
 
+    game->menu_background = al_load_bitmap("assets/Menu_Design.png");
+   
     return game;
 }
+
+void read_mouse(Game* game){
+    ALLEGRO_MOUSE_STATE state;
+    al_get_mouse_state(&state);
+
+    game->mouse.x = state.x;
+    game->mouse.y = state.y;
+
+    game->mouse.left = state.buttons & 1;
+}
+
+Btn_state is_mouse_in_btn(Game* game){
+    if (game->mouse.x >= game->btn_init.x && game->mouse.x <= game->btn_init.x + game->btn_init.w &&
+            game->mouse.y >= game->btn_init.y && game->mouse.y <= game->btn_init.y + game->btn_init.h){
+        return BTN_INIT;
+    }else if(game->mouse.x >= game->btn_options.x && game->mouse.x <= game->btn_options.x + game->btn_options.w &&
+                game->mouse.y >= game->btn_options.y && game->mouse.y <= game->btn_options.y + game->btn_options.h){
+        return BTN_OPTIONS;
+    }else if(game->mouse.x >= game->btn_exit.x && game->mouse.x <= game->btn_exit.x + game->btn_exit.w &&
+            game->mouse.y >= game->btn_exit.y && game->mouse.y <= game->btn_exit.y + game->btn_exit.h){
+        return BTN_EXIT;
+    }else{
+        return NONE;
+    }
+
+    
+} 
 
 void check_battle(Game* game){
     if(!game->enemy->entity.isActive) return;
@@ -59,7 +92,22 @@ void check_battle(Game* game){
     }
 }
 
+void menu_options(Game* game){
+   Btn_state btn_state = is_mouse_in_btn(game);
+
+    if (game->mouse.left && btn_state == BTN_INIT)
+    {
+        game->state = GAME_EXPLORING;
+    } else if(game->mouse.left && btn_state == BTN_EXIT){
+        game->state = GAME_OVER;
+    }
+}
+
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt){
+    read_mouse(game);   
+    
+    if(game->state == GAME_MENU) menu_options(game);
+
     check_battle(game);
 
     if(game->state == GAME_EXPLORING){
@@ -87,32 +135,118 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     }
 }
 
+void create_button(Button* btn, int x, int y, int w, int h){
+    btn->x = x - (w / 2);
+    btn->y = y;
+    btn->w = w;
+    btn->h = h;
+}
+    
+void draw_menu(Game* game){
+    int btn_w = 200;
+    int btn_h = 50;
+    int gap = 20;
+
+    int btn1x = SCREEN_W / 2;
+    int btn1y = (SCREEN_H / 2) + gap;
+    int btn2x = SCREEN_W / 2;
+    int btn2y = btn1y + btn_h + gap;
+
+    int btn3x = SCREEN_W /2;
+    int btn3y = btn2y + btn_h + gap;
+
+    create_button(&game->btn_init, btn1x, btn1y, btn_w, btn_h);
+    create_button(&game->btn_options, btn2x, btn2y, btn_w, btn_h);
+    create_button(&game->btn_exit, btn3x, btn3y, btn_w, btn_h);
+
+    al_draw_scaled_bitmap(
+        game->menu_background,
+        0, 0, 1300, 736,
+        0, 0, SCREEN_W, SCREEN_H,    
+        0
+    );
+
+    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), (SCREEN_W / 2), (SCREEN_H / 2) - 250, ALLEGRO_ALIGN_CENTER, "CRÔNICAS DO CÁLCULO");
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), (SCREEN_W / 2), (SCREEN_H / 2) - 210, ALLEGRO_ALIGN_CENTER, "O DESPERTAR DO ARAUTO");
+
+    al_draw_rectangle(btn1x - (btn_w / 2), btn1y, btn1x + (btn_w / 2), btn1y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn1y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "INICIAR");
+
+    al_draw_rectangle(btn2x - (btn_w / 2), btn2y, btn2x + (btn_w / 2), btn2y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "OPÇÕES");
+
+    al_draw_rectangle(btn3x - (btn_w / 2), btn3y, btn3x + (btn_w / 2), btn3y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn3y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "SAIR");
+
+}
+
 void draw_game(Game* game){
+    switch(game->state){
+        case GAME_MENU:
+            draw_menu(game);
+            break;
+        case GAME_EXPLORING:
+            al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->player->entity.box.x + game->player->entity.box.w, game->player->entity.box.y, ALLEGRO_ALIGN_CENTER, "Player");
+            draw_entity(&game->player->entity);
 
-    if(game->state == GAME_MENU){
-        draw_menu(game);
+            if(game->enemy->entity.isActive){
+                al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->enemy->entity.x, game->enemy->entity.y - 30, ALLEGRO_ALIGN_CENTER, "Enemy");
+                draw_entity(&game->enemy->entity);
+            }
+            break;
+        case GAME_BATTLE:
+            al_draw_text(game->game_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "BATALHA!");
+
+            if(game->battle->turn_state == TURN_PLAYER)
+                al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 150, ALLEGRO_ALIGN_CENTER, "Turno do player");
+            else 
+                al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 150, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
+
+            al_draw_text(game->game_font, al_map_rgb(255, 255, 0), 40, (SCREEN_H / 2) - 300, ALLEGRO_ALIGN_LEFT, "Player");
+            al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), 40, (SCREEN_H / 2) - 290, ALLEGRO_ALIGN_LEFT, "HP: %d", game->player->entity.hp);
+
+            al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_RIGHT, "Enemy");
+            al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, SCREEN_H / 2 - 290, ALLEGRO_ALIGN_RIGHT, "HP: %d", game->enemy->entity.hp);
+    }
+}
+
+void destroy_game(Game* game) {
+    if (!game) return;
+
+    if (game->battle) {
+        destroy_battle(game->battle);
+        game->battle = NULL;
     }
 
-    if(game->state == GAME_BATTLE && game->battle){
-        al_draw_text(game->game_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "BATALHA!");
-
-        if(game->battle->turn_state == TURN_PLAYER)
-            al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 150, ALLEGRO_ALIGN_CENTER, "Turno do player");
-        else 
-            al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 150, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
-
-        al_draw_text(game->game_font, al_map_rgb(255, 255, 0), 40, (SCREEN_H / 2) - 300, ALLEGRO_ALIGN_LEFT, "Player");
-        al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), 40, (SCREEN_H / 2) - 290, ALLEGRO_ALIGN_LEFT, "HP: %d", game->player->entity.hp);
-
-        al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_RIGHT, "Enemy");
-        al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, SCREEN_H / 2 - 290, ALLEGRO_ALIGN_RIGHT, "HP: %d", game->enemy->entity.hp);
+    if (game->enemy) {
+        destroy_enemy(game->enemy);
+        game->enemy = NULL;
     }
 
-    al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->player->entity.box.x + game->player->entity.box.w, game->player->entity.box.y, ALLEGRO_ALIGN_CENTER, "Player");
-    draw_entity(&game->player->entity);
-
-    if(game->enemy->entity.isActive){
-        al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->enemy->entity.x, game->enemy->entity.y - 30, ALLEGRO_ALIGN_CENTER, "Enemy");
-        draw_entity(&game->enemy->entity);
+    if (game->player) {
+        destroy_player(game->player);
+        game->player = NULL;
     }
+
+    if (game->menu_background) {
+        al_destroy_bitmap(game->menu_background);
+        game->menu_background = NULL;
+    }
+
+    if (game->game_font) {
+        al_destroy_font(game->game_font);
+        game->game_font = NULL;
+    }
+
+    if (game->title_font) {
+        al_destroy_font(game->title_font);
+        game->title_font = NULL;
+    }
+
+    if (game->subtitle_font) {
+        al_destroy_font(game->subtitle_font);
+        game->subtitle_font = NULL;
+    }
+
+    free(game);
 }
