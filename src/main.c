@@ -119,12 +119,9 @@ int main(){
         }
     }
 
+    destroy_game(game);
     al_destroy_display(display);
-    al_destroy_font(font);
-    al_destroy_font(title);
-    al_destroy_font(subtitle);
     al_destroy_timer(fps);
     al_destroy_timer(timer_enemy);
     al_destroy_event_queue(queue);
-    
 }

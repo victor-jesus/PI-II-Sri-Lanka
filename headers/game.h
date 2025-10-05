@@ -50,5 +50,6 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt);
 void draw_menu(Game* game);
 void draw_game(Game* game);
+void destroy_game(Game* game);
 
 #endif

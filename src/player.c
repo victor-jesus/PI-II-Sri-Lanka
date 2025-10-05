@@ -93,3 +93,7 @@ void destroy_sprite_from_player(Player* player){
         destroy_sprite(player->entity.sprite[i]);
     }
 }
+
+void destroy_player(Player* player){
+    free(player);
+}

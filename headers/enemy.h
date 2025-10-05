@@ -12,5 +12,6 @@ typedef struct {
 
 void init_enemy(Enemy* enemy, int x, int y, int vx, int hp);
 void update_enemy(Entity* entity, float dt);
+void destroy_enemy(Enemy* enemy);
 
 #endif

@@ -16,3 +16,6 @@ void update_enemy(Entity* entity, float dt){
     update_sprite(current, dt);
 }
 
+void destroy_enemy(Enemy* enemy){
+    free(enemy);
+}
