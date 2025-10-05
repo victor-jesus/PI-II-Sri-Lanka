@@ -3,6 +3,8 @@
 #include "battle.h"
 #include "screen.h"
 #include "allegro5/allegro5.h"
+#include "allegro5/allegro_primitives.h"
+#include <stdio.h>
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -19,7 +21,7 @@ const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
 const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->player = malloc(sizeof(Player));    
@@ -43,9 +45,41 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     game->game_font = font;
     game->title_font = title_font;
+    game->subtitle_font = subtitle_font;
+   
+
+
+  
 
     return game;
 }
+
+void read_mouse(Game* game){
+    ALLEGRO_MOUSE_STATE state;
+    al_get_mouse_state(&state);
+
+    game->mouse.x = state.x;
+    game->mouse.y = state.y;
+
+    game->mouse.left   = state.buttons & 1;
+}
+
+Btn_state is_mouse_in_btn(Game* game){
+    if (game->mouse.x >= game->btn_init.x && game->mouse.x <= game->btn_init.x + game->btn_init.w &&
+            game->mouse.y >= game->btn_init.y && game->mouse.y <= game->btn_init.y + game->btn_init.h){
+        return BTN_INIT;
+    }else if(game->mouse.x >= game->btn_options.x && game->mouse.x <= game->btn_options.x + game->btn_options.w &&
+                game->mouse.y >= game->btn_options.y && game->mouse.y <= game->btn_options.y + game->btn_options.h){
+        return BTN_OPTIONS;
+    }else if(game->mouse.x >= game->btn_exit.x && game->mouse.x <= game->btn_exit.x + game->btn_exit.w &&
+            game->mouse.y >= game->btn_exit.y && game->mouse.y <= game->btn_exit.y + game->btn_exit.h){
+        return BTN_EXIT;
+    }else{
+        return NONE;
+    }
+
+    
+} 
 
 void check_battle(Game* game){
     if(!game->enemy->entity.isActive) return;
@@ -61,6 +95,23 @@ void check_battle(Game* game){
 }
 
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt){
+    read_mouse(game);
+    //printf("mouse: %d, %d\n", game->mouse.x, game->mouse.y);
+
+    Btn_state btn_state = is_mouse_in_btn(game);
+    if (game->mouse.left && btn_state == BTN_INIT)
+    {
+        game->state = GAME_EXPLORING;
+    }
+
+    if(game->mouse.left && btn_state == BTN_EXIT){
+        game->state = GAME_OVER;
+    }
+    
+    
+
+
+
     check_battle(game);
 
     if(game->state == GAME_EXPLORING){
@@ -88,14 +139,63 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     }
 }
 
+void create_button(Game* game, int btn1x, int btn1y, int btn2x, int btn2y, int btn3x, int btn3y, int btn_h, int btn_w){
+   
+    game->btn_init.w = btn_w;
+    game->btn_options.w = btn_w;
+    game->btn_exit.w = btn_w;
+
+    game->btn_init.h = btn_h;
+    game->btn_options.h = btn_h;
+    game->btn_exit.h = btn_h;
+
+    game->btn_init.x = btn1x;
+    game->btn_init.y = btn1y;
+
+    game->btn_options.x = btn2x;
+    game->btn_options.y = btn2y;
+
+    game->btn_exit.x = btn3x;
+    game->btn_exit.y = btn3y;
+
+}
+
+
+    
 void draw_menu(Game* game){
     ALLEGRO_BITMAP* menu = al_load_bitmap("assets/Menu_Design.png");
+    int btn_w = 200;
+    int btn_h = 50;
+    int gap = 20;
+
+    int btn1x = SCREEN_W / 2;
+    int btn1y = (SCREEN_H / 2) + gap;
+    int btn2x = SCREEN_W / 2;
+    int btn2y = btn1y + btn_h + gap;
+
+    int btn3x = SCREEN_W /2;
+    int btn3y = btn2y + btn_h + gap;
+
+    create_button(game, btn1x, btn1y, btn2x, btn2y, btn3x, btn3y, btn_h, btn_w);
+
     al_draw_scaled_bitmap(
         menu,
         0, 0, 1312, 736, // origem e tamanho original
-        0, 0, 1280, 720,    // destino e tamanho novo
+        0, 0, SCREEN_W, SCREEN_H,    // destino e tamanho novo
         0                   // flags
     );
+
+    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), (SCREEN_W / 2), (SCREEN_H / 2) - 250, ALLEGRO_ALIGN_CENTER, "CRÔNICAS DO CÁLCULO");
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), (SCREEN_W / 2), (SCREEN_H / 2) - 210, ALLEGRO_ALIGN_CENTER, "O DESPERTAR DO ARAUTO");
+
+    al_draw_rectangle(btn1x - (btn_w / 2), btn1y, btn1x + (btn_w / 2), btn1y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn1y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "INICIAR");
+
+    al_draw_rectangle(btn2x - (btn_w / 2), btn2y, btn2x + (btn_w / 2), btn2y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "OPÇÕES");
+
+    al_draw_rectangle(btn3x - (btn_w / 2), btn3y, btn3x + (btn_w / 2), btn3y + btn_h, al_map_rgb(255, 255, 0), 2);
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn3y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "SAIR");
 
 }
 
