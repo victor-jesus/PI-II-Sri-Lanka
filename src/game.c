@@ -46,11 +46,9 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->game_font = font;
     game->title_font = title_font;
     game->subtitle_font = subtitle_font;
+
+    game->menu_background = al_load_bitmap("assets/Menu_Design.png");
    
-
-
-  
-
     return game;
 }
 
@@ -102,9 +100,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     if (game->mouse.left && btn_state == BTN_INIT)
     {
         game->state = GAME_EXPLORING;
-    }
-
-    if(game->mouse.left && btn_state == BTN_EXIT){
+    } else if(game->mouse.left && btn_state == BTN_EXIT){
         game->state = GAME_OVER;
     }
     
@@ -163,7 +159,6 @@ void create_button(Game* game, int btn1x, int btn1y, int btn2x, int btn2y, int b
 
     
 void draw_menu(Game* game){
-    ALLEGRO_BITMAP* menu = al_load_bitmap("assets/Menu_Design.png");
     int btn_w = 200;
     int btn_h = 50;
     int gap = 20;
@@ -179,7 +174,7 @@ void draw_menu(Game* game){
     create_button(game, btn1x, btn1y, btn2x, btn2y, btn3x, btn3y, btn_h, btn_w);
 
     al_draw_scaled_bitmap(
-        menu,
+        game->menu_background,
         0, 0, 1312, 736, // origem e tamanho original
         0, 0, SCREEN_W, SCREEN_H,    // destino e tamanho novo
         0                   // flags

@@ -34,6 +34,7 @@ typedef struct{
 } Button;
 
 typedef struct {
+    ALLEGRO_BITMAP* menu_background;
     Game_state state;
     Player* player;
     Enemy* enemy;

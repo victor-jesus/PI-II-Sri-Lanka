@@ -51,8 +51,6 @@ int main(){
 
     al_show_mouse_cursor(display);
 
-     
-
     bool isRunning = true;
     bool redraw = true;
 
@@ -74,6 +72,7 @@ int main(){
                 update_game(game, key, event, timer_enemy, (1.0/60));
                 if(game->state == GAME_OVER){
                     isRunning = false;
+                    break;
                 }
                 for (int i = 0; i < ALLEGRO_KEY_MAX; i++)
                     key[i] &= ~KEY_SEEN;
@@ -92,7 +91,10 @@ int main(){
                     }
                 }
 
-                if(key[ALLEGRO_KEY_ESCAPE]) isRunning = false;
+                if(key[ALLEGRO_KEY_ESCAPE]){
+                    isRunning = false;
+                    break;
+                } 
 
                 break;
 
