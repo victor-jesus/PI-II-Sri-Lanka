@@ -16,11 +16,13 @@ typedef struct {
     int flip;
     int hp;
     int offset_up, offset_down, offset_left, offset_right;
+    float scale_factor;
     bool isActive;
 } Entity;
 
 void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp);
 void set_entity_sprite(Entity* entity, AnimationState state, Sprite* sprite);
+void set_entity_scale(Entity* entity, float scale_factor);
 void set_hit_box(Entity* entity, int offset_up, int offset_down, int offset_left, int offset_right);
 void set_entity_anim(Entity* entity, const char* path, AnimationState animation_type, int cols, int rows, float frame_time);
 void toggle_entity_active(Entity* entity, bool change);

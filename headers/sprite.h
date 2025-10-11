@@ -18,7 +18,7 @@ typedef struct {
 
 void create_sprite(Sprite* sprite, const char* path, int cols, int rows, float frame_time);
 void update_sprite(Sprite* sprite, float dt);
-void draw_sprite(Sprite* sprite, int dx, int dy, int flip);
+void draw_sprite(Sprite* sprite, int dx, int dy, int flip, float size);
 void destroy_sprite(Sprite* sprite);
 
 #endif
