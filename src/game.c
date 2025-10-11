@@ -20,12 +20,21 @@ const char* path_skeleton_run = "assets/sprites/skeleton/run.png";
 const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
 const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
-
 Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->player = malloc(sizeof(Player));    
     game->enemy = malloc(sizeof(Enemy));
+    game->map = malloc(sizeof(Map));
+
+    for(int y = 0; y < MAP_H; y++){
+        for(int x = 0; x < MAP_W; x++){
+            if (y == 0 || y == MAP_H - 1 || x == 0 || x == MAP_W - 1)
+                game->map->tiles[y][x] = 1;
+            else
+                game->map->tiles[y][x] = 0;
+        }
+    }
 
     init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 50, 14, 30, 30);
 
@@ -180,12 +189,39 @@ void draw_menu(Game* game){
 
 }
 
+void draw_map(Map *map) {
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            float draw_x = x * TILE_W;
+            float draw_y = y * TILE_H;
+
+            if (draw_x + TILE_W < 0 || draw_x > 1280 || draw_y + TILE_H < 0 || draw_y > 720)
+                continue;
+
+            if (map->tiles[y][x] == 1) {
+                al_draw_filled_rectangle(draw_x, draw_y, 
+                                         draw_x + TILE_W, draw_y + TILE_H,
+                                         al_map_rgb(255, 255, 255));
+            } else {
+                al_draw_filled_rectangle(draw_x, draw_y, 
+                                         draw_x + TILE_W, draw_y + TILE_H,
+                                         al_map_rgb(50, 100, 50));
+            }
+
+
+        }
+    }
+}
+
+
 void draw_game(Game* game){
+
     switch(game->state){
         case GAME_MENU:
             draw_menu(game);
             break;
         case GAME_EXPLORING:
+            draw_map(game->map);
             al_draw_text(game->game_font, al_map_rgb(255, 255, 0), game->player->entity.box.x + game->player->entity.box.w, game->player->entity.box.y, ALLEGRO_ALIGN_CENTER, "Player");
             draw_entity(&game->player->entity);
 
@@ -195,6 +231,7 @@ void draw_game(Game* game){
             }
             break;
         case GAME_BATTLE:
+            draw_map(game->map);
             al_draw_text(game->game_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "BATALHA!");
 
             if(game->battle->turn_state == TURN_PLAYER)

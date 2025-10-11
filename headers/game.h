@@ -7,6 +7,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "battle.h"
+#include "map.h"
 
 typedef enum{
     GAME_MENU,
@@ -41,6 +42,7 @@ typedef struct {
     Battle* battle;
     Mouse mouse;
     Button btn_init, btn_options, btn_exit;
+    Map* map;
     ALLEGRO_FONT* game_font;
     ALLEGRO_FONT* title_font;
     ALLEGRO_FONT* subtitle_font;
