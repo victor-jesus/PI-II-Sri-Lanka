@@ -31,6 +31,8 @@ const char* path_window_1 = "assets/sprites/map/window_1.png";
 const char* path_window_big = "assets/sprites/map/big_window.png";
 const char* path_bau = "assets/sprites/enviroment/bau.png";
 
+const char* path_key_e = "assets/sprites/ui/controls/KEYBOARD/KEYS/E.png";
+
 #define TILE_FLOOR 1
 #define TILE_WALL 0
 
@@ -41,6 +43,12 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->enemy = malloc(sizeof(Enemy));
     game->map = malloc(sizeof(Map));
     game->num_world_entities = 0;
+
+    Entity* key_e = malloc(sizeof(Entity));
+    init_entity(key_e, 0, 0, 0, 0, 1, KEY);
+    set_entity_anim(key_e, path_key_e, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(key_e, 1);
+    set_hit_box(key_e, 0, 0, 0, 0);
 
     init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 140, vx_player, 5, 20, 20, 30, 30);
 
@@ -83,7 +91,7 @@ void render_first_map(Game* game){
     init_map(game->map, path_map_tile, path_map_tile_floor); 
 
     Entity* door = malloc(sizeof(Entity));
-    init_entity(door, 1500, (SCREEN_H / 2) + 125, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(door, 1500, (SCREEN_H / 2) + 125, 0, 0, 1, DOOR);
     set_entity_anim(door, path_door, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(door, 0.5);
     set_hit_box(door, 0, 0, 0, 0);
@@ -145,6 +153,9 @@ void render_first_map(Game* game){
     add_world_entity(game, banner);
     add_world_entity(game, banner2);
     add_world_entity(game, door); 
+
+    game->controls = al_load_bitmap(path_key_e);
+
 }
 
 void add_world_entity(Game* game, Entity* entity) {
@@ -206,6 +217,40 @@ void menu_options(Game* game){
     }
 }
 
+bool check_interaction(ALLEGRO_BITMAP* control, Entity* entity_1, Entity* entity_2){
+    if(entity_1->box.x + entity_1->box.w >= entity_2->box.x && entity_1->box.x <= entity_2->box.x + entity_2->box.w 
+        && entity_1->box.y + entity_1->box.h >= entity_2->box.y && entity_1->box.y <= entity_2->box.y + entity_2->box.h){
+
+            if(entity_2->entity_type == DOOR){
+                render_control(control, entity_2);
+            }
+            return true;
+    }
+
+    return false;
+}
+
+void render_control(ALLEGRO_BITMAP* control, Entity* entity){
+    float draw_x = entity->x + (entity->box.w / 2) - (32 / 2); 
+    float draw_y = entity->y - 30; 
+
+    al_draw_scaled_bitmap(
+        control,
+        0, 0,
+        16, 16,
+        draw_x, draw_y,
+        32, 32,
+        0 
+    );
+
+}
+
+void resolve_interaction(Game* game, Entity* entity_1, Entity* entity_2, unsigned char* key){
+    if(key[ALLEGRO_KEY_E]){
+        game->state = GAME_MENU;
+    }
+}
+
 void update_camera(Game* game) {
     float player_x = game->player->entity.x;
     float player_y = game->player->entity.y;
@@ -250,6 +295,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     }
 
     if(game->state == GAME_EXPLORING){
+        
         update_player(game->player, key, dt);
 
         for(int i = 0; i < game->num_world_entities; i++){
@@ -257,6 +303,13 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             if(current_entity && current_entity->isActive){
                 update_entity(current_entity, dt);
             }
+
+            if(current_entity && current_entity->entity_type == DOOR){
+                bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+
+                if(check) resolve_interaction(game, game->player, current_entity, key);
+            }
+
         }
 
         if(game->enemy->entity.isActive)
@@ -287,8 +340,6 @@ void create_button(Button* btn, int x, int y, int w, int h){
     btn->w = w;
     btn->h = h;
 }
-    
-// map.c
 
 void draw_map(Map *map) {
     if (!map || !map->wall) return; 
@@ -401,10 +452,15 @@ void draw_game(Game* game){
                 if(current_entity && current_entity->isActive){
                     draw_entity(current_entity);
                 }
+
+                
+                if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                }
             }
             
             draw_entity(&game->player->entity);
-
+            
             if(game->enemy->entity.isActive){
                 draw_entity(&game->enemy->entity);
             }
@@ -420,7 +476,7 @@ void draw_game(Game* game){
                 else 
                     al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 150, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
 
-                al_draw_text(game->game_font, al_map_rgb(255, 255, 0), 40, 50, ALLEGRO_ALIGN_LEFT, "Player");
+
                 al_draw_textf(game->game_font, al_map_rgb(255, 255, 0), 40, 70, ALLEGRO_ALIGN_LEFT, "HP: %d", game->player->entity.hp);
 
                 al_draw_text(game->game_font, al_map_rgb(255, 255, 0), SCREEN_W - 40, 50, ALLEGRO_ALIGN_RIGHT, "Enemy");

@@ -52,6 +52,7 @@ typedef struct {
     ALLEGRO_FONT* subtitle_font;
     ALLEGRO_TRANSFORM camera_transform; 
 
+    ALLEGRO_BITMAP* controls;
     Entity* world_entities[MAX_WORLD_ENTITIES];
     int num_world_entities;
 } Game;

@@ -9,6 +9,8 @@
 #define QUANT_ANIMATIONS 5
 
 typedef enum{
+    DOOR,
+    KEY,
     ENVIRONMENT_NO_MOVE,
     ENVIRONMENT_MOVE,
     CHARACTER
