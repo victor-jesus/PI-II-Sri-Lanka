@@ -28,6 +28,7 @@ const char* path_banner = "assets/sprites/map/banners.png";
 const char* path_door = "assets/sprites/enviroment/door_01.png";
 const char* path_torch = "assets/sprites/map/torch.png";
 const char* path_window_1 = "assets/sprites/map/window_1.png";
+const char* path_window_big = "assets/sprites/map/big_window.png";
 const char* path_bau = "assets/sprites/enviroment/bau.png";
 
 #define TILE_FLOOR 1
@@ -41,6 +42,35 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->map = malloc(sizeof(Map));
     game->num_world_entities = 0;
 
+    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 140, vx_player, 5, 20, 20, 30, 30);
+
+    set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
+    set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.06f);
+    set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
+    set_entity_scale(&game->player->entity, 2.5);
+
+    init_enemy(game->enemy, 600, 720/2, 5, 100);
+    set_entity_anim(&game->enemy->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 13, 1, 0.06f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.1f);
+    game->enemy->entity.isActive = false;
+
+    game->battle = NULL;
+
+    game->game_font = font;
+    game->title_font = title_font;
+    game->subtitle_font = subtitle_font;
+
+    game->menu_background = al_load_bitmap("assets/Menu_Design.png");
+
+    al_identity_transform(&game->camera_transform);
+   
+    return game;
+}
+
+void render_first_map(Game* game){
     for(int y = 0; y < MAP_HEIGHT; y++){
         for(int x = 0; x < MAP_WIDTH; x++){
             if(y == MAP_HEIGHT - 1)
@@ -88,6 +118,12 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     set_entity_scale(window_1, 2);
     set_hit_box(window_1, 0, 0, 0, 0);
 
+    Entity* window_big = malloc(sizeof(Entity));
+    init_entity(window_big, 700, 80, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(window_big, path_window_big, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(window_big, 1.2);
+    set_hit_box(window_big, 0, 0, 0, 0);
+
     Entity* window_2 = malloc(sizeof(Entity));
     init_entity(window_2, 2000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_2, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
@@ -102,39 +138,13 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     add_world_entity(game, torch);
     add_world_entity(game, bau);
+    add_world_entity(game, window_big);
     add_world_entity(game, window_1);
     add_world_entity(game, window_2);
     add_world_entity(game, torch2);
     add_world_entity(game, banner);
     add_world_entity(game, banner2);
     add_world_entity(game, door); 
-
-    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 140, vx_player, 5, 20, 20, 30, 30);
-
-    set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
-    set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.06f);
-    set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
-    set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
-    set_entity_scale(&game->player->entity, 2.5);
-
-    init_enemy(game->enemy, 600, 720/2, 5, 100);
-    set_entity_anim(&game->enemy->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 13, 1, 0.06f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.1f);
-    game->enemy->entity.isActive = false;
-
-    game->battle = NULL;
-
-    game->game_font = font;
-    game->title_font = title_font;
-    game->subtitle_font = subtitle_font;
-
-    game->menu_background = al_load_bitmap("assets/Menu_Design.png");
-
-    al_identity_transform(&game->camera_transform);
-   
-    return game;
 }
 
 void add_world_entity(Game* game, Entity* entity) {
@@ -189,6 +199,7 @@ void menu_options(Game* game){
 
     if (game->mouse.left && btn_state == BTN_INIT)
     {
+        render_first_map(game);
         game->state = GAME_EXPLORING;
     } else if(game->mouse.left && btn_state == BTN_EXIT){
         game->state = GAME_OVER;
