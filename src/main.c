@@ -40,9 +40,11 @@ int main(){
     ALLEGRO_FONT* font = al_create_builtin_font();
     must_init(font, "font builtin");
     
-    ALLEGRO_FONT* title = al_load_ttf_font("assets/fonts/fonte_titulo.ttf", 32, 0);
+    ALLEGRO_FONT* title = al_load_ttf_font("assets/fonts/pressStart2p.ttf", 32, 0);
     
-    ALLEGRO_FONT* subtitle = al_load_ttf_font("assets/fonts/fonte_subtitulo.ttf", 16, 0);
+    ALLEGRO_FONT* subtitle = al_load_ttf_font("assets/fonts/pressStart2p.ttf", 16, 0);
+
+    ALLEGRO_FONT* subtitle_8 = al_load_ttf_font("assets/fonts/pressStart2p.ttf", 8, 0);
     
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     must_init(queue, "queue");
@@ -93,10 +95,16 @@ int main(){
             case ALLEGRO_EVENT_KEY_DOWN:
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
+                if(game->state == GAME_INIT){
+                    if(key[ALLEGRO_KEY_E]){
+                        game->init_dialogues++;
+                    }
+                }
+
                 if(key[ALLEGRO_KEY_SPACE]) {
                     game->player->entity.anim_state = ANIM_ATTACK;
 
-                    if(game->state == GAME_BATTLE && game->battle->turn_state == TURN_PLAYER){
+                    if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle->turn_state == TURN_PLAYER){
                         game->player->turn_choice = TURN_ATTACK;
                     }
                 }

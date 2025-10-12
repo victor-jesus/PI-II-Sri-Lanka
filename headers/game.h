@@ -16,10 +16,27 @@
 typedef enum{
     GAME_MENU,
     GAME_INIT,
-    GAME_EXPLORING,
+    GAME_FIRST_MISSION,
+    GAME_SECOND_MISSION,
     GAME_BATTLE,
     GAME_OVER
 } Game_state;
+
+typedef enum{
+    DIALOGUE_1,
+    DIALOGUE_2,
+    DIALOGUE_3,
+    DIALOGUE_4,
+    DIALOGUE_5,
+    NEXT_LEVEL,
+    DIALOGUE_NONE
+} Init_dialogues;
+
+typedef enum{
+    GAMEPLAY_BATTLE,
+    GAMEPLAY_EXPLORING,
+    GAMEPLAY_NONE
+} Gameplay_state;
 
 typedef struct{
     int x, y;
@@ -30,16 +47,14 @@ typedef enum{
     BTN_INIT,
     BTN_OPTIONS,
     BTN_EXIT,
-    NONE
+    BTN_NONE
 } Btn_state;
 
 typedef struct{
     int x, y, w, h;
-
 } Button;
 
 typedef struct {
-    ALLEGRO_BITMAP* menu_background;
     Game_state state;
     Player* player;
     Enemy* enemy;
@@ -50,11 +65,16 @@ typedef struct {
     ALLEGRO_FONT* game_font;
     ALLEGRO_FONT* title_font;
     ALLEGRO_FONT* subtitle_font;
+    ALLEGRO_FONT* subtitle_8_font;
     ALLEGRO_TRANSFORM camera_transform; 
 
+    Init_dialogues init_dialogues;
+    Gameplay_state gameplay_state;
     ALLEGRO_BITMAP* controls;
     Entity* world_entities[MAX_WORLD_ENTITIES];
     int num_world_entities;
+    ALLEGRO_BITMAP* background;
+
 } Game;
 
 

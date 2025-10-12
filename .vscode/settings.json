@@ -9,6 +9,7 @@
         "stdbool.h": "c",
         "map.h": "c",
         "battle.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "allegro_ttf.h": "c"
     }
 }

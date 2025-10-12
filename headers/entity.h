@@ -11,6 +11,7 @@
 typedef enum{
     DOOR,
     KEY,
+    DIALOGUE,
     ENVIRONMENT_NO_MOVE,
     ENVIRONMENT_MOVE,
     CHARACTER
@@ -30,6 +31,7 @@ typedef struct {
 } Entity;
 
 void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_type type);
+void set_entity_pos(Entity* entity, int x, int y);
 void set_entity_sprite(Entity* entity, AnimationState state, Sprite* sprite);
 void set_entity_scale(Entity* entity, float scale_factor);
 void set_hit_box(Entity* entity, int offset_up, int offset_down, int offset_left, int offset_right);

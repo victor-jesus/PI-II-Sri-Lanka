@@ -18,6 +18,11 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_ty
     entity->entity_type = entity_type;
 }
 
+void set_entity_pos(Entity* entity, int x, int y){
+    entity->x = x;
+    entity->y = y;
+}
+
 void set_entity_scale(Entity* entity, float scale) {
     entity->scale_factor = scale;
     update_hit_box(entity);
