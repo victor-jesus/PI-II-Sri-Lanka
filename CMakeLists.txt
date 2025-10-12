@@ -13,6 +13,7 @@ set(SRC
     src/battle.c
     src/dice.c
     src/sprite.c
+    src/map.c
 )
 
 include_directories(

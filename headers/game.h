@@ -60,6 +60,7 @@ typedef struct {
 void add_world_entity(Game* game, Entity* entity);
 Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player);
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt);
+void draw_map(Map *map);
 void draw_menu(Game* game);
 void draw_game(Game* game);
 void destroy_game(Game* game);

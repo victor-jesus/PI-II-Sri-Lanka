@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
-    init_entity(&player->entity, x, y, vx, vy, max_hp);
+    init_entity(&player->entity, x, y, vx, vy, max_hp, CHARACTER);
     player->iniciative = 10;
 
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);

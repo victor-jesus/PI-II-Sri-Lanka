@@ -21,7 +21,17 @@ const char* path_skeleton_run = "assets/sprites/skeleton/run.png";
 const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
 const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
+const char* path_map_tile = "assets/sprites/map/background-wall.png";
+const char* path_map_tile_floor = "assets/sprites/map/chao-4.png";
+
+const char* path_banner = "assets/sprites/map/banners.png";
 const char* path_door = "assets/sprites/enviroment/door_01.png";
+const char* path_torch = "assets/sprites/map/torch.png";
+const char* path_window_1 = "assets/sprites/map/window_1.png";
+const char* path_bau = "assets/sprites/enviroment/bau.png";
+
+#define TILE_FLOOR 1
+#define TILE_WALL 0
 
 Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
@@ -33,37 +43,75 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     for(int y = 0; y < MAP_HEIGHT; y++){
         for(int x = 0; x < MAP_WIDTH; x++){
-            if (y == 0 || y == MAP_HEIGHT - 1 || x == 0 || x == MAP_WIDTH - 1)
-                game->map->tiles[y][x] = 1;
+            if(y == MAP_HEIGHT - 1)
+                game->map->tiles[y][x] = TILE_FLOOR;
             else
-                game->map->tiles[y][x] = 0;
-
-            if(x == 5 && y == 5){
-                game->map->tiles[y][x] = 1;
-            }
-            if(x == 6 && y == 6){
-                game->map->tiles[y][x] = 1;
-            }
-            if(x == 6 && y == 5){
-                game->map->tiles[y][x] = 1;
-            }
-            if(x == 5 && y == 6){
-                game->map->tiles[y][x] = 1;
-            }
+                game->map->tiles[y][x] = TILE_WALL;
         }
     }
 
+    init_map(game->map, path_map_tile, path_map_tile_floor); 
+
     Entity* door = malloc(sizeof(Entity));
-    init_entity(door, 1500, (SCREEN_H / 2) + 25, 0, 0, 1);
+    init_entity(door, 1500, (SCREEN_H / 2) + 125, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(door, path_door, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(door, 0.5);
     set_hit_box(door, 0, 0, 0, 0);
 
+    Entity* banner = malloc(sizeof(Entity));
+    init_entity(banner, 1425, (SCREEN_H / 2) + 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(banner, path_banner, ANIM_IDLE, 6, 1, 0.1f);
+    set_entity_scale(banner, 0.5);
+    set_hit_box(banner, 0, 0, 0, 0);
+
+    Entity* banner2 = malloc(sizeof(Entity));
+    init_entity(banner2, 1580, (SCREEN_H / 2) + 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(banner2, path_banner, ANIM_IDLE, 6, 1, 0.1f);
+    set_entity_scale(banner2, 0.5);
+    set_hit_box(banner2, 0, 0, 0, 0);
+
+    Entity* torch = malloc(sizeof(Entity));
+    init_entity(torch, 1425, (SCREEN_H / 2) + 100, 0, 0, 1, ENVIRONMENT_MOVE);
+    set_entity_anim(torch, path_torch, ANIM_IDLE, 4, 2, 0.2f);
+    set_entity_scale(torch, 1.2);
+    set_hit_box(torch, 0, 0, 0, 0);
+
+    Entity* torch2 = malloc(sizeof(Entity));
+    init_entity(torch2, 1570, (SCREEN_H / 2) + 100, 0, 0, 1, ENVIRONMENT_MOVE);
+    set_entity_anim(torch2, path_torch, ANIM_IDLE, 4, 2, 0.2f);
+    set_entity_scale(torch2, 1.2);
+    set_hit_box(torch2, 0, 0, 0, 0);
+
+    Entity* window_1 = malloc(sizeof(Entity));
+    init_entity(window_1, 1000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(window_1, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(window_1, 2);
+    set_hit_box(window_1, 0, 0, 0, 0);
+
+    Entity* window_2 = malloc(sizeof(Entity));
+    init_entity(window_2, 2000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(window_2, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(window_2, 2);
+    set_hit_box(window_2, 0, 0, 0, 0);
+
+    Entity* bau = malloc(sizeof(Entity));
+    init_entity(bau, 400, (SCREEN_H / 2) + 180, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    set_entity_anim(bau, path_bau, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(bau, 1.2);
+    set_hit_box(bau, 0, 0, 0, 0);
+
+    add_world_entity(game, torch);
+    add_world_entity(game, bau);
+    add_world_entity(game, window_1);
+    add_world_entity(game, window_2);
+    add_world_entity(game, torch2);
+    add_world_entity(game, banner);
+    add_world_entity(game, banner2);
     add_world_entity(game, door); 
 
-    init_player(game->player, 100, pos_x_player, pos_y_player, vx_player, 5, 20, 20, 30, 30);
+    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 140, vx_player, 5, 20, 20, 30, 30);
 
-    set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
@@ -94,8 +142,7 @@ void add_world_entity(Game* game, Entity* entity) {
         game->world_entities[game->num_world_entities] = entity;
         game->num_world_entities++;
     } else {
-        // Opcional: imprimir um aviso ou liberar a memória da entidade não adicionada
-        fprintf(stderr, "Aviso: Nao foi possivel adicionar mais entidades. Limite atingido.\n");
+        printf("Não foi possível adicionar mais entidades. Limite atingido.\n");
     }
 }
 
@@ -230,6 +277,59 @@ void create_button(Button* btn, int x, int y, int w, int h){
     btn->h = h;
 }
     
+// map.c
+
+void draw_map(Map *map) {
+    if (!map || !map->wall) return; 
+    if(!map || !map->floor) return;
+
+    const int TILES_PER_ROW = 1; 
+    
+    const float SOURCE_W = 32; 
+    const float SOURCE_H = 32; 
+    
+    const float DEST_W = TILE_W; 
+    const float DEST_H = TILE_H; 
+
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            float draw_x = x * DEST_W;
+            float draw_y = y * DEST_H;
+
+            int tile_index = map->tiles[y][x];
+
+            int tile_col = tile_index % TILES_PER_ROW; 
+            int tile_row = tile_index / TILES_PER_ROW; 
+
+            float sx = (float)tile_col * SOURCE_W;
+            float sy = (float)tile_row * SOURCE_H;
+
+
+            if(map->tiles[y][x] == TILE_WALL){
+                al_draw_scaled_bitmap(
+                    map->wall,
+                    sx, sy,
+                    SOURCE_W, SOURCE_H,
+                    draw_x, draw_y,
+                    DEST_W, DEST_H,      
+                    0                    
+                );
+            }
+
+            if(map->tiles[y][x] == TILE_FLOOR){
+                al_draw_scaled_bitmap(
+                    map->floor,
+                    sx, sy,
+                    1024, 1024,
+                    draw_x, draw_y,
+                    128, 128,
+                    0 
+                );
+            }
+        }
+    }
+}
+
 void draw_menu(Game* game){
     int btn_w = 200;
     int btn_h = 50;
@@ -266,29 +366,6 @@ void draw_menu(Game* game){
     al_draw_rectangle(btn3x - (btn_w / 2), btn3y, btn3x + (btn_w / 2), btn3y + btn_h, al_map_rgb(255, 255, 0), 2);
     al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn3y + btn_h) - (btn_h / 2) - 10, ALLEGRO_ALIGN_CENTER, "SAIR");
 
-}
-
-void draw_map(Map *map) {
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            float draw_x = x * TILE_W;
-            float draw_y = y * TILE_H;
-
-            if (map->tiles[y][x] == 1) {
-                al_draw_filled_rectangle(draw_x, draw_y, 
-                                         draw_x + TILE_W, draw_y + TILE_H,
-                                         al_map_rgb(255, 255, 255));
-            } else {
-                al_draw_filled_rectangle(draw_x, draw_y, 
-                                         draw_x + TILE_W, draw_y + TILE_H,
-                                         al_map_rgb(50, 100, 50));
-            }
-                al_draw_rectangle(draw_x, draw_y, 
-                                draw_x + TILE_W, draw_y + TILE_H,
-                                al_map_rgb(0, 0, 0), 1);
-
-        }
-    }
 }
 
 

@@ -1,7 +1,7 @@
 #include "entity.h"
 #include "allegro5/allegro_primitives.h"
 
-void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp){
+void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_type entity_type){
     for(int i = 0; i < QUANT_ANIMATIONS; i++){
         entity->sprite[i] = NULL;
     }
@@ -15,6 +15,7 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp){
     entity->flip = 0;
     entity->isActive = true;
     entity->scale_factor = 1.0f; 
+    entity->entity_type = entity_type;
 }
 
 void set_entity_scale(Entity* entity, float scale) {
@@ -46,6 +47,8 @@ void set_entity_anim(Entity* entity, const char* path, AnimationState animation_
 }
 
 void update_entity(Entity* entity, float dt){
+    if(entity->entity_type == ENVIRONMENT_NO_MOVE) return;
+
     Sprite* current = entity->sprite[entity->anim_state];
     
     if (!current) {
