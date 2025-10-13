@@ -13,7 +13,7 @@ static ALLEGRO_BITMAP* load_checked_tile(const char* path, const char* name) {
     return bmp;
 }
 
-void init_map(Map* map, const char* wall_path, const char* floor_path) {
+void init_map(Map* map, const char* wall_path, const char* floor_path, const char* floor_2_path) {
     if (!map) {
         fprintf(stderr, "ERRO FATAL: Ponteiro 'map' invalido em init_map.\n");
         exit(1);
@@ -21,6 +21,7 @@ void init_map(Map* map, const char* wall_path, const char* floor_path) {
     
     map->wall = load_checked_tile(wall_path, "wall");
     map->floor = load_checked_tile(floor_path, "floor");
+    map->floor_2 = load_checked_tile(floor_2_path, "floor 2");
 }
 
 void destroy_map(Map* map) {

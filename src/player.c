@@ -77,6 +77,14 @@ void update_player(Player* player, unsigned char* key, float dt){
         player->entity.flip = 0;
         player->moving = true; 
     }
+    if (key[ALLEGRO_KEY_W] || key[ALLEGRO_KEY_UP]) { 
+        player->entity.y -= player->entity.vy; 
+        player->moving = true; 
+    }
+    if (key[ALLEGRO_KEY_S] ||  key[ALLEGRO_KEY_DOWN]) { 
+        player->entity.y += player->entity.vy; 
+        player->moving = true; 
+    }
     
     if(player->moving){
         player->entity.anim_state = ANIM_RUN;

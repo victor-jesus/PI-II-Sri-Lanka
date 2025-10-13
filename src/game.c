@@ -26,6 +26,10 @@ const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
 
 const char* path_map_tile = "assets/sprites/map/background-wall.png";
 const char* path_map_tile_floor = "assets/sprites/map/chao-4.png";
+const char* path_map_tile_floor_rock = "assets/sprites/map/teste-chao.png";
+
+const char* path_map_tile_cave_floor = "assets/sprites/map/cave-chao.png";
+const char* path_map_tile_cave_wall = "assets/sprites/map/textura-teste.png";
 
 const char* path_banner = "assets/sprites/map/banners.png";
 const char* path_banner_e = "assets/sprites/enviroment/banner-e.png";
@@ -44,6 +48,7 @@ const char* path_subtitle_8_font = "assets/fonts/pressStart2p.ttf";
 const char* path_key_e = "assets/sprites/ui/controls/KEYBOARD/KEYS/E.png";
 
 
+#define TILE_FLOOR_2 2 
 #define TILE_FLOOR 1
 #define TILE_WALL 0
 
@@ -63,7 +68,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     set_entity_scale(key_e, 1);
     set_hit_box(key_e, 0, 0, 0, 0);
 
-    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 140, vx_player, 5, 20, 20, 30, 30);
+    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 30, vx_player, 5, 20, 20, 30, 30);
 
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.06f);
@@ -96,6 +101,8 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 }
 
 void render_initial_level(Game* game){
+    reset_world_entities(game);
+
     if (game->state != GAME_INIT) {
         if (game->background) {
             al_destroy_bitmap(game->background);
@@ -127,17 +134,19 @@ void render_first_map(Game* game){
 
     for(int y = 0; y < MAP_HEIGHT; y++){
         for(int x = 0; x < MAP_WIDTH; x++){
-            if(y == MAP_HEIGHT - 1)
+            if(y == MAP_HEIGHT - 2)
                 game->map->tiles[y][x] = TILE_FLOOR;
+            else if(y == MAP_HEIGHT - 1)
+                game->map->tiles[y][x] = TILE_FLOOR_2;
             else
                 game->map->tiles[y][x] = TILE_WALL;
         }
     }
 
-    init_map(game->map, path_map_tile, path_map_tile_floor); 
+    init_map(game->map, path_map_tile, path_map_tile_floor, path_map_tile_floor_rock); 
 
     Entity* door = malloc(sizeof(Entity));
-    init_entity(door, 1500, (SCREEN_H / 2) + 125, 0, 0, 1, DOOR);
+    init_entity(door, 1500, (SCREEN_H / 2) - 96, 0, 0, 1, DOOR);
     set_entity_anim(door, path_door, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(door, 0.5);
     set_hit_box(door, 0, 0, 0, 0);
@@ -172,25 +181,25 @@ void render_first_map(Game* game){
     set_entity_pos(torch2, door->x + (door->box.w / 2) - (torch2->box.w / 2) + 100, door->y);
 
     Entity* window_1 = malloc(sizeof(Entity));
-    init_entity(window_1, 1000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_1, 600, (SCREEN_H / 2) - 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_1, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(window_1, 2);
     set_hit_box(window_1, 0, 0, 0, 0);
 
     Entity* window_big = malloc(sizeof(Entity));
-    init_entity(window_big, 700, 80, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_big, 300, 0, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_big, path_window_big, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(window_big, 1.2);
+    set_entity_scale(window_big, 1.0);
     set_hit_box(window_big, 0, 0, 0, 0);
 
     Entity* window_2 = malloc(sizeof(Entity));
-    init_entity(window_2, 2000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_2, 1800, (SCREEN_H / 2) - 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_2, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(window_2, 2);
     set_hit_box(window_2, 0, 0, 0, 0);
 
     Entity* bau = malloc(sizeof(Entity));
-    init_entity(bau, 400, (SCREEN_H / 2) + 180, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(bau, 400, (SCREEN_H / 2) - 30, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(bau, path_bau, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(bau, 1.2);
     set_hit_box(bau, 0, 0, 0, 0);
@@ -214,34 +223,20 @@ void render_second_map(Game* game){
 
     for(int y = 0; y < MAP_HEIGHT; y++){
         for(int x = 0; x < MAP_WIDTH; x++){
-            if(y == MAP_HEIGHT - 1)
+            if(y == MAP_HEIGHT - 1 || y == MAP_HEIGHT - 2)
                 game->map->tiles[y][x] = TILE_FLOOR;
             else
                 game->map->tiles[y][x] = TILE_WALL;
         }
     }
 
-    init_map(game->map, path_map_tile, path_map_tile_floor); 
+    init_map(game->map, path_map_tile_cave_wall, path_map_tile_cave_floor, path_map_tile_cave_floor); 
 
     Entity* door = malloc(sizeof(Entity));
-    init_entity(door, 1500, (SCREEN_H / 2) + 125, 0, 0, 1, DOOR);
+    init_entity(door, 1500, (SCREEN_H / 2) - 96, 0, 0, 1, DOOR);
     set_entity_anim(door, path_door, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(door, 0.5);
     set_hit_box(door, 0, 0, 0, 0);
-
-    Entity* banner = malloc(sizeof(Entity));
-    init_entity(banner, 0, 0, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(banner, path_banner_e, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(banner, 0.2);
-    set_hit_box(banner, 0, 0, 0, 0);
-    set_entity_pos(banner, door->x + (door->box.w / 2) - (banner->box.w / 2) + 200, door->y + door->box.w - 100);
-
-    Entity* banner2 = malloc(sizeof(Entity));
-    init_entity(banner2, 0, 0, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(banner2, path_banner_pi, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(banner2, 0.2);
-    set_hit_box(banner2, 0, 0, 0, 0);
-    set_entity_pos(banner2, door->x + (door->box.w / 2) - (banner2->box.w / 2) - 200, door->y + door->box.w - 100);
 
 
     Entity* torch = malloc(sizeof(Entity));
@@ -259,37 +254,28 @@ void render_second_map(Game* game){
     set_entity_pos(torch2, door->x + (door->box.w / 2) - (torch2->box.w / 2) + 100, door->y);
 
     Entity* window_1 = malloc(sizeof(Entity));
-    init_entity(window_1, 1000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_1, 600, (SCREEN_H / 2) - 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_1, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(window_1, 2);
     set_hit_box(window_1, 0, 0, 0, 0);
 
     Entity* window_big = malloc(sizeof(Entity));
-    init_entity(window_big, 700, 80, 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_big, 300, 0, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_big, path_window_big, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(window_big, 1.2);
+    set_entity_scale(window_big, 1.0);
     set_hit_box(window_big, 0, 0, 0, 0);
 
     Entity* window_2 = malloc(sizeof(Entity));
-    init_entity(window_2, 2000, (SCREEN_H / 2), 0, 0, 1, ENVIRONMENT_NO_MOVE);
+    init_entity(window_2, 1800, (SCREEN_H / 2) - 200, 0, 0, 1, ENVIRONMENT_NO_MOVE);
     set_entity_anim(window_2, path_window_1, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(window_2, 2);
     set_hit_box(window_2, 0, 0, 0, 0);
 
-    Entity* bau = malloc(sizeof(Entity));
-    init_entity(bau, 400, (SCREEN_H / 2) + 180, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(bau, path_bau, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(bau, 1.2);
-    set_hit_box(bau, 0, 0, 0, 0);
-
     add_world_entity(game, torch);
-    add_world_entity(game, bau);
     add_world_entity(game, window_big);
     add_world_entity(game, window_1);
     add_world_entity(game, window_2);
     add_world_entity(game, torch2);
-    add_world_entity(game, banner);
-    add_world_entity(game, banner2);
     add_world_entity(game, door); 
 
 }
@@ -309,6 +295,26 @@ void reset_world_entities(Game* game){
     }
     game->num_world_entities = 0;
 }
+
+void render_control(ALLEGRO_BITMAP* control, Entity* entity, Key_code key){
+    switch (key){
+        case INTERACT_E:
+            float draw_x = entity->x + (entity->box.w / 2) - (32 / 2); 
+            float draw_y = entity->y - 30; 
+
+            al_draw_scaled_bitmap(
+                control,
+                0, 0,
+                16, 16,
+                draw_x, draw_y,
+                32, 32,
+                0 
+            );
+            break;
+    }
+
+}
+
 
 void read_mouse(Game* game){
     ALLEGRO_MOUSE_STATE state;
@@ -359,7 +365,6 @@ void menu_options(Game* game){
             game->background = NULL;         
         }
 
-        reset_world_entities(game);
         render_initial_level(game);
     } else if(game->mouse.left && btn_state == BTN_EXIT){
         game->state = GAME_OVER;
@@ -376,25 +381,6 @@ bool check_interaction(ALLEGRO_BITMAP* control, Entity* entity_1, Entity* entity
     }
 
     return false;
-}
-
-void render_control(ALLEGRO_BITMAP* control, Entity* entity, Key_code key){
-    switch (key){
-        case INTERACT_E:
-            float draw_x = entity->x + (entity->box.w / 2) - (32 / 2); 
-            float draw_y = entity->y - 30; 
-
-            al_draw_scaled_bitmap(
-                control,
-                0, 0,
-                16, 16,
-                draw_x, draw_y,
-                32, 32,
-                0 
-            );
-            break;
-    }
-
 }
 
 void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_2, unsigned char* key){
@@ -499,50 +485,42 @@ void create_button(Button* btn, int x, int y, int w, int h){
 }
 
 void draw_map(Map *map) {
-    if (!map || !map->wall) return; 
-    if(!map || !map->floor) return;
-
-    const int TILES_PER_ROW = 1; 
+    if (!map || !map->wall || !map->floor) return; 
     
-    const float SOURCE_W = 32; 
-    const float SOURCE_H = 32; 
-    
+    // Dimensões de Destino (sempre o tamanho da célula da grade)
     const float DEST_W = TILE_W; 
     const float DEST_H = TILE_H; 
+    
+    // Coordenadas de origem (sx, sy) permanecem 0,0 já que cada tile é um arquivo separado
 
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             float draw_x = x * DEST_W;
             float draw_y = y * DEST_H;
 
-            int tile_index = map->tiles[y][x];
-
-            int tile_col = tile_index % TILES_PER_ROW; 
-            int tile_row = tile_index / TILES_PER_ROW; 
-
-            float sx = (float)tile_col * SOURCE_W;
-            float sy = (float)tile_row * SOURCE_H;
-
-
+            ALLEGRO_BITMAP *tile_to_draw = NULL;
+            
             if(map->tiles[y][x] == TILE_WALL){
+                tile_to_draw = map->wall;
+            } else if(map->tiles[y][x] == TILE_FLOOR){
+                tile_to_draw = map->floor;
+            } else if(map->tiles[y][x] == TILE_FLOOR_2){
+                tile_to_draw = map->floor_2;
+            }
+            // Adicione mais verificações para outros tipos de tile, se necessário
+            
+            if (tile_to_draw) {
+                // Dimensões de Origem (o tamanho real do arquivo PNG)
+                float SOURCE_W = al_get_bitmap_width(tile_to_draw);
+                float SOURCE_H = al_get_bitmap_height(tile_to_draw);
+                
                 al_draw_scaled_bitmap(
-                    map->wall,
-                    sx, sy,
+                    tile_to_draw,
+                    0, 0, 
                     SOURCE_W, SOURCE_H,
                     draw_x, draw_y,
                     DEST_W, DEST_H,      
                     0                    
-                );
-            }
-
-            if(map->tiles[y][x] == TILE_FLOOR){
-                al_draw_scaled_bitmap(
-                    map->floor,
-                    sx, sy,
-                    1024, 1024,
-                    draw_x, draw_y,
-                    128, 128,
-                    0 
                 );
             }
         }
