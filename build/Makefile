@@ -190,6 +190,30 @@ src/dice.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/dice.c.s
 .PHONY : src/dice.c.s
 
+src/door.o: src/door.c.o
+.PHONY : src/door.o
+
+# target to build an object file
+src/door.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.o
+.PHONY : src/door.c.o
+
+src/door.i: src/door.c.i
+.PHONY : src/door.i
+
+# target to preprocess a source file
+src/door.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.i
+.PHONY : src/door.c.i
+
+src/door.s: src/door.c.s
+.PHONY : src/door.s
+
+# target to generate assembly for a file
+src/door.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.s
+.PHONY : src/door.c.s
+
 src/enemy.o: src/enemy.c.o
 .PHONY : src/enemy.o
 
@@ -286,6 +310,30 @@ src/main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/main.c.s
 .PHONY : src/main.c.s
 
+src/map.o: src/map.c.o
+.PHONY : src/map.o
+
+# target to build an object file
+src/map.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/map.c.o
+.PHONY : src/map.c.o
+
+src/map.i: src/map.c.i
+.PHONY : src/map.i
+
+# target to preprocess a source file
+src/map.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/map.c.i
+.PHONY : src/map.c.i
+
+src/map.s: src/map.c.s
+.PHONY : src/map.s
+
+# target to generate assembly for a file
+src/map.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/map.c.s
+.PHONY : src/map.c.s
+
 src/player.o: src/player.c.o
 .PHONY : src/player.o
 
@@ -350,6 +398,9 @@ help:
 	@echo "... src/dice.o"
 	@echo "... src/dice.i"
 	@echo "... src/dice.s"
+	@echo "... src/door.o"
+	@echo "... src/door.i"
+	@echo "... src/door.s"
 	@echo "... src/enemy.o"
 	@echo "... src/enemy.i"
 	@echo "... src/enemy.s"
@@ -362,6 +413,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/map.o"
+	@echo "... src/map.i"
+	@echo "... src/map.s"
 	@echo "... src/player.o"
 	@echo "... src/player.i"
 	@echo "... src/player.s"

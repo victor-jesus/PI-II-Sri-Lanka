@@ -35,13 +35,13 @@ void update_sprite(Sprite* sprite, float dt){
     }
 }
 
-void draw_sprite(Sprite* sprite, int dx, int dy, int flip){
+void draw_sprite(Sprite* sprite, int dx, int dy, int flip, float size){
     if (!sprite) return;
 
     int sx = sprite->current_frame * sprite->frame_w;
     int sy = sprite->current_row * sprite->frame_h;
-    float dw = sprite->frame_w * 2.5;
-    float dh = sprite->frame_h * 2.5;
+    float dw = sprite->frame_w * size;
+    float dh = sprite->frame_h * size;
 
     al_draw_scaled_bitmap(sprite->bitmap, sx, sy, sprite->frame_w, sprite->frame_h, dx, dy, dw, dh, flip);
 }

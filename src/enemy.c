@@ -2,7 +2,7 @@
 #include "allegro5/allegro5.h"
 
 void init_enemy(Enemy* enemy, int x, int y, int vx, int hp){
-    init_entity(&enemy->entity, x, y, vx, 5, hp);
+    init_entity(&enemy->entity, x, y, vx, 5, hp, CHARACTER);
     enemy->iniciative = 10;
 }
 

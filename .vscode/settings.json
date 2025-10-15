@@ -6,6 +6,10 @@
         "player.h": "c",
         "allegro_font.h": "c",
         "dice.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "map.h": "c",
+        "battle.h": "c",
+        "stdlib.h": "c",
+        "allegro_ttf.h": "c"
     }
 }

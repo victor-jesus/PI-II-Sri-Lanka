@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
-    init_entity(&player->entity, x, y, vx, vy, max_hp);
+    init_entity(&player->entity, x, y, vx, vy, max_hp, CHARACTER);
     player->iniciative = 10;
 
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
@@ -14,7 +14,7 @@ void update_player_battle(Player* player, float dt){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
 
-        if(hit->current_frame == hit->cols - 1){
+        if(hit->current_frame == 0 && hit->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             hit->current_frame = 0;
             hit->elapsed = 0;
@@ -26,7 +26,7 @@ void update_player_battle(Player* player, float dt){
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
         update_sprite(attack, dt);
 
-        if(attack->current_frame == attack->cols - 1){
+        if(attack->current_frame == 0 && attack->elapsed < dt){
             player->turn_choice = TURN_ATTACK;
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
@@ -47,7 +47,7 @@ void update_player(Player* player, unsigned char* key, float dt){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
 
-        if(hit->current_frame == hit->cols - 1){
+        if(hit->current_frame == 0 && hit->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             hit->current_frame = 0;
             hit->elapsed = 0;
@@ -59,7 +59,7 @@ void update_player(Player* player, unsigned char* key, float dt){
         
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
         update_sprite(attack, dt);
-        if(attack->current_frame == attack->cols - 1){
+        if(attack->current_frame == 0 && attack->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
             attack->elapsed = 0;
@@ -75,6 +75,14 @@ void update_player(Player* player, unsigned char* key, float dt){
     if (key[ALLEGRO_KEY_D] ||  key[ALLEGRO_KEY_RIGHT]) { 
         player->entity.x += player->entity.vx; 
         player->entity.flip = 0;
+        player->moving = true; 
+    }
+    if (key[ALLEGRO_KEY_W] || key[ALLEGRO_KEY_UP]) { 
+        player->entity.y -= player->entity.vy; 
+        player->moving = true; 
+    }
+    if (key[ALLEGRO_KEY_S] ||  key[ALLEGRO_KEY_DOWN]) { 
+        player->entity.y += player->entity.vy; 
         player->moving = true; 
     }
     
