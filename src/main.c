@@ -142,6 +142,7 @@ int main(){
     if(title) al_destroy_font(title);
     if(subtitle) al_destroy_font(subtitle);
     if(font) al_destroy_font(font);
+    if(subtitle_8) al_destroy_font(subtitle_8);
     al_destroy_display(display);
     al_destroy_timer(fps);
     al_destroy_timer(timer_enemy);

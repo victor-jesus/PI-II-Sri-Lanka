@@ -12,12 +12,17 @@
 #include "enemy.h"
 #include "battle.h"
 #include "map.h"
+#include "door.h"
 
 typedef enum{
     GAME_MENU,
     GAME_INIT,
+    GAME_MINOTAUR_LEVEL,
+    GAME_MEDUSA_LEVEL,
+    GAME_ARAUTO_LEVEL,
     GAME_FIRST_MISSION,
     GAME_SECOND_MISSION,
+    GAME_THIRD_MISSION,
     GAME_BATTLE,
     GAME_OVER
 } Game_state;
@@ -74,7 +79,6 @@ typedef struct {
     Entity* world_entities[MAX_WORLD_ENTITIES];
     int num_world_entities;
     ALLEGRO_BITMAP* background;
-
 } Game;
 
 

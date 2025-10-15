@@ -14,6 +14,7 @@ set(SRC
     src/dice.c
     src/sprite.c
     src/map.c
+    src/door.c
 )
 
 include_directories(

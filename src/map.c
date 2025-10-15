@@ -7,7 +7,7 @@
 static ALLEGRO_BITMAP* load_checked_tile(const char* path, const char* name) {
     ALLEGRO_BITMAP* bmp = al_load_bitmap(path);
     if (!bmp) {
-        printf("ERRO FATAL: Nao foi possivel carregar o tile %s em: %s\n", name, path);
+        printf("ERRO: Nao foi possivel carregar o tile %s em: %s\n", name, path);
         exit(1);
     }
     return bmp;
@@ -15,7 +15,7 @@ static ALLEGRO_BITMAP* load_checked_tile(const char* path, const char* name) {
 
 void init_map(Map* map, const char* wall_path, const char* floor_path, const char* floor_2_path) {
     if (!map) {
-        fprintf(stderr, "ERRO FATAL: Ponteiro 'map' invalido em init_map.\n");
+        printf("ERRO: Ponteiro 'map' invalido em init_map.\n");
         exit(1);
     }
     
@@ -30,10 +30,17 @@ void destroy_map(Map* map) {
             al_destroy_bitmap(map->wall);
             map->wall = NULL;
         }
+
+        if (map->floor_2) {
+            al_destroy_bitmap(map->floor_2);
+            map->wall = NULL;
+        }
         
         if (map->floor) {
             al_destroy_bitmap(map->floor);
             map->floor = NULL;
         }
     }
+
+    free(map);
 }

@@ -21,6 +21,8 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_ty
 void set_entity_pos(Entity* entity, int x, int y){
     entity->x = x;
     entity->y = y;
+
+    update_hit_box(entity);
 }
 
 void set_entity_scale(Entity* entity, float scale) {
@@ -94,16 +96,28 @@ void take_damage(Entity* entity, int amount){
 }
 
 void draw_entity(Entity* entity){
-    float dx = entity->x;
-    float dy = entity->y;
+    Sprite* current = entity->sprite[entity->anim_state];
+    if (!current) {
+        current = entity->sprite[ANIM_IDLE];
+        if (!current) return;
+    }
+
+    float dx, dy;
+
+    dy = entity->box.y - (entity->offset_up * entity->scale_factor);
+
+    if (entity->flip == ALLEGRO_FLIP_HORIZONTAL) {
+        dx = entity->box.x - (entity->offset_right * entity->scale_factor);
+    } else {
+        dx = entity->box.x - (entity->offset_left * entity->scale_factor);
+    }
+
+    draw_sprite(current, dx, dy, entity->flip, entity->scale_factor);
 
     // float x1 = entity->box.x;
     // float y1 = entity->box.y;
     // float x2 = x1 + entity->box.w; 
     // float y2 = y1 + entity->box.h;  
 
-    // al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255,0,0), 2);
-
-    Sprite* current = entity->sprite[entity->anim_state];
-    draw_sprite(current, dx, dy, entity->flip, entity->scale_factor);
+    // al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 0, 0), 2);
 }

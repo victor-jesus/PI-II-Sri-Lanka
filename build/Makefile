@@ -190,6 +190,30 @@ src/dice.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/dice.c.s
 .PHONY : src/dice.c.s
 
+src/door.o: src/door.c.o
+.PHONY : src/door.o
+
+# target to build an object file
+src/door.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.o
+.PHONY : src/door.c.o
+
+src/door.i: src/door.c.i
+.PHONY : src/door.i
+
+# target to preprocess a source file
+src/door.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.i
+.PHONY : src/door.c.i
+
+src/door.s: src/door.c.s
+.PHONY : src/door.s
+
+# target to generate assembly for a file
+src/door.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/door.c.s
+.PHONY : src/door.c.s
+
 src/enemy.o: src/enemy.c.o
 .PHONY : src/enemy.o
 
@@ -374,6 +398,9 @@ help:
 	@echo "... src/dice.o"
 	@echo "... src/dice.i"
 	@echo "... src/dice.s"
+	@echo "... src/door.o"
+	@echo "... src/door.i"
+	@echo "... src/door.s"
 	@echo "... src/enemy.o"
 	@echo "... src/enemy.i"
 	@echo "... src/enemy.s"

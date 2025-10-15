@@ -14,7 +14,7 @@ void update_player_battle(Player* player, float dt){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
 
-        if(hit->current_frame == hit->cols - 1){
+        if(hit->current_frame == 0 && hit->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             hit->current_frame = 0;
             hit->elapsed = 0;
@@ -26,7 +26,7 @@ void update_player_battle(Player* player, float dt){
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
         update_sprite(attack, dt);
 
-        if(attack->current_frame == attack->cols - 1){
+        if(attack->current_frame == 0 && attack->elapsed < dt){
             player->turn_choice = TURN_ATTACK;
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
@@ -47,7 +47,7 @@ void update_player(Player* player, unsigned char* key, float dt){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
 
-        if(hit->current_frame == hit->cols - 1){
+        if(hit->current_frame == 0 && hit->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             hit->current_frame = 0;
             hit->elapsed = 0;
@@ -59,7 +59,7 @@ void update_player(Player* player, unsigned char* key, float dt){
         
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
         update_sprite(attack, dt);
-        if(attack->current_frame == attack->cols - 1){
+        if(attack->current_frame == 0 && attack->elapsed < dt){
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
             attack->elapsed = 0;
