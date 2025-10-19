@@ -15,6 +15,7 @@ set(SRC
     src/sprite.c
     src/map.c
     src/door.c
+    src/physics.c
 )
 
 include_directories(

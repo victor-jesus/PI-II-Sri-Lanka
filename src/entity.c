@@ -55,7 +55,6 @@ void set_entity_anim(Entity* entity, const char* path, AnimationState animation_
 
 void update_entity(Entity* entity, float dt){
     if(entity->entity_type == ENVIRONMENT_NO_MOVE) return;
-
     Sprite* current = entity->sprite[entity->anim_state];
     
     if (!current) {

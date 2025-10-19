@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include "door.h"
+#include "box.h"
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -99,9 +100,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->num_world_entities = 0;
     game->init_dialogues = DIALOGUE_NONE;
 
-
-
-    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 30, vx_player, 5, 25, 22, 30, 30);
+    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 25, 22, 30, 30);
 
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.07f);
@@ -124,6 +123,54 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     al_identity_transform(&game->camera_transform);
    
     return game;
+}
+
+void check_map_collision(Entity* entity, Map* map) {
+    for (int row = 0; row < MAP_HEIGHT; row++) {
+        for (int col = 0; col < MAP_WIDTH; col++) {
+            if (map->tiles[row][col] == TILE_WALL) {
+                Box tile_box = get_tile_box(row, col);
+
+                if (entity->box.x < tile_box.x + tile_box.w &&
+                    entity->box.x + entity->box.w > tile_box.x &&
+                    entity->box.y < tile_box.y + tile_box.h &&
+                    entity->box.y + entity->box.h > tile_box.y)
+                {
+                    resolve_collision_between_boxes(entity, &tile_box);
+                }
+            }
+        }
+    }
+}
+
+void resolve_collision_between_boxes(Entity* b1, Box* b2){
+    float overlapLeft   = (b1->box.x + b1->box.w) - b2->x;
+    float overlapRight  = (b2->x + b2->w) - b1->box.x;
+    float overlapTop    = (b1->box.y + b1->box.h) - b2->y;
+    float overlapBottom = (b2->y + b2->h) - b1->box.y;
+
+    float minOverlapX = (overlapLeft < overlapRight) ? overlapLeft : overlapRight;
+    float minOverlapY = (overlapTop < overlapBottom) ? overlapTop : overlapBottom;
+
+    if (minOverlapX < minOverlapY) {
+        if (overlapLeft < overlapRight) {
+            b1->x -= overlapLeft;
+        } else {
+            b1->x += overlapRight;
+        }
+        b1->vx = 0;
+    } else {
+        if(overlapTop < overlapBottom){
+            b1->y -= overlapTop;
+            b1->vy = 0;
+        } else {
+            b1->y += overlapBottom;
+            b1->vy = 0;
+        }
+    }
+
+    update_hit_box(b1);
+    
 }
 
 void render_initial_level(Game* game){
@@ -669,12 +716,11 @@ void update_camera(Game* game) {
     }
 
     al_identity_transform(&game->camera_transform);
-
     al_translate_transform(&game->camera_transform, -camera_x, -camera_y);
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
+    update_player(game, game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -707,7 +753,7 @@ static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
 }
 
 static void update_medusa_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
+    update_player(game, game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -739,7 +785,7 @@ static void update_medusa_level(Game* game, unsigned char* key, float dt) {
 }
 
 static void update_arauto_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
+    update_player(game, game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -772,7 +818,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
 
 static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     update_camera(game);
-    update_player(game->player, key, dt);
+    update_player(game, game->player, key, dt);
 
     for(int i = 0; i < game->num_world_entities; i++) {
         Entity* current_entity = game->world_entities[i];
@@ -836,6 +882,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
+                    check_map_collision(&game->player->entity, game->map);
                     update_exploring_state(game, key, dt);
                     break;
                 case GAMEPLAY_BATTLE:

@@ -7,6 +7,7 @@
 #define TILE_H 128
 
 #include <allegro5/allegro5.h>
+#include "box.h"
 
 typedef struct {
     int tiles[MAP_HEIGHT][MAP_WIDTH];
@@ -16,7 +17,7 @@ typedef struct {
 } Map;
 
 void init_map(Map* map, const char* wall, const char* floor, const char* floor_2);
-
-void destroy_map(Map* map); // Para limpeza
+Box get_tile_box(int row, int col);
+void destroy_map(Map* map);
 
 #endif

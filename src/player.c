@@ -1,4 +1,5 @@
 #include "player.h"
+#include "game.h"
 #include "allegro5/allegro5.h"
 #include <stdio.h>
 
@@ -39,7 +40,7 @@ void update_player_battle(Player* player, float dt){
     update_sprite(current, dt);
 }
 
-void update_player(Player* player, unsigned char* key, float dt){
+void update_player(struct Game* game, Player* player, unsigned char* key, float dt){
     update_hit_box(&player->entity);
     player->moving = false;
 
@@ -68,26 +69,31 @@ void update_player(Player* player, unsigned char* key, float dt){
     }
 
     if (key[ALLEGRO_KEY_A] || key[ALLEGRO_KEY_LEFT]) { 
+        player->entity.vx = 5;
         player->entity.x -= player->entity.vx; 
         player->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
         player->moving = true; 
-    }
-    if (key[ALLEGRO_KEY_D] ||  key[ALLEGRO_KEY_RIGHT]) { 
+    } else if (key[ALLEGRO_KEY_D] ||  key[ALLEGRO_KEY_RIGHT]) { 
+        player->entity.vx = 5;
         player->entity.x += player->entity.vx; 
         player->entity.flip = 0;
         player->moving = true; 
     }
+    
     if (key[ALLEGRO_KEY_W] || key[ALLEGRO_KEY_UP]) { 
+        player->entity.vy = 5;
         player->entity.y -= player->entity.vy; 
         player->moving = true; 
-    }
-    if (key[ALLEGRO_KEY_S] ||  key[ALLEGRO_KEY_DOWN]) { 
+    } else if (key[ALLEGRO_KEY_S] ||  key[ALLEGRO_KEY_DOWN]) { 
+        player->entity.vy = 5;
         player->entity.y += player->entity.vy; 
         player->moving = true; 
     }
     
     if(player->moving){
         player->entity.anim_state = ANIM_RUN;
+        player->entity.x += player->entity.vx * dt;
+        player->entity.y += player->entity.vy * dt;
     } else {
         player->entity.anim_state = ANIM_IDLE;
     }
