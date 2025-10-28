@@ -143,6 +143,10 @@ void check_map_collision(Entity* entity, Map* map) {
     }
 }
 
+void resolve_map_collision(Entity* entity, Map* map){
+
+}
+
 void resolve_collision_between_boxes(Entity* b1, Box* b2){
     float overlapLeft   = (b1->box.x + b1->box.w) - b2->x;
     float overlapRight  = (b2->x + b2->w) - b1->box.x;
@@ -863,6 +867,12 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* 
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt) {
     read_mouse(game);
 
+    if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
+        check_map_collision(&game->player->entity, game->map);
+        resolve_map_collision(&game->player->entity, game->map);
+    }
+
+
     switch (game->state) {
         case GAME_MENU:
             menu_options(game);
@@ -879,10 +889,8 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             break;
         case GAME_FIRST_MISSION:
             check_battle(game);
-            
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
-                    check_map_collision(&game->player->entity, game->map);
                     update_exploring_state(game, key, dt);
                     break;
                 case GAMEPLAY_BATTLE:

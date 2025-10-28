@@ -1,5 +1,6 @@
 #include "player.h"
 #include "game.h"
+#include "map.h"
 #include "allegro5/allegro5.h"
 #include <stdio.h>
 
@@ -11,6 +12,8 @@ void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int o
 }
 
 void update_player_battle(Player* player, float dt){
+    
+
     if(player->entity.anim_state == ANIM_HIT){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
@@ -41,6 +44,10 @@ void update_player_battle(Player* player, float dt){
 }
 
 void update_player(struct Game* game, Player* player, unsigned char* key, float dt){
+    if(player->entity.y > 480) player->entity.y = 480;
+    if(player->entity.x < 10) player->entity.x = 10;
+    if(player->entity.x > (MAP_WIDTH * TILE_W) - 50) player->entity.x = (MAP_WIDTH * TILE_W) - 50;
+
     update_hit_box(&player->entity);
     player->moving = false;
 
