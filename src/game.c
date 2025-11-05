@@ -122,6 +122,10 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     al_identity_transform(&game->camera_transform);
    
+
+    Item* HEAL_POTION = create_item(1, "Poção", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
+    add_item(&game->player->inventory, HEAL_POTION, 2);
+
     return game;
 }
 
@@ -141,10 +145,6 @@ void check_map_collision(Entity* entity, Map* map) {
             }
         }
     }
-}
-
-void resolve_map_collision(Entity* entity, Map* map){
-
 }
 
 void resolve_collision_between_boxes(Entity* b1, Box* b2){
@@ -724,7 +724,7 @@ void update_camera(Game* game) {
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    update_player(game, game->player, key, dt);
+    update_player(game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -757,7 +757,7 @@ static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
 }
 
 static void update_medusa_level(Game* game, unsigned char* key, float dt) {
-    update_player(game, game->player, key, dt);
+    update_player(game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -789,7 +789,7 @@ static void update_medusa_level(Game* game, unsigned char* key, float dt) {
 }
 
 static void update_arauto_level(Game* game, unsigned char* key, float dt) {
-    update_player(game, game->player, key, dt);
+    update_player(game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -822,7 +822,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
 
 static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     update_camera(game);
-    update_player(game, game->player, key, dt);
+    update_player(game->player, key, dt);
 
     for(int i = 0; i < game->num_world_entities; i++) {
         Entity* current_entity = game->world_entities[i];
@@ -869,7 +869,6 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
 
     if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
         check_map_collision(&game->player->entity, game->map);
-        resolve_map_collision(&game->player->entity, game->map);
     }
 
 

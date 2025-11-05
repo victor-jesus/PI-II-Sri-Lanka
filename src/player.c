@@ -1,11 +1,15 @@
 #include "player.h"
 #include "game.h"
 #include "map.h"
+#include "inventory.h"
+#include "item_type.h"
 #include "allegro5/allegro5.h"
 #include <stdio.h>
 
 void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right){
     init_entity(&player->entity, x, y, vx, vy, max_hp, CHARACTER);
+    init_inventory(&player->inventory);
+
     player->iniciative = 10;
 
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
@@ -43,7 +47,7 @@ void update_player_battle(Player* player, float dt){
     update_sprite(current, dt);
 }
 
-void update_player(struct Game* game, Player* player, unsigned char* key, float dt){
+void update_player(Player* player, unsigned char* key, float dt){
     if(player->entity.y > 480) player->entity.y = 480;
     if(player->entity.x < 10) player->entity.x = 10;
     if(player->entity.x > (MAP_WIDTH * TILE_W) - 50) player->entity.x = (MAP_WIDTH * TILE_W) - 50;
