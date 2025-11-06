@@ -40,6 +40,7 @@ void add_item(Inventory* inventory, Item* item, int amount){
             
             slot->quantity = amount_to_add;
             amount -= amount_to_add;
+
         }
     }
 

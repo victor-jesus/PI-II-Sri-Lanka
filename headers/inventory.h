@@ -16,5 +16,7 @@ typedef struct {
 
 void init_inventory(Inventory* inventory);
 void add_item(Inventory* inventory, Item* item, int amount);
+void clear_inventory(Inventory* inventory);
+void destroy_inventory(Inventory* inventory);
 
 #endif

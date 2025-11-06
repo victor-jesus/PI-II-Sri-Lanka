@@ -95,6 +95,10 @@ int main(){
             case ALLEGRO_EVENT_KEY_DOWN:
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
+                if(game->gameplay_state == GAMEPLAY_EXPLORING) {
+                    select_item(game->player, key);
+                }
+
                 if(game->state == GAME_INIT){
                     if(key[ALLEGRO_KEY_E]){
                         game->init_dialogues++;

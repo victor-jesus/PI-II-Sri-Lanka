@@ -55,13 +55,15 @@ const char* path_bau = "assets/sprites/enviroment/bau.png";
 const char* path_quadro_bhakara = "assets/sprites/enviroment/quadro-bhaskara.png";
 const char* path_armadura_env = "assets/sprites/enviroment/armadura_1.png";
 
+const char* path_minotaur_idle = "assets/sprites/transparent/small_potion.png";
+const char* path_minotaur_run = "assets/sprites/transparent/big_potion.png";
+
 const char* path_initial_background = "assets/background_level_01.jpg";
 const char* path_dialogue_box = "assets/sprites/ui/gui/dialogue_box.png";
 
 const char* path_subtitle_8_font = "assets/fonts/pressStart2p.ttf";
 
 const char* path_key_e = "assets/sprites/ui/controls/KEYBOARD/KEYS/E.png";
-
 
 #define TILE_FLOOR_2 2 
 #define TILE_FLOOR 1
@@ -123,8 +125,15 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     al_identity_transform(&game->camera_transform);
    
 
-    Item* HEAL_POTION = create_item(1, "Poção", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
+    Item* HEAL_POTION = create_item(1, "Poção Grande", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
     add_item(&game->player->inventory, HEAL_POTION, 2);
+
+    Item* HEAL_SMALL_POTION = create_item(2, "Poção Pequena", "Cura 10 HP.", 10, true, 3, ITEM_SMALL_HEAL);
+    add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
+
+    Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
+    add_item(&game->player->inventory, HEAL_WATER, 5);
+
 
     return game;
 }
@@ -906,6 +915,9 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
+
+                    al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), game->player->entity.x, game->player->entity.y, ALLEGRO_ALIGN_CENTER, "HP: %d", game->player->entity.hp);
+
                     break;
                 case GAMEPLAY_BATTLE:
                     update_battle_state(game, event, timer_enemy, dt);
@@ -1146,6 +1158,7 @@ void draw_game(Game* game){
         case GAME_FIRST_MISSION:
             al_use_transform(&game->camera_transform);
 
+
             draw_map(game->map);
 
             for(int i = 0; i < game->num_world_entities; i++){
@@ -1226,6 +1239,27 @@ void draw_game(Game* game){
             reset_world_entities(game);
 
             al_draw_text(game->title_font, al_map_rgb(255, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você morreu!");
+            break;
+    }
+
+    switch (game->gameplay_state){
+        case GAMEPLAY_EXPLORING:
+            
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 100, game->player->entity.y, ALLEGRO_ALIGN_CENTER, "HP: %d", game->player->entity.hp);
+
+            for(int i = 0; i < MAX_ITENS; i++){
+                Item* current_item = game->player->inventory.slots[i].item;
+                
+                if(current_item == NULL) continue;
+
+                al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 200, (i + 1) * 10, ALLEGRO_ALIGN_CENTER, "Item: %s", current_item->name);
+                al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 500, (i + 1) * 10, ALLEGRO_ALIGN_CENTER, "Descrição: %s", current_item->description);
+                al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 350, (i + 1) * 10, ALLEGRO_ALIGN_CENTER, "Quantidade: %d", game->player->inventory.slots[i].quantity);
+
+
+            }
+            break;
+        default:
             break;
     }
 }

@@ -15,5 +15,6 @@ typedef struct {
 } Item;
 
 Item* create_item(int id, const char* name, const char* description, double value, bool stackable, int max_stack, Item_type type);
+void use_item(Item* item);
 
 #endif

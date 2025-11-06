@@ -113,6 +113,52 @@ void update_player(Player* player, unsigned char* key, float dt){
     update_sprite(current, dt);
 }
 
+void select_item(Player* player, unsigned char* key){
+    if(key[ALLEGRO_KEY_1]){
+        for(int i = 0; i < MAX_ITENS; i++){
+            Item* current_item = player->inventory.slots[i].item;
+
+            
+            if(current_item->type == ITEM_HEAL){
+                if(player->inventory.slots[i].quantity <= 0) return;
+                
+                player->entity.hp += current_item->value;
+                player->inventory.slots[i].quantity--;
+                printf("Quantidade: %d\n", player->inventory.slots[i].quantity);
+                return;
+            }
+        }
+    } else if(key[ALLEGRO_KEY_2]){
+        for(int i = 0; i < MAX_ITENS; i++){
+            Item* current_item = player->inventory.slots[i].item;
+
+            
+            if(current_item->type == ITEM_SMALL_HEAL){
+                if(player->inventory.slots[i].quantity <= 0) return;
+
+                player->entity.hp += current_item->value;
+                player->inventory.slots[i].quantity--;
+                printf("Quantidade: %d\n", player->inventory.slots[i].quantity);
+                return;
+            }
+        }
+    } else if(key[ALLEGRO_KEY_3]){
+        for(int i = 0; i < MAX_ITENS; i++){
+            Item* current_item = player->inventory.slots[i].item;
+
+            
+            if(current_item->type == ITEM_WATER){
+                if(player->inventory.slots[i].quantity <= 0) return;
+
+                player->entity.hp += current_item->value;
+                player->inventory.slots[i].quantity--;
+                printf("Quantidade: %d\n", player->inventory.slots[i].quantity);
+                return;
+            }
+        }
+    }
+}
+
 void destroy_sprite_from_player(Player* player){
     for(int i = 0; i < QUANT_ANIMATIONS; i++){
         destroy_sprite(player->entity.sprite[i]);

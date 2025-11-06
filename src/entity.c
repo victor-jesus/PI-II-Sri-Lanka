@@ -113,10 +113,10 @@ void draw_entity(Entity* entity){
 
     draw_sprite(current, dx, dy, entity->flip, entity->scale_factor);
 
-    // float x1 = entity->box.x;
-    // float y1 = entity->box.y;
-    // float x2 = x1 + entity->box.w; 
-    // float y2 = y1 + entity->box.h;  
+    float x1 = entity->box.x;
+    float y1 = entity->box.y;
+    float x2 = x1 + entity->box.w; 
+    float y2 = y1 + entity->box.h;  
 
-    // al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 0, 0), 2);
+    al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 0, 0), 2);
 }
