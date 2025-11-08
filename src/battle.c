@@ -10,9 +10,6 @@ Battle* start_battle(Player* player, Enemy* enemy){
     battle->player = player;
     battle->enemy = enemy;
 
-    battle->player->entity.x = 300;
-    battle->enemy->entity.x = SCREEN_W - 300;
-
     battle->state = BATTLE_START;
 
     int dice = D_20;
@@ -27,9 +24,14 @@ Battle* start_battle(Player* player, Enemy* enemy){
 
     if(player_iniciative >= enemy_iniciative){
         battle->turn_state = TURN_PLAYER;
+        battle->turn_choice = TURN_NONE;
     } else {
         battle->turn_state = TURN_ENEMY;
+        battle->turn_choice = TURN_NONE;
     }
+
+    battle->player->turn_choice = TURN_NONE;
+    battle->enemy->turn_choice = TURN_NONE;
 
     return battle;
 }
@@ -45,6 +47,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
         Turn_choice choice = enemy_choice(battle);
         if(event.timer.source == timer_enemy){
             if(choice == TURN_ATTACK){
+                battle->enemy->entity.anim_state = ANIM_ATTACK;
                 take_damage(&battle->player->entity, 10);
                 battle->enemy->turn_choice = TURN_NONE;
                 battle->turn_state = TURN_PLAYER;

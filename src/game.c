@@ -473,22 +473,30 @@ void load_third_map(Game* game) {
 }
 
 void render_minotaur_level(Game* game){
-    game->background = al_load_bitmap("assets/sprites/map/minotaur/background-minotaur.png");
     reset_world_entities(game);
+
+    game->background = al_load_bitmap("assets/sprites/map/minotaur/background-minotaur.png");
+
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 700, 405, 5, 100);
+    init_enemy(game->enemy, BOSSES, 700, 405, 5, 100);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_minotaur_hit, ANIM_HIT, 3, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_minotaur_hit, ANIM_HIT, 3, 1, 0.14f);
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
     set_entity_scale(&game->enemy->entity, 2.0);
     set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
+
+    game->enemy->hp_heart = al_load_bitmap(path_heart);
     
     game->player->entity.x = 200; 
+    game->player->entity.flip = 0;
 
     game->player->entity.y = 517; 
+
+    game->battle = start_battle(game->player, game->enemy);
+
 }
 
 void render_medusa_level(Game* game){
@@ -497,7 +505,7 @@ void render_medusa_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 800, 400, 5, 100);
+    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100);
     set_entity_anim(&game->enemy->entity, path_medusa_idle, ANIM_IDLE, 7, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_walk, ANIM_RUN, 13, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_medusa_attack, ANIM_ATTACK, 16, 1, 0.1f);
@@ -519,7 +527,7 @@ void render_arauto_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 800, 400, 5, 100);
+    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100);
     set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 6, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_walk, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_arauto_attack, ANIM_ATTACK, 6, 1, 0.1f);
@@ -765,14 +773,9 @@ void update_camera(Game* game) {
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    update_player_battle(game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
-    }
-
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
     }
 
     if (key[ALLEGRO_KEY_K]) {
@@ -805,7 +808,7 @@ static void update_medusa_level(Game* game, unsigned char* key, float dt) {
     }
 
     if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+        update_enemy(game->enemy, dt);
     }
 
     if (key[ALLEGRO_KEY_K]) {
@@ -837,7 +840,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
     }
 
     if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+        update_enemy(game->enemy, dt);
     }
 
     if (key[ALLEGRO_KEY_K]) {
@@ -879,7 +882,7 @@ static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     }
 
     if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+        update_enemy(game->enemy, dt);
     }
 }
 
@@ -894,13 +897,12 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* 
         game->battle = NULL;
         return;
     }
-
-    update_camera(game);
-
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
-    }
     
+    if(game->enemy && game->enemy->entity.isActive == true)
+        update_enemy(game->enemy, dt);
+    
+    
+
     manage_battle(game->battle, event, timer_enemy);
     update_player_battle(game->player, key, dt);
 }
@@ -909,9 +911,16 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
     read_mouse(game);
 
     if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
-        check_map_collision(&game->player->entity, game->map);
     }
-
+    
+    switch(game->gameplay_state){
+        case GAMEPLAY_EXPLORING:
+            check_map_collision(&game->player->entity, game->map);
+            break;
+        case GAMEPLAY_BATTLE:
+            update_battle_state(game, event, timer_enemy, key, dt);
+            break;
+    }
 
     switch (game->state) {
         case GAME_MENU:
@@ -933,9 +942,6 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
-                case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
-                    break;
                 case GAMEPLAY_NONE:
                 default:
                     break;
@@ -948,9 +954,6 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
-                case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
-                    break;
                 case GAMEPLAY_NONE:
                 default:
                     break;
@@ -962,9 +965,6 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
-                    break;
-                case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -1140,19 +1140,29 @@ int calculate_hearts(int hp){
     else {return 0;}
 }
 
-void draw_hp(ALLEGRO_BITMAP* heart, int hp){
-    int qt_heart = calculate_hearts(hp);
+void draw_hp(ALLEGRO_FONT* font, ALLEGRO_BITMAP* heart, int x1, int y1, int hp, int y2, int max_hp){
+    int x1_background = x1 - 2;
+    int y1_background = y1 - 2;
+    int x2_background = x1 + max_hp + 2;
+    int y2_background = y2 + 2;
 
-    for(int i = 0; i < qt_heart; i++){
-        al_draw_scaled_bitmap(
-            heart,
-            0, 0,
-            17, 17,
-            (10 * i) * 4, 5,
-            40, 40,
-            0
-        );
-    }
+    al_draw_filled_rectangle(x1_background, y1_background, x2_background, y2_background, al_map_rgb(255, 255, 255));
+    al_draw_filled_rectangle(x1, y1, x1 + hp, y2, al_map_rgb(255, 0, 0));
+    al_draw_textf(font, al_map_rgb(0, 0, 0), (x1 + max_hp) - (max_hp / 2), (y2_background - y1_background) / 2, ALLEGRO_ALIGN_CENTER, "%d", hp);
+    
+    // int qt_heart = calculate_hearts(hp);
+
+    // for(int i = 0; i < qt_heart; i++){
+    //     al_draw_scaled_bitmap(
+    //         heart,
+    //         0, 0,
+    //         17, 17,
+    //         (10 * i) * 4, 5,
+    //         40, 40,
+    //         0
+    //     );
+    // }
+
 }
 
 void draw_inventory(Player* player, ALLEGRO_FONT* font){
@@ -1313,44 +1323,38 @@ void draw_game(Game* game){
             
             draw_inventory(game->player, game->subtitle_8_font);
 
-            al_draw_scaled_bitmap(
-                game->player->hp_heart, 
-                0, 0,
-                17, 17, 
-                20, 695, 24, 24,
-                0
-            );  
+            // al_draw_scaled_bitmap(
+            //     game->player->hp_heart, 
+            //     0, 0,
+            //     17, 17, 
+            //     20, 695, 24, 24,
+            //     0
+            // );  
 
-            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+            // al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
 
-            draw_hp(game->player->hp_heart, game->player->entity.hp);
-
-
-            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
-            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
-            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
-
+            draw_hp(game->subtitle_font, game->player->hp_heart, 50, 10, game->player->entity.hp, 30, game->player->entity.max_hp);
 
             break;
         case GAMEPLAY_BATTLE:
             draw_inventory(game->player, game->subtitle_8_font);
 
-            al_draw_scaled_bitmap(
-                game->player->hp_heart, 
-                0, 0,
-                17, 17, 
-                20, 695, 24, 24,
-                0
-            );  
+            if(game->battle->turn_state == TURN_PLAYER)
+                al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "Seu turno");
+            else if (game->battle->turn_state == TURN_ENEMY)
+                al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
 
-            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+            // al_draw_scaled_bitmap(
+            //     game->player->hp_heart, 
+            //     0, 0,
+            //     17, 17, 
+            //     20, 695, 24, 24,
+            //     0
+            // );  
 
-            draw_hp(game->player->hp_heart, game->player->entity.hp);
+            draw_hp(game->subtitle_font, game->player->hp_heart, 75, 10, game->player->entity.hp, 30, game->player->entity.max_hp);
+            draw_hp(game->subtitle_font, game->enemy->hp_heart, (SCREEN_W - 75) - game->enemy->entity.max_hp, 10, game->enemy->entity.hp, 30, game->enemy->entity.max_hp);
 
-
-            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
-            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
-            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
             break;
     }
 }

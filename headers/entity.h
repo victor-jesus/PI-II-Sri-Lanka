@@ -25,7 +25,7 @@ typedef struct {
     Box box;
     int x, y, vx, vy;
     int flip;
-    int hp;
+    int hp, max_hp; 
     int offset_up, offset_down, offset_left, offset_right;
     float scale_factor;
     Entity_type entity_type;

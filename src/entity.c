@@ -12,6 +12,7 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_ty
     entity->vx = vx;
     entity->vy = vy;
     entity->hp = hp;
+    entity->max_hp = hp;
     entity->flip = 0;
     entity->isActive = true;
     entity->scale_factor = 1.0f; 

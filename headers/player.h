@@ -14,7 +14,6 @@ struct Game;
 typedef struct {
     Entity entity;
     int iniciative;
-    int hp, max_hp;
     Turn_choice turn_choice;
     int max_itens;
     Inventory inventory;

@@ -1,18 +1,52 @@
 #include "enemy.h"
 #include "allegro5/allegro5.h"
 
-void init_enemy(Enemy* enemy, int x, int y, int vx, int hp){
+void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp){
     init_entity(&enemy->entity, x, y, vx, 5, hp, CHARACTER);
-    enemy->iniciative = 10;
+    enemy->enemy_type = enemy_type;
+    enemy->moving = false;
+    enemy->iniciative = 0;
 }
 
 /*
     Aqui vamos atualizar conforme uma função que cria um sistema de "IA" para o modo exploração e batalha
 */
-void update_enemy(Entity* entity, float dt){
+void update_enemy(Enemy* enemy, float dt){
+    update_hit_box(&enemy->entity);
+    enemy->moving = false;
 
+    if(enemy->entity.anim_state == ANIM_HIT){
+        Sprite* hit = enemy->entity.sprite[ANIM_HIT];
+        update_sprite(hit, dt);
 
-    Sprite* current = entity->sprite[entity->anim_state];
+        if(hit->current_frame == 0 && hit->elapsed < dt){
+            enemy->entity.anim_state = ANIM_IDLE;
+            hit->current_frame = 0;
+            hit->elapsed = 0;
+        }
+        return;
+    }
+
+    if(enemy->entity.anim_state == ANIM_ATTACK){
+        Sprite* attack = enemy->entity.sprite[ANIM_ATTACK];
+        update_sprite(attack, dt);
+        if(attack->current_frame == 0 && attack->elapsed < dt){
+            enemy->entity.anim_state = ANIM_IDLE;
+            attack->current_frame = 0;
+            attack->elapsed = 0;
+        }
+        return;
+    }
+
+    if(enemy->moving){
+        enemy->entity.anim_state = ANIM_RUN;
+        enemy->entity.x += enemy->entity.vx * dt;
+        enemy->entity.y += enemy->entity.vy * dt;
+    } else {
+        enemy->entity.anim_state = ANIM_IDLE;
+    }
+    
+    Sprite* current = enemy->entity.sprite[enemy->entity.anim_state];
     update_sprite(current, dt);
 }
 
