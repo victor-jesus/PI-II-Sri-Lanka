@@ -15,8 +15,9 @@ void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int o
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
 }
 
-void update_player_battle(Player* player, float dt){
-    
+void update_player_battle(Player* player, unsigned char* key, float dt){
+    update_hit_box(&player->entity);
+    player->moving = false;
 
     if(player->entity.anim_state == ANIM_HIT){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
@@ -31,27 +32,22 @@ void update_player_battle(Player* player, float dt){
     }
 
     if(player->entity.anim_state == ANIM_ATTACK){
+        
         Sprite* attack = player->entity.sprite[ANIM_ATTACK];
         update_sprite(attack, dt);
-
         if(attack->current_frame == 0 && attack->elapsed < dt){
-            player->turn_choice = TURN_ATTACK;
             player->entity.anim_state = ANIM_IDLE;
             attack->current_frame = 0;
             attack->elapsed = 0;
         }
         return;
     }
-
+    
     Sprite* current = player->entity.sprite[player->entity.anim_state];
     update_sprite(current, dt);
 }
 
 void update_player(Player* player, unsigned char* key, float dt){
-    if(player->entity.y > 480) player->entity.y = 480;
-    if(player->entity.x < 10) player->entity.x = 10;
-    if(player->entity.x > (MAP_WIDTH * TILE_W) - 50) player->entity.x = (MAP_WIDTH * TILE_W) - 50;
-
     update_hit_box(&player->entity);
     player->moving = false;
 
@@ -114,21 +110,23 @@ void update_player(Player* player, unsigned char* key, float dt){
 }
 
 void select_item(Player* player, unsigned char* key){
-    if(key[ALLEGRO_KEY_1]){
+    if(key[ALLEGRO_KEY_H]){
         for(int i = 0; i < MAX_ITENS; i++){
             Item* current_item = player->inventory.slots[i].item;
 
             
             if(current_item->type == ITEM_HEAL){
                 if(player->inventory.slots[i].quantity <= 0) return;
-                
+
                 player->entity.hp += current_item->value;
                 player->inventory.slots[i].quantity--;
                 printf("Quantidade: %d\n", player->inventory.slots[i].quantity);
                 return;
             }
         }
-    } else if(key[ALLEGRO_KEY_2]){
+    } 
+    
+    if(key[ALLEGRO_KEY_J]){
         for(int i = 0; i < MAX_ITENS; i++){
             Item* current_item = player->inventory.slots[i].item;
 
@@ -142,7 +140,9 @@ void select_item(Player* player, unsigned char* key){
                 return;
             }
         }
-    } else if(key[ALLEGRO_KEY_3]){
+    }
+    
+    if(key[ALLEGRO_KEY_K]){
         for(int i = 0; i < MAX_ITENS; i++){
             Item* current_item = player->inventory.slots[i].item;
 

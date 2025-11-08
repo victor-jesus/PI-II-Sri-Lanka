@@ -19,10 +19,11 @@ typedef struct {
     int max_itens;
     Inventory inventory;
     bool moving;
+    ALLEGRO_BITMAP* hp_heart;
 } Player;
 
 void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right);
-void update_player_battle(Player* player, float dt);
+void update_player_battle(Player* player, unsigned char* key, float dt);
 void update_player(Player* player, unsigned char* key, float dt);
 void select_item(Player* player, unsigned char* key);
 void destroy_player(Player* player);

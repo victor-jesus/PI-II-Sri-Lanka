@@ -14,6 +14,8 @@ typedef enum{
     DIALOGUE,
     ENVIRONMENT_NO_MOVE,
     ENVIRONMENT_MOVE,
+    INVENTORY,
+    UI,
     CHARACTER
 } Entity_type;
 
