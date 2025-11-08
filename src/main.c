@@ -95,18 +95,24 @@ int main(){
             case ALLEGRO_EVENT_KEY_DOWN:
                 key[event.keyboard.keycode] = KEY_SEEN | KEY_DOWN;
 
+                if(game->gameplay_state == GAMEPLAY_EXPLORING) {
+                    select_item(game->player, key);
+                }
+
                 if(game->state == GAME_INIT){
                     if(key[ALLEGRO_KEY_E]){
                         game->init_dialogues++;
                     }
                 }
 
+                if(key[ALLEGRO_KEY_Y]) game->player->entity.hp = game->player->entity.hp - 20;
+                if(key[ALLEGRO_KEY_U]) game->player->entity.hp = game->player->entity.hp - 15;
+                if(key[ALLEGRO_KEY_I]) game->player->entity.hp = game->player->entity.hp - 10;
+                if(key[ALLEGRO_KEY_O]) game->player->entity.hp = game->player->entity.hp - 1;
+
+
                 if(key[ALLEGRO_KEY_SPACE]) {
                     game->player->entity.anim_state = ANIM_ATTACK;
-
-                    if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle->turn_state == TURN_PLAYER){
-                        game->player->turn_choice = TURN_ATTACK;
-                    }
                 }
 
                 if(key[ALLEGRO_KEY_ESCAPE]){

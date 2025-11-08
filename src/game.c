@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include "door.h"
+#include "box.h"
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -54,13 +55,18 @@ const char* path_bau = "assets/sprites/enviroment/bau.png";
 const char* path_quadro_bhakara = "assets/sprites/enviroment/quadro-bhaskara.png";
 const char* path_armadura_env = "assets/sprites/enviroment/armadura_1.png";
 
+const char* path_water = "assets/sprites/transparent/water-potion.png";
+const char* path_small_potion = "assets/sprites/transparent/small-potion.png";
+const char* path_big_potion = "assets/sprites/transparent/big-potion.png";
+
+const char* path_heart = "assets/sprites/transparent/heart.png";
+
 const char* path_initial_background = "assets/background_level_01.jpg";
 const char* path_dialogue_box = "assets/sprites/ui/gui/dialogue_box.png";
 
 const char* path_subtitle_8_font = "assets/fonts/pressStart2p.ttf";
 
 const char* path_key_e = "assets/sprites/ui/controls/KEYBOARD/KEYS/E.png";
-
 
 #define TILE_FLOOR_2 2 
 #define TILE_FLOOR 1
@@ -77,9 +83,11 @@ void add_world_entity(Game* game, Entity* entity) {
 
 void reset_world_entities(Game* game){
     for(int i = 0; i < game->num_world_entities; i++){
+
         if(game->world_entities[i] != NULL){
+            
             free(game->world_entities[i]);
-            game->world_entities[i] = NULL; // Opcional, mas boa prática
+            game->world_entities[i] = NULL;
         }
     }
     game->num_world_entities = 0;
@@ -99,9 +107,15 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->num_world_entities = 0;
     game->init_dialogues = DIALOGUE_NONE;
 
+    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 25, 22, 30, 30);
 
-
-    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 30, vx_player, 5, 25, 22, 30, 30);
+    Entity* hp = malloc(sizeof(Entity));
+    init_entity(hp, 0, 0, 0, 0, 1, UI);
+    set_entity_anim(hp, path_heart, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(hp, 1.5);
+    set_hit_box(hp, 0, 0, 0, 0);
+    set_entity_pos(hp, SCREEN_W - (hp->box.w) - 20, 10);
+    add_world_entity(game, hp);
 
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.07f);
@@ -117,44 +131,78 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->subtitle_font = subtitle_font;
     game->subtitle_8_font = al_load_ttf_font(path_subtitle_8_font, 8, 0);
 
+    game->player->hp_heart = al_load_bitmap("assets/sprites/transparent/heart.png");
     game->background = al_load_bitmap("assets/Menu_Design.png");
 
     game->controls = al_load_bitmap(path_key_e);
 
     al_identity_transform(&game->camera_transform);
    
+
+    initial_inventory(game);
+
+    // Item* HEAL_SMALL_POTION = create_item(2, "Poção Pequena", "Cura 10 HP.", 10, true, 3, ITEM_SMALL_HEAL);
+    // add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
+
+    // Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
+    // add_item(&game->player->inventory, HEAL_WATER, 5);
+
+
     return game;
 }
 
-void render_initial_level(Game* game){
-    reset_world_entities(game);
+void check_map_collision(Entity* entity, Map* map) {
+    for (int row = 0; row < MAP_HEIGHT; row++) {
+        for (int col = 0; col < MAP_WIDTH; col++) {
+            if (map->tiles[row][col] == TILE_WALL) {
+                Box tile_box = get_tile_box(row, col);
 
-    if (game->state != GAME_INIT) {
-        if (game->background) {
-            al_destroy_bitmap(game->background);
-            game->background = NULL;
-        }
-
-        game->state = GAME_INIT;
-        game->background = al_load_bitmap(path_initial_background);
-        if (!game->background) {
-            printf("ERRO: Nao foi possivel carregar background_level_01.jpg\n");
+                if (entity->box.x < tile_box.x + tile_box.w &&
+                    entity->box.x + entity->box.w > tile_box.x &&
+                    entity->box.y < tile_box.y + tile_box.h &&
+                    entity->box.y + entity->box.h > tile_box.y)
+                {
+                    resolve_collision_between_boxes(entity, &tile_box);
+                }
+            }
         }
     }
 
-    Entity* dialogue = malloc(sizeof(Entity));
-    init_entity(dialogue, 0, 0, 0, 0, 1, DIALOGUE);
-    set_entity_anim(dialogue, path_dialogue_box, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(dialogue, 1.5);
-    set_hit_box(dialogue, 0, 0, 0, 0);
-    set_entity_pos(dialogue, SCREEN_W - (dialogue->box.w) - 20, 10);
-
-    add_world_entity(game, dialogue);
-
-    game->init_dialogues = DIALOGUE_1;
+    if(entity->y > 480) entity->y = 480;
+    if(entity->x < 10) entity->x = 10;
+    if(entity->x > (MAP_WIDTH * TILE_W) - 50) entity->x = (MAP_WIDTH * TILE_W) - 50;
 }
 
-Entity* create_entity(const char* path, float x, float y, float scale, int frame, int cols, int rows, float dt, Entity_type entity_type){
+void resolve_collision_between_boxes(Entity* b1, Box* b2){
+    float overlapLeft   = (b1->box.x + b1->box.w) - b2->x;
+    float overlapRight  = (b2->x + b2->w) - b1->box.x;
+    float overlapTop    = (b1->box.y + b1->box.h) - b2->y;
+    float overlapBottom = (b2->y + b2->h) - b1->box.y;
+
+    float minOverlapX = (overlapLeft < overlapRight) ? overlapLeft : overlapRight;
+    float minOverlapY = (overlapTop < overlapBottom) ? overlapTop : overlapBottom;
+
+    if (minOverlapX < minOverlapY) {
+        if (overlapLeft < overlapRight) {
+            b1->x -= overlapLeft;
+        } else {
+            b1->x += overlapRight;
+        }
+        b1->vx = 0;
+    } else {
+        if(overlapTop < overlapBottom){
+            b1->y -= overlapTop;
+            b1->vy = 0;
+        } else {
+            b1->y += overlapBottom;
+            b1->vy = 0;
+        }
+    }
+
+    update_hit_box(b1);
+}
+
+Entity* create_entity(const char* path, float x, float y, float scale, float frame, int cols, int rows, float dt, Entity_type entity_type){
     Entity* entity = malloc(sizeof(Entity));
     init_entity(entity, x, y, 0, 0, 1, entity_type);
     set_entity_anim(entity, path, ANIM_IDLE, cols, rows, dt);
@@ -200,6 +248,50 @@ Entity* create_banner(const char* path, float x, float y, float scale, int frame
     return banner;
 }
     
+
+void initial_inventory(Game* game){
+    Item* HEAL_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
+    add_item(&game->player->inventory, HEAL_POTION, 2);
+    set_entity_pos(HEAL_POTION->entity, 150, 680); 
+
+    Item* HEAL_SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 5, ITEM_SMALL_HEAL);
+    add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
+    set_entity_pos(HEAL_SMALL_POTION->entity, 200, 680);
+
+    Item* WATER_POTION = create_item(path_water, "K", "Garrafa de agua", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
+    add_item(&game->player->inventory, WATER_POTION, 1);
+    set_entity_pos(WATER_POTION->entity, 250, 680);
+}
+
+void render_initial_level(Game* game){
+    reset_world_entities(game);
+
+    if (game->state != GAME_INIT) {
+        if (game->background) {
+            al_destroy_bitmap(game->background);
+            game->background = NULL;
+        }
+
+        game->state = GAME_INIT;
+        game->background = al_load_bitmap(path_initial_background);
+        if (!game->background) {
+            printf("ERRO: Nao foi possivel carregar background_level_01.jpg\n");
+        }
+    }
+
+    Entity* dialogue = malloc(sizeof(Entity));
+    init_entity(dialogue, 0, 0, 0, 0, 1, DIALOGUE);
+    set_entity_anim(dialogue, path_dialogue_box, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dialogue, 1.5);
+    set_hit_box(dialogue, 0, 0, 0, 0);
+    set_entity_pos(dialogue, SCREEN_W - (dialogue->box.w) - 20, 10);
+
+    add_world_entity(game, dialogue);
+
+    game->init_dialogues = DIALOGUE_1;
+}
+
+
 /*
     Refatorar as funções de criar entidades e implementar posição relacionada ao eixo X (LEVEL_WIDTH * porcentagem)
 */
@@ -383,10 +475,9 @@ void load_third_map(Game* game) {
 void render_minotaur_level(Game* game){
     game->background = al_load_bitmap("assets/sprites/map/minotaur/background-minotaur.png");
     reset_world_entities(game);
-
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 800, 400, 5, 100);
+    init_enemy(game->enemy, 700, 405, 5, 100);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
@@ -395,11 +486,9 @@ void render_minotaur_level(Game* game){
     set_entity_scale(&game->enemy->entity, 2.0);
     set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
     
-    game->gameplay_state = GAMEPLAY_EXPLORING; 
+    game->player->entity.x = 200; 
 
-    game->player->entity.x = 50; 
-
-    game->player->entity.y = 505; 
+    game->player->entity.y = 517; 
 }
 
 void render_medusa_level(Game* game){
@@ -455,6 +544,8 @@ void draw_minotaur_level(Game* game){
         SCREEN_W, SCREEN_H,
         0
     );
+
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
 }
 
 void draw_medusa_level(Game* game){
@@ -619,6 +710,7 @@ void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_
                 break;
             case DOOR_MINOTAUR:
                 game->state = GAME_MINOTAUR_LEVEL;
+                game->gameplay_state = GAMEPLAY_BATTLE;
                 render_minotaur_level(game);
                 break;
             case DOOR_MEDUSA:
@@ -669,12 +761,11 @@ void update_camera(Game* game) {
     }
 
     al_identity_transform(&game->camera_transform);
-
     al_translate_transform(&game->camera_transform, -camera_x, -camera_y);
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
+    update_player_battle(game->player, key, dt);
 
     if (game->player->entity.x > SCREEN_W / 2) {
         game->player->entity.x = SCREEN_W / 2;
@@ -792,7 +883,7 @@ static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     }
 }
 
-static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt) {
+static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, unsigned char* key, float dt) {
     if (!game->battle) {
         game->gameplay_state = GAMEPLAY_EXPLORING;
         return;
@@ -811,11 +902,16 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* 
     }
     
     manage_battle(game->battle, event, timer_enemy);
-    update_player_battle(game->player, dt);
+    update_player_battle(game->player, key, dt);
 }
 
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt) {
     read_mouse(game);
+
+    if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
+        check_map_collision(&game->player->entity, game->map);
+    }
+
 
     switch (game->state) {
         case GAME_MENU:
@@ -833,13 +929,12 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             break;
         case GAME_FIRST_MISSION:
             check_battle(game);
-            
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
                 case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, dt);
+                    update_battle_state(game, event, timer_enemy, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -854,7 +949,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
                     update_exploring_state(game, key, dt);
                     break;
                 case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, dt);
+                    update_battle_state(game, event, timer_enemy, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -869,7 +964,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
                     update_exploring_state(game, key, dt);
                     break;
                 case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, dt);
+                    update_battle_state(game, event, timer_enemy, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -1036,6 +1131,43 @@ void draw_menu(Game* game){
 
 }
 
+int calculate_hearts(int hp){
+    if(hp >= 100) {return 5;}
+    else if(hp >= 80) {return 4;}
+    else if(hp >= 60) {return 3;}
+    else if(hp >= 40) {return 2;}
+    else if(hp >= 20) {return 1;}
+    else {return 0;}
+}
+
+void draw_hp(ALLEGRO_BITMAP* heart, int hp){
+    int qt_heart = calculate_hearts(hp);
+
+    for(int i = 0; i < qt_heart; i++){
+        al_draw_scaled_bitmap(
+            heart,
+            0, 0,
+            17, 17,
+            (10 * i) * 4, 5,
+            40, 40,
+            0
+        );
+    }
+}
+
+void draw_inventory(Player* player, ALLEGRO_FONT* font){
+    for(int i = 0; i < MAX_ITENS; i++){
+        Item* current_item = player->inventory.slots[i].item;
+        
+        if(current_item == NULL) continue;
+
+        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%d", player->inventory.slots[i].quantity);
+        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x + current_item->entity->box.w, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%s", current_item->id);
+
+        draw_entity(current_item->entity);
+    }
+
+}
 
 void draw_game(Game* game){
     ALLEGRO_TRANSFORM identity_transform;
@@ -1091,6 +1223,7 @@ void draw_game(Game* game){
             break;
         case GAME_FIRST_MISSION:
             al_use_transform(&game->camera_transform);
+
 
             draw_map(game->map);
 
@@ -1172,6 +1305,52 @@ void draw_game(Game* game){
             reset_world_entities(game);
 
             al_draw_text(game->title_font, al_map_rgb(255, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você morreu!");
+            break;
+    }
+
+    switch (game->gameplay_state){
+        case GAMEPLAY_EXPLORING:
+            
+            draw_inventory(game->player, game->subtitle_8_font);
+
+            al_draw_scaled_bitmap(
+                game->player->hp_heart, 
+                0, 0,
+                17, 17, 
+                20, 695, 24, 24,
+                0
+            );  
+
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+
+            draw_hp(game->player->hp_heart, game->player->entity.hp);
+
+
+            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
+            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
+            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+
+
+            break;
+        case GAMEPLAY_BATTLE:
+            draw_inventory(game->player, game->subtitle_8_font);
+
+            al_draw_scaled_bitmap(
+                game->player->hp_heart, 
+                0, 0,
+                17, 17, 
+                20, 695, 24, 24,
+                0
+            );  
+
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+
+            draw_hp(game->player->hp_heart, game->player->entity.hp);
+
+
+            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
+            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
+            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
             break;
     }
 }

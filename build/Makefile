@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka"
+CMAKE_SOURCE_DIR = /home/victor-gustavo/Programação/PI-II/PI-II-GAME/PI-II-Sri-Lanka
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build"
+CMAKE_BINARY_DIR = /home/victor-gustavo/Programação/PI-II/PI-II-GAME/PI-II-Sri-Lanka/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build/CMakeFiles" "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build//CMakeFiles/progress.marks"
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/victor-gustavo/Programação/PI-II/PI-II-GAME/PI-II-Sri-Lanka/build/CMakeFiles /home/victor-gustavo/Programação/PI-II/PI-II-GAME/PI-II-Sri-Lanka/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start "/home/victor-gustavo/Programação/PI-II/PI II Arauto da Matematica/PI-II-Sri-Lanka/build/CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/victor-gustavo/Programação/PI-II/PI-II-GAME/PI-II-Sri-Lanka/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -286,6 +286,54 @@ src/game.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/game.c.s
 .PHONY : src/game.c.s
 
+src/inventory.o: src/inventory.c.o
+.PHONY : src/inventory.o
+
+# target to build an object file
+src/inventory.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/inventory.c.o
+.PHONY : src/inventory.c.o
+
+src/inventory.i: src/inventory.c.i
+.PHONY : src/inventory.i
+
+# target to preprocess a source file
+src/inventory.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/inventory.c.i
+.PHONY : src/inventory.c.i
+
+src/inventory.s: src/inventory.c.s
+.PHONY : src/inventory.s
+
+# target to generate assembly for a file
+src/inventory.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/inventory.c.s
+.PHONY : src/inventory.c.s
+
+src/item.o: src/item.c.o
+.PHONY : src/item.o
+
+# target to build an object file
+src/item.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/item.c.o
+.PHONY : src/item.c.o
+
+src/item.i: src/item.c.i
+.PHONY : src/item.i
+
+# target to preprocess a source file
+src/item.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/item.c.i
+.PHONY : src/item.c.i
+
+src/item.s: src/item.c.s
+.PHONY : src/item.s
+
+# target to generate assembly for a file
+src/item.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/item.c.s
+.PHONY : src/item.c.s
+
 src/main.o: src/main.c.o
 .PHONY : src/main.o
 
@@ -333,6 +381,30 @@ src/map.s: src/map.c.s
 src/map.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/map.c.s
 .PHONY : src/map.c.s
+
+src/physics.o: src/physics.c.o
+.PHONY : src/physics.o
+
+# target to build an object file
+src/physics.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/physics.c.o
+.PHONY : src/physics.c.o
+
+src/physics.i: src/physics.c.i
+.PHONY : src/physics.i
+
+# target to preprocess a source file
+src/physics.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/physics.c.i
+.PHONY : src/physics.c.i
+
+src/physics.s: src/physics.c.s
+.PHONY : src/physics.s
+
+# target to generate assembly for a file
+src/physics.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/physics.c.s
+.PHONY : src/physics.c.s
 
 src/player.o: src/player.c.o
 .PHONY : src/player.o
@@ -410,12 +482,21 @@ help:
 	@echo "... src/game.o"
 	@echo "... src/game.i"
 	@echo "... src/game.s"
+	@echo "... src/inventory.o"
+	@echo "... src/inventory.i"
+	@echo "... src/inventory.s"
+	@echo "... src/item.o"
+	@echo "... src/item.i"
+	@echo "... src/item.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
 	@echo "... src/map.o"
 	@echo "... src/map.i"
 	@echo "... src/map.s"
+	@echo "... src/physics.o"
+	@echo "... src/physics.i"
+	@echo "... src/physics.s"
 	@echo "... src/player.o"
 	@echo "... src/player.i"
 	@echo "... src/player.s"

@@ -10,6 +10,11 @@
         "map.h": "c",
         "battle.h": "c",
         "stdlib.h": "c",
-        "allegro_ttf.h": "c"
+        "allegro_ttf.h": "c",
+        "inventory.h": "c",
+        "stdio.h": "c",
+        "typeinfo": "c",
+        "item_type.h": "c",
+        "cstdlib": "c"
     }
 }

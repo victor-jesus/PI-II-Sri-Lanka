@@ -2,6 +2,8 @@
 
 #include <stdio.h> 
 #include <stdlib.h> 
+
+#include "box.h"
 #include <allegro5/allegro5.h>
 
 static ALLEGRO_BITMAP* load_checked_tile(const char* path, const char* name) {
@@ -22,6 +24,15 @@ void init_map(Map* map, const char* wall_path, const char* floor_path, const cha
     map->wall = load_checked_tile(wall_path, "wall");
     map->floor = load_checked_tile(floor_path, "floor");
     map->floor_2 = load_checked_tile(floor_2_path, "floor 2");
+}
+
+Box get_tile_box(int row, int col){
+    Box b;
+    b.x = col * TILE_W;
+    b.y = row * TILE_H;
+    b.w = TILE_W;
+    b.h = TILE_H;
+    return b;
 }
 
 void destroy_map(Map* map) {
