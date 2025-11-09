@@ -59,16 +59,16 @@ int main(){
     al_register_event_source(queue, al_get_timer_event_source(timer_enemy));
 
     al_show_mouse_cursor(display);
-
+    
     bool isRunning = true;
     bool redraw = true;
-
+    
     ALLEGRO_EVENT event;
-
     al_start_timer(fps);
 
-    Game* game = create_game(GAME_MENU, font, title, subtitle, 200, SCREEN_H / 2, 5, 100);
+    Game* game = create_game(GAME_MENU, font, title, subtitle, queue, 200, SCREEN_H / 2, 5, 100);
     
+
 
     unsigned char key[ALLEGRO_KEY_MAX];
     memset(key, 0, sizeof(key));

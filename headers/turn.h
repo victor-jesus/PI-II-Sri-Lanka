@@ -3,7 +3,8 @@
 
 typedef enum{
     TURN_PLAYER,
-    TURN_ENEMY
+    TURN_ENEMY,
+    TURN_EMPTY
 } Turn_state;
 
 typedef enum{

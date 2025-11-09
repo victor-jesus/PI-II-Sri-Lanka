@@ -6,6 +6,7 @@
 #include "player.h"
 #include "enemy.h"
 #include <allegro5/allegro5.h>
+#include "allegro5/allegro_font.h"
 
 typedef struct Battle{
     Player* player;
@@ -13,10 +14,12 @@ typedef struct Battle{
     Battle_state state;
     Turn_choice turn_choice;
     Turn_state turn_state;
+    ALLEGRO_TIMER* timer_dialogue;
+    ALLEGRO_TIMER* timer_end;
 } Battle;
 
-Battle* start_battle(Player* player, Enemy* enemy);
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer);
+void start_battle(Battle* battle, Player* player, Enemy* enemy);
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer, ALLEGRO_FONT* font);
 void destroy_battle(Battle* battle);
 
 #endif

@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <allegro5/allegro5.h>
+#include "allegro5/allegro5.h"
+#include "allegro5/allegro_font.h"
 
-Battle* start_battle(Player* player, Enemy* enemy){
-    Battle* battle = malloc(sizeof(Battle));
+void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->player = player;
     battle->enemy = enemy;
 
@@ -32,15 +33,28 @@ Battle* start_battle(Player* player, Enemy* enemy){
 
     battle->player->turn_choice = TURN_NONE;
     battle->enemy->turn_choice = TURN_NONE;
-
-    return battle;
 }
 
 Turn_choice enemy_choice(Battle* battle){
     return TURN_ATTACK;
 }
 
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy){
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, ALLEGRO_FONT* font){
+
+    if(battle->enemy->entity.hp <= 0){
+        battle->turn_state = TURN_EMPTY;
+        al_start_timer(battle->timer_end);
+
+        battle->enemy->entity.anim_state = ANIM_DEATH;        
+        battle->state = BATTLE_WIN;
+        if(event.timer.source == battle->timer_end){
+            battle->enemy->entity.isActive = false;
+            al_stop_timer(battle->timer_end);
+            al_set_timer_count(battle->timer_end, 0);
+        }
+        return;
+    }
+
     if(battle->turn_state == TURN_ENEMY){
         al_start_timer(timer_enemy);
 
@@ -62,17 +76,14 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
     if(battle->turn_state == TURN_PLAYER){
         if(battle->player->turn_choice == TURN_ATTACK){
             battle->player->entity.anim_state = ANIM_ATTACK;
-            take_damage(&battle->enemy->entity, 10);
+            take_damage(&battle->enemy->entity, 100);
             battle->turn_state = TURN_ENEMY;
             battle->player->turn_choice = TURN_NONE;
         }
         return;
     }
 
-    if(battle->enemy->entity.hp == 0){
-        battle->state = BATTLE_END;
-        battle->enemy->entity.isActive = false;
-    }
+    
 }
 
 void destroy_battle(Battle* battle){

@@ -25,7 +25,7 @@ const char* path_minotaur_idle = "assets/sprites/minotaur_1/idle.png";
 const char* path_minotaur_run = "assets/sprites/minotaur_1/walk.png";
 const char* path_minotaur_attack = "assets/sprites/minotaur_1/attack.png";
 const char* path_minotaur_hit = "assets/sprites/minotaur_1/hurt.png";
-
+const char* path_minotaur_death = "assets/sprites/minotaur_1/dead.png";
 
 const char* path_medusa_idle = "assets/sprites/medusa_1/idle.png";
 const char* path_medusa_walk = "assets/sprites/medusa_1/walk.png";
@@ -93,22 +93,22 @@ void reset_world_entities(Game* game){
     game->num_world_entities = 0;
 }
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, ALLEGRO_EVENT_QUEUE* queue, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->gameplay_state = GAMEPLAY_NONE;
     game->player = malloc(sizeof(Player));   
-
+    
     game->map = malloc(sizeof(Map));
     game->map->wall = NULL;
     game->map->floor = NULL;
     game->map->floor_2 = NULL;
-
+    
     game->num_world_entities = 0;
     game->init_dialogues = DIALOGUE_NONE;
-
+    
     init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 25, 22, 30, 30);
-
+    
     Entity* hp = malloc(sizeof(Entity));
     init_entity(hp, 0, 0, 0, 0, 1, UI);
     set_entity_anim(hp, path_heart, ANIM_IDLE, 1, 1, 0.1f);
@@ -117,14 +117,21 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     set_entity_pos(hp, SCREEN_W - (hp->box.w) - 20, 10);
     add_world_entity(game, hp);
 
+    game->queue = queue;
+ 
+    
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.07f);
     set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
     set_entity_scale(&game->player->entity, 2.5);
-
+    
     game->enemy = NULL;
-    game->battle = NULL;
+
+    game->battle = malloc(sizeof(Battle));
+
+    game->battle->timer_end = al_create_timer(5.0);
+    al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
 
     game->game_font = font;
     game->title_font = title_font;
@@ -133,12 +140,13 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     game->player->hp_heart = al_load_bitmap("assets/sprites/transparent/heart.png");
     game->background = al_load_bitmap("assets/Menu_Design.png");
-
+    
     game->controls = al_load_bitmap(path_key_e);
-
+    
+    
     al_identity_transform(&game->camera_transform);
-   
-
+    
+    
     initial_inventory(game);
 
     // Item* HEAL_SMALL_POTION = create_item(2, "Poção Pequena", "Cura 10 HP.", 10, true, 3, ITEM_SMALL_HEAL);
@@ -479,14 +487,15 @@ void render_minotaur_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, BOSSES, 700, 405, 5, 100);
+    init_enemy(game->enemy, BOSSES, 700, 405, 5, 100, 30,0,0,0);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_hit, ANIM_HIT, 3, 1, 0.14f);
+    set_entity_anim(&game->enemy->entity, path_minotaur_death, ANIM_DEATH, 5, 1, 0.25f);
+
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
 
     game->enemy->hp_heart = al_load_bitmap(path_heart);
     
@@ -495,7 +504,9 @@ void render_minotaur_level(Game* game){
 
     game->player->entity.y = 517; 
 
-    game->battle = start_battle(game->player, game->enemy);
+    start_battle(game->battle, game->player, game->enemy);
+    al_register_event_source(game->queue, game->battle->timer_end);
+
 
 }
 
@@ -505,14 +516,13 @@ void render_medusa_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100);
+    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_medusa_idle, ANIM_IDLE, 7, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_walk, ANIM_RUN, 13, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_medusa_attack, ANIM_ATTACK, 16, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_hit, ANIM_HIT, 3, 1, 0.1f);
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
     
     game->gameplay_state = GAMEPLAY_EXPLORING; 
 
@@ -527,14 +537,13 @@ void render_arauto_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100);
+    init_enemy(game->enemy, BOSSES, 800, 400, 5, 100, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 6, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_walk, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_arauto_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_hit, ANIM_HIT, 3, 1, 0.1f);
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
     
     game->gameplay_state = GAMEPLAY_EXPLORING; 
 
@@ -636,7 +645,7 @@ void check_battle(Game* game){
     if(dist >= -300 && dist <= 300){
         if(dist < 0) game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
         //game->state = GAMEPLAY_BATTLE;
-        game->battle = start_battle(game->player, game->enemy);
+        start_battle(game->battle, game->player, game->enemy);
     }
 }
 
@@ -892,18 +901,18 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* 
         return;
     }
 
-    if (game->battle->state == BATTLE_END) {
-        game->gameplay_state = GAMEPLAY_EXPLORING;
-        game->battle = NULL;
-        return;
-    }
+    // if (game->battle->state == BATTLE_WIN) {
+    //     game->gameplay_state = GAMEPLAY_EXPLORING;
+    //     game->battle = NULL;
+    //     return;
+    // }
     
     if(game->enemy && game->enemy->entity.isActive == true)
         update_enemy(game->enemy, dt);
     
     
 
-    manage_battle(game->battle, event, timer_enemy);
+    manage_battle(game->battle, event, timer_enemy, game->subtitle_font);
     update_player_battle(game->player, key, dt);
 }
 
@@ -1343,6 +1352,13 @@ void draw_game(Game* game){
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "Seu turno");
             else if (game->battle->turn_state == TURN_ENEMY)
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
+            else if (game->battle->turn_state == TURN_EMPTY)
+                al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "FIM!");
+                
+            if(game->battle->state == BATTLE_WIN) 
+                al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você ganhou!");
+            else if(game->battle->state == BATTLE_LOST)
+                al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você perdeu!");
 
             // al_draw_scaled_bitmap(
             //     game->player->hp_heart, 

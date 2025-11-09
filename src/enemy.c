@@ -1,11 +1,13 @@
 #include "enemy.h"
 #include "allegro5/allegro5.h"
 
-void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp){
+void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp, int offset_up, int offset_down, int offset_left, int offset_right){
     init_entity(&enemy->entity, x, y, vx, 5, hp, CHARACTER);
     enemy->enemy_type = enemy_type;
     enemy->moving = false;
     enemy->iniciative = 0;
+
+    set_hit_box(&enemy->entity, offset_up, offset_down, offset_left, offset_right);
 }
 
 /*
@@ -14,6 +16,18 @@ void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int h
 void update_enemy(Enemy* enemy, float dt){
     update_hit_box(&enemy->entity);
     enemy->moving = false;
+
+    if(enemy->entity.anim_state == ANIM_DEATH){
+
+        Sprite* death = enemy->entity.sprite[ANIM_DEATH];
+
+        if(death->current_frame < death->cols - 1)
+            update_sprite(death, dt);
+            return;
+
+        return;
+    }
+            
 
     if(enemy->entity.anim_state == ANIM_HIT){
         Sprite* hit = enemy->entity.sprite[ANIM_HIT];
@@ -37,6 +51,8 @@ void update_enemy(Enemy* enemy, float dt){
         }
         return;
     }
+
+      
 
     if(enemy->moving){
         enemy->entity.anim_state = ANIM_RUN;

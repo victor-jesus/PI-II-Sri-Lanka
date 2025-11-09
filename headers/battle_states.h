@@ -3,7 +3,8 @@
 
 typedef enum{
     BATTLE_START,
-    BATTLE_END
+    BATTLE_WIN,
+    BATTLE_LOST
 } Battle_state;
 
 #endif

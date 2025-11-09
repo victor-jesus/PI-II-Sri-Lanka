@@ -20,7 +20,7 @@ typedef struct {
     Enemy_type enemy_type;
 } Enemy;
 
-void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp);
+void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp, int offset_up, int offset_down, int offset_left, int offset_right);
 void update_enemy(Enemy* enemy, float dt);
 void destroy_enemy(Enemy* enemy);
 
