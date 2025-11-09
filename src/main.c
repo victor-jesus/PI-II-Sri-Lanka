@@ -49,14 +49,11 @@ int main(){
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     must_init(queue, "queue");
 
-    ALLEGRO_TIMER* timer_enemy = al_create_timer(3.0);
-    must_init(timer_enemy, "timer enemy");
-
+    
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_timer_event_source(fps));
-    al_register_event_source(queue, al_get_timer_event_source(timer_enemy));
 
     al_show_mouse_cursor(display);
     
@@ -66,9 +63,7 @@ int main(){
     ALLEGRO_EVENT event;
     al_start_timer(fps);
 
-    Game* game = create_game(GAME_MENU, font, title, subtitle, queue, 200, SCREEN_H / 2, 5, 100);
-    
-
+    Game* game = create_game(GAME_MENU, font, title, subtitle, queue, &event, 200, SCREEN_H / 2, 5, 100);
 
     unsigned char key[ALLEGRO_KEY_MAX];
     memset(key, 0, sizeof(key));
@@ -79,7 +74,7 @@ int main(){
         // Update/Lógica
         switch (event.type){
             case ALLEGRO_EVENT_TIMER:
-                update_game(game, key, event, timer_enemy, (1.0/60));
+                update_game(game, key, event, (1.0/60));
                 
                 if(game->state == GAME_OVER){
                     isRunning = false;
@@ -102,6 +97,18 @@ int main(){
                 if(game->state == GAME_INIT){
                     if(key[ALLEGRO_KEY_E]){
                         game->init_dialogues++;
+                    }
+                }
+
+                if(game->battle->state == BATTLE_DIALOGUE){ 
+                    if(key[ALLEGRO_KEY_E]){
+
+
+                        if(game->battle->dialogues == DIALOGUE_FINAL_INTRO){
+                            game->battle->state = BATTLE_START;
+                        } 
+
+                        game->battle->dialogues++;
                     }
                 }
 
@@ -156,7 +163,6 @@ int main(){
     if(subtitle_8) al_destroy_font(subtitle_8);
     al_destroy_display(display);
     al_destroy_timer(fps);
-    al_destroy_timer(timer_enemy);
     al_destroy_event_queue(queue);
 
     return 0;

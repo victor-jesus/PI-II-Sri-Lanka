@@ -1,11 +1,14 @@
 #include "enemy.h"
 #include "allegro5/allegro5.h"
 
-void init_enemy(Enemy* enemy, Enemy_type enemy_type, int x, int y, int vx, int hp, int offset_up, int offset_down, int offset_left, int offset_right){
+void init_enemy(Enemy* enemy, const char* name, Enemy_type enemy_type, int x, int y, int vx, int attack, int defense, int hp, int offset_up, int offset_down, int offset_left, int offset_right){
     init_entity(&enemy->entity, x, y, vx, 5, hp, CHARACTER);
+    enemy->name = name;
     enemy->enemy_type = enemy_type;
     enemy->moving = false;
     enemy->iniciative = 0;
+    enemy->attack = attack;
+    enemy->defense = defense;
 
     set_hit_box(&enemy->entity, offset_up, offset_down, offset_left, offset_right);
 }

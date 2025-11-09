@@ -12,16 +12,19 @@
 struct Game;
 
 typedef struct {
+    const char* name;
     Entity entity;
     int iniciative;
     Turn_choice turn_choice;
     int max_itens;
     Inventory inventory;
     bool moving;
+    int attack, defense;
     ALLEGRO_BITMAP* hp_heart;
+    ALLEGRO_BITMAP* shield;
 } Player;
 
-void init_player(Player* player, int max_hp, int x, int y, int vx, int vy, int offset_up, int offset_down, int offset_left, int offset_right);
+void init_player(Player* player, const char* name, int max_hp, int x, int y, int vx, int vy, int attack, int defense, int offset_up, int offset_down, int offset_left, int offset_right);
 void update_player_battle(Player* player, unsigned char* key, float dt);
 void update_player(Player* player, unsigned char* key, float dt);
 void select_item(Player* player, unsigned char* key);

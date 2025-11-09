@@ -7,11 +7,16 @@
 #include "allegro5/allegro5.h"
 #include "allegro5/allegro_font.h"
 
+Turn_state turn_state;
+
 void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->player = player;
     battle->enemy = enemy;
 
-    battle->state = BATTLE_START;
+    battle->log_ln1[0] = '\0';
+    battle->log_ln2[0] = '\0';
+
+    battle->state = BATTLE_DIALOGUE;
 
     int dice = D_20;
 
@@ -39,7 +44,95 @@ Turn_choice enemy_choice(Battle* battle){
     return TURN_ATTACK;
 }
 
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, ALLEGRO_FONT* font){
+typedef enum {
+    HIT,
+    MISS
+} Attack_hit;
+
+void attack_state(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Player* player, Enemy* enemy, Turn_state turn_state){
+    int d20;
+    
+    switch (turn_state) {
+    case TURN_PLAYER:
+        d20 = roll(D_20);
+        int attack_total = d20 + player->attack;
+        
+        if(attack_total >= enemy->defense){
+            sprintf(battle->log_ln1, "Ataque: %d+%d=%d. Acertou!", d20, player->attack, attack_total);
+            sprintf(battle->log_ln2, "Defesa inimigo: %d", enemy->defense);
+
+            battle->player->entity.anim_state = ANIM_ATTACK;
+            take_damage(&battle->enemy->entity, attack_total);
+            battle->turn_state = TURN_ENEMY;
+            battle->player->turn_choice = TURN_NONE;
+        } else {
+            sprintf(battle->log_ln1, "Ataque: %d+%d=%d. Errou!", d20, player->attack, attack_total);        
+            sprintf(battle->log_ln2, "Defesa inimigo: %d", enemy->defense);
+            battle->player->entity.anim_state = ANIM_ATTACK;
+            battle->turn_state = TURN_ENEMY;
+            battle->player->turn_choice = TURN_NONE;
+        }
+
+        break;
+    case TURN_ENEMY:
+        al_start_timer(battle->timer_enemy);
+
+        Turn_choice choice = enemy_choice(battle);
+        if(event.timer.source == battle->timer_enemy){
+            if(choice == TURN_ATTACK){
+                d20 = roll(D_20);
+                int attack_total = d20 + enemy->attack;
+
+                if(attack_total >= player->defense){
+                    sprintf(battle->log_ln1, "Ataque: %d+%d=%d. Inimigo acertou!", d20, enemy->attack, attack_total);
+                    sprintf(battle->log_ln2, "Defesa player: %d", player->defense);
+
+                    battle->enemy->entity.anim_state = ANIM_ATTACK;
+                    take_damage(&battle->player->entity, attack_total);
+                    battle->enemy->turn_choice = TURN_NONE;
+                    battle->turn_state = TURN_PLAYER;
+                    al_stop_timer(battle->timer_enemy);
+                    al_set_timer_count(battle->timer_enemy, 0);
+                }
+               
+            }
+            return;
+        }
+    default:
+        break;
+    }
+}
+
+void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
+
+    switch (battle->turn_state)
+    {
+    case TURN_PLAYER:
+        if(choice == TURN_ATTACK){
+            attack_state(battle, event, battle->battle_font, battle->player, battle->enemy, battle->turn_state);
+        }
+        break;
+    case TURN_ENEMY:
+        attack_state(battle, event, battle->battle_font, battle->player, battle->enemy, battle->turn_state);
+    default:
+        break;
+    }
+
+
+}
+
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font){
+
+
+    if(event.timer.source == battle->log_timer){
+        al_stop_timer(battle->log_timer);
+        al_set_timer_count(battle->log_timer, 0);
+
+        battle->log_ln1[0] = '\0';
+        battle->log_ln2[0] = '\0';
+
+    }
+    
 
     if(battle->enemy->entity.hp <= 0){
         battle->turn_state = TURN_EMPTY;
@@ -49,6 +142,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
         battle->state = BATTLE_WIN;
         if(event.timer.source == battle->timer_end){
             battle->enemy->entity.isActive = false;
+            battle->state = BATTLE_NONE;
             al_stop_timer(battle->timer_end);
             al_set_timer_count(battle->timer_end, 0);
         }
@@ -56,34 +150,14 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_ene
     }
 
     if(battle->turn_state == TURN_ENEMY){
-        al_start_timer(timer_enemy);
-
-        Turn_choice choice = enemy_choice(battle);
-        if(event.timer.source == timer_enemy){
-            if(choice == TURN_ATTACK){
-                battle->enemy->entity.anim_state = ANIM_ATTACK;
-                take_damage(&battle->player->entity, 10);
-                battle->enemy->turn_choice = TURN_NONE;
-                battle->turn_state = TURN_PLAYER;
-                al_stop_timer(timer_enemy);
-                al_set_timer_count(timer_enemy, 0);
-            }
-            return;
-        }
-
-    }
-
-    if(battle->turn_state == TURN_PLAYER){
-        if(battle->player->turn_choice == TURN_ATTACK){
-            battle->player->entity.anim_state = ANIM_ATTACK;
-            take_damage(&battle->enemy->entity, 100);
-            battle->turn_state = TURN_ENEMY;
-            battle->player->turn_choice = TURN_NONE;
-        }
+        deal_choice(battle, event, battle->turn_choice);
         return;
     }
 
-    
+    if(battle->turn_state == TURN_PLAYER){
+        deal_choice(battle, event, battle->player->turn_choice);
+        return;
+    }
 }
 
 void destroy_battle(Battle* battle){

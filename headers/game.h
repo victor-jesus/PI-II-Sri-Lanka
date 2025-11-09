@@ -32,6 +32,7 @@ typedef enum{
     DIALOGUE_2,
     DIALOGUE_3,
     DIALOGUE_4,
+    DIALOGUE_FINAL_INTRO,
     DIALOGUE_5,
     NEXT_LEVEL,
     DIALOGUE_NONE
@@ -71,6 +72,7 @@ typedef struct {
     ALLEGRO_FONT* title_font;
     ALLEGRO_FONT* subtitle_font;
     ALLEGRO_FONT* subtitle_8_font;
+    ALLEGRO_FONT* subtitle_12_font;
     ALLEGRO_TRANSFORM camera_transform; 
 
     Init_dialogues init_dialogues;
@@ -80,12 +82,13 @@ typedef struct {
     int num_world_entities;
     ALLEGRO_BITMAP* background;
     ALLEGRO_EVENT_QUEUE* queue;
+    ALLEGRO_EVENT* event;
 } Game;
 
 
 void add_world_entity(Game* game, Entity* entity);
-Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, ALLEGRO_EVENT_QUEUE* queue, int pos_x_player, int pos_y_player, int vx_player, int hp_player);
-void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt);
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_EVENT* event, int pos_x_player, int pos_y_player, int vx_player, int hp_player);
+void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt);
 void draw_map(Map *map);
 void draw_menu(Game* game);
 void draw_game(Game* game);
