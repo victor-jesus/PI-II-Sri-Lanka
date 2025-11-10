@@ -62,9 +62,16 @@ const char* path_big_potion = "assets/sprites/transparent/big-potion.png";
 const char* path_heart = "assets/sprites/transparent/heart.png";
 const char* path_shield = "assets/sprites/transparent/shield.png";
 const char* path_shield_enemy = "assets/sprites/transparent/shield_enemy.png";
+const char* path_hp_canva_minotaur = "assets/sprites/minotaur_1/minotaur_hp.png";
+const char* path_portrait_minotaur = "assets/sprites/minotaur_1/portrait_minotaur.jpeg";
+
+
+const char* path_portrait_player = "assets/sprites/warrior_2/portrait_player.png";
+const char* path_player_sprite_hp = "assets/sprites/warrior_2/hp_player.png";
 
 const char* path_initial_background = "assets/background_level_01.jpg";
 const char* path_dialogue_box = "assets/sprites/ui/gui/dialogue_box.png";
+const char* path_dialogue_box_battle = "assets/sprites/ui/gui/dialogue_box_battle.png";
 
 const char* path_subtitle_8_font = "assets/fonts/pressStart2p.ttf";
 
@@ -110,7 +117,9 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->init_dialogues = DIALOGUE_NONE;
     
     init_player(game->player, "Estudante", 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 10, 10, 25, 22, 30, 30);
-    
+    game->player->portrait = al_load_bitmap(path_portrait_player);
+    game->player->player_hp = al_load_bitmap(path_player_sprite_hp);
+
     Entity* hp = malloc(sizeof(Entity));
     init_entity(hp, 0, 0, 0, 0, 1, UI);
     set_entity_anim(hp, path_heart, ANIM_IDLE, 1, 1, 0.1f);
@@ -144,7 +153,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->title_font = title_font;
     game->subtitle_font = subtitle_font;
     game->subtitle_8_font = al_load_ttf_font(path_subtitle_8_font, 8, 0);
-    game->subtitle_12_font = al_load_ttf_font(path_subtitle_8_font, 12, 0);
+    game->subtitle_11_font = al_load_ttf_font(path_subtitle_8_font, 11, 0);
 
     game->player->hp_heart = al_load_bitmap(path_heart);
     game->player->shield = al_load_bitmap(path_shield);
@@ -501,7 +510,7 @@ void render_minotaur_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Minotauro de arqumedes", BOSSES, 700, 405, 5, 10, 30, 100, 30,0,0,0);
+    init_enemy(game->enemy, "Minotauro de arquimedes", BOSSES, 700, 405, 5, 10, 25, 200, 30,0,0,0);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
@@ -509,11 +518,15 @@ void render_minotaur_level(Game* game){
     set_entity_anim(&game->enemy->entity, path_minotaur_death, ANIM_DEATH, 5, 1, 0.25f);
 
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+    game->enemy->portrait = al_load_bitmap(path_portrait_minotaur);
     set_entity_scale(&game->enemy->entity, 2.0);
 
     game->enemy->hp_heart = al_load_bitmap(path_heart);
     game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
+    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
+    
     
     game->player->entity.x = 200; 
     game->player->entity.flip = 0;
@@ -578,6 +591,7 @@ void render_arauto_level(Game* game){
 }
 
 void draw_minotaur_level(Game* game){
+    
     al_draw_scaled_bitmap(
         game->background,
         0, 0,
@@ -586,6 +600,7 @@ void draw_minotaur_level(Game* game){
         SCREEN_W, SCREEN_H,
         0
     );
+    
 
     al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
 
@@ -593,33 +608,258 @@ void draw_minotaur_level(Game* game){
         switch (game->battle->dialogues)
         {
         case DIALOGUE_BATTLE_0:
-            al_draw_textf(game->subtitle_12_font, al_map_rgb(255, 255, 0),  SCREEN_W / 2, SCREEN_H / 2 - 20, ALLEGRO_ALIGN_CENTER, "%s:", game->enemy->name);
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você ousa adentrar o labirinto do conhecimento?");
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 20, ALLEGRO_ALIGN_CENTER, "Sou o Minotauro, forjado pelos cálculos e sabedoria de Arquimedes.");
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Você ousa adentrar");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "o labirinto do conhecimento?");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Sou o Minotauro,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "forjado pelos cálculos");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "e sabedoria de Arquimedes.");
+            
             break;
         case DIALOGUE_BATTLE_1:
-           al_draw_textf(game->subtitle_12_font, al_map_rgb(255, 255, 0),  SCREEN_W / 2, SCREEN_H / 2 - 20, ALLEGRO_ALIGN_CENTER, "%s:", game->player->name);
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Não busco confronto, mas sim entendimento.");
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 20, ALLEGRO_ALIGN_CENTER, "Vim desvendar os segredos da matemática.");
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->player->portrait,
+                0,0,
+                520, 596,
+                SCREEN_W - 660, 50,
+                215, 246,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Não busco confronto,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "mas sim entendimento.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Vim desvendar");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "os segredos da matemática.");
             break;
         case DIALOGUE_BATTLE_2:
-            al_draw_textf(game->subtitle_12_font, al_map_rgb(255, 255, 0),  SCREEN_W / 2, SCREEN_H / 2 - 20, ALLEGRO_ALIGN_CENTER, "%s:", game->enemy->name);
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Muitos tentaram o mesmo caminho e o final foi trágico, não será você que vai conseguir.");
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 20, ALLEGRO_ALIGN_CENTER, "Me responda, jovem está pronto para raciocinar sob pressão, ou será mais uma alma perdida e insignificante?");
+            
+
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Muitos tentaram o mesmo caminho");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "e o final foi trágico,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "não será você que vai conseguir.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Me responda, jovem! Está pronto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "para raciocinar sob pressão,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "ou será mais uma alma");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "perdida e insignificante?");
+
             break;
         case DIALOGUE_BATTLE_3:
-            al_draw_textf(game->subtitle_12_font, al_map_rgb(255, 255, 0),  SCREEN_W / 2, SCREEN_H / 2 - 20, ALLEGRO_ALIGN_CENTER, "%s:", game->player->name);
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Não temo desafios! Cada obstáculo que venço me leva mais perto do que busco.");
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 20, ALLEGRO_ALIGN_CENTER, "Se preciso provar meu valor, que assim seja. Estou pronto e será uma honra enfrentar um grande gênio como você Arquimedes.");
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->player->portrait,
+                0,0,
+                520, 596,
+                SCREEN_W - 660, 50,
+                215, 246,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Não temo desafios!");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Cada obstáculo que venço");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "me leva mais perto do que busco.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Se preciso provar meu valor,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "que assim seja. Estou pronto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "e será uma honra");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "enfrentar um grande gênio");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "como você Arquimedes.");
+            
             break;
         case DIALOGUE_BATTLE_4:
-            al_draw_textf(game->subtitle_12_font, al_map_rgb(255, 255, 0),  SCREEN_W / 2, SCREEN_H / 2 - 20, ALLEGRO_ALIGN_CENTER, "%s:", game->enemy->name);
-            al_draw_text(game->subtitle_12_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Então prepare-se. Apenas quem domina o equilíbrio entre força e lógica merece avançar.");
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Então prepare-se!");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Apenas quem domina");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "o equilíbrio entre força");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "e lógica merece avançar.");
+            
+            break;
+        case DIALOGUE_BATTLE_FINAL_INTRO:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para começar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_AFTER_TRASH_TALK:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para retomar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_BATTLE_5:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Você é fraco e sem conhecimento");
+            
+            break;
+        case DIALOGUE_BATTLE_6:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Sua lógica é tão pífia");
+            
+            break;
+
+        case DIALOGUE_BATTLE_7:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Suas habilidades e seu conhecimento");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "é igual a zero!");
+
             break;
         default:
             break;
         }
+    } else {
+        al_draw_scaled_bitmap(
+            game->enemy->hp_canva,
+            0, 0,
+            895, 470,
+            SCREEN_W - 380, 20,
+            324, 170,
+            0
+        );
     }
+
 }
 
 void draw_medusa_level(Game* game){
@@ -1103,7 +1343,7 @@ void draw_level_01(Game* game){
     al_draw_scaled_bitmap(
         game->background,
         0, 0, 2624, 1472,
-        0, 0, 1280, 720,    
+        0, 0, SCREEN_W, SCREEN_H,    
         0
     );
 
@@ -1215,30 +1455,30 @@ int calculate_hearts(int hp){
     else {return 0;}
 }
 
-void draw_hp(ALLEGRO_FONT* font, ALLEGRO_BITMAP* heart, int x1, int y1, int hp, int y2, int max_hp){
-    int x1_background = x1 - 2;
-    int y1_background = y1 - 2;
-    int x2_background = x1 + max_hp + 2;
-    int y2_background = y2 + 2;
 
-    al_draw_filled_rectangle(x1_background, y1_background, x2_background, y2_background, al_map_rgb(255, 255, 255));
-    al_draw_filled_rectangle(x1, y1, x1 + hp, y2, al_map_rgb(255, 0, 0));
-    al_draw_textf(font, al_map_rgb(0, 0, 0), (x1 + max_hp) - (max_hp / 2), (y2_background - y1_background) / 2, ALLEGRO_ALIGN_CENTER, "%d", hp);
+void draw_hp_bar_scalable(ALLEGRO_FONT* font, int x, int y, int width, int height, int hp, int max_hp) {
     
-    // int qt_heart = calculate_hearts(hp);
+    if (hp < 0) hp = 0;
 
-    // for(int i = 0; i < qt_heart; i++){
-    //     al_draw_scaled_bitmap(
-    //         heart,
-    //         0, 0,
-    //         17, 17,
-    //         (10 * i) * 4, 5,
-    //         40, 40,
-    //         0
-    //     );
-    // }
+    float hp_ratio = (float)hp / (float)max_hp;
 
+    int current_hp_width = (int)(hp_ratio * width);
+
+    al_draw_filled_rectangle(x, y, x + width, y + height, al_map_rgb(50, 50, 50));
+
+    al_draw_filled_rectangle(x, y, x + current_hp_width, y + height, al_map_rgb(255, 0, 0));
+
+    al_draw_rectangle(x, y, x + width, y + height, al_map_rgb(255, 255, 255), 2);
+
+    char hp_text[20];
+    sprintf(hp_text, "%d / %d", hp, max_hp);
+
+    int text_center_x = x + (width / 2);
+    int text_center_y = y + (height / 2) - (12 / 2);
+
+    al_draw_text(font, al_map_rgb(255, 255, 255), text_center_x, text_center_y, ALLEGRO_ALIGN_CENTER, hp_text);
 }
+
 
 void draw_defense(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int defense){
     al_draw_scaled_bitmap(
@@ -1420,7 +1660,15 @@ void draw_game(Game* game){
 
             // al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
 
-            draw_hp(game->subtitle_font, game->player->hp_heart, 50, 10, game->player->entity.hp, 30, game->player->entity.max_hp);
+            al_draw_scaled_bitmap(
+                game->player->player_hp,
+                0, 0,
+                922, 432,
+                20, 20,
+                213, 100,
+                0
+            );
+            draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
             draw_defense(game->player->shield, game->subtitle_font, 30, 686,game->player->defense);
 
 
@@ -1440,32 +1688,39 @@ void draw_game(Game* game){
             else if(game->battle->state == BATTLE_LOST)
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você perdeu!");
 
-            draw_hp(game->subtitle_font, game->player->hp_heart, 75, 10, game->player->entity.hp, 30, game->player->entity.max_hp);
-            draw_defense(game->player->shield, game->subtitle_font, 30, 686,game->player->defense);
+            if(game->battle->state != BATTLE_DIALOGUE){
+                al_draw_scaled_bitmap(
+                    game->player->player_hp,
+                    0, 0,
+                    922, 432,
+                    20, 20,
+                    213, 100,
+                    0
+                );
+                draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
 
-
-            draw_hp(game->subtitle_font, game->enemy->hp_heart, (SCREEN_W - 75) - game->enemy->entity.max_hp, 10, game->enemy->entity.hp, 30, game->enemy->entity.max_hp);
-            draw_defense(game->enemy->shield_enemy, game->subtitle_font, 1000, 686,game->enemy->defense);
+                draw_hp_bar_scalable(game->subtitle_11_font, SCREEN_W - 338, 70, 235, 35, game->enemy->entity.hp, game->enemy->entity.max_hp);
+                draw_defense(game->enemy->shield_enemy, game->subtitle_font, 1000, 686,game->enemy->defense);
+            }
 
             if(game->battle->turn_state == TURN_PLAYER || game->battle->turn_state == TURN_ENEMY) {
                 if(game->event->timer.source == game->battle->timer_enemy)
                     al_start_timer(game->battle->log_timer);
 
-                // Desenha a mensagem do log
                 al_draw_text(
-                    game->subtitle_8_font, // Ou a fonte que você quiser
-                    al_map_rgb(255, 255, 0), // Cor amarela
-                    SCREEN_W / 2, 
-                    10, // Perto da parte de baixo da tela
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0), 
+                    SCREEN_W - 200, 
+                    10,
                     ALLEGRO_ALIGN_CENTER, 
                     game->battle->log_ln1
                 );
 
                 al_draw_text(
-                    game->subtitle_8_font, // Ou a fonte que você quiser
-                    al_map_rgb(255, 255, 0), // Cor amarela
-                    SCREEN_W / 2, 
-                    20, // Perto da parte de baixo da tela
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W - 200, 
+                    27,
                     ALLEGRO_ALIGN_CENTER, 
                     game->battle->log_ln2
                 );

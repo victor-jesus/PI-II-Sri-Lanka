@@ -4,8 +4,6 @@
 #include <allegro5/allegro_font.h>
 #include <stdbool.h>
 
-#define SCREEN_W 1280
-#define SCREEN_H 720
 #define MAX_WORLD_ENTITIES 100
 
 #include "player.h"
@@ -32,7 +30,6 @@ typedef enum{
     DIALOGUE_2,
     DIALOGUE_3,
     DIALOGUE_4,
-    DIALOGUE_FINAL_INTRO,
     DIALOGUE_5,
     NEXT_LEVEL,
     DIALOGUE_NONE
@@ -72,7 +69,7 @@ typedef struct {
     ALLEGRO_FONT* title_font;
     ALLEGRO_FONT* subtitle_font;
     ALLEGRO_FONT* subtitle_8_font;
-    ALLEGRO_FONT* subtitle_12_font;
+    ALLEGRO_FONT* subtitle_11_font;
     ALLEGRO_TRANSFORM camera_transform; 
 
     Init_dialogues init_dialogues;

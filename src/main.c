@@ -103,12 +103,33 @@ int main(){
                 if(game->battle->state == BATTLE_DIALOGUE){ 
                     if(key[ALLEGRO_KEY_E]){
 
-
-                        if(game->battle->dialogues == DIALOGUE_FINAL_INTRO){
+                        // 1. Verificações de "SAÍDA" do diálogo
+                        if(game->battle->dialogues == DIALOGUE_BATTLE_FINAL_INTRO){
                             game->battle->state = BATTLE_START;
+                            // Opcional: resetar o diálogo para não re-triggerar
+                            // game->battle->dialogues = DIALOGUE_BATTLE_0; 
                         } 
-
-                        game->battle->dialogues++;
+                        else if(game->battle->dialogues == DIALOGUE_AFTER_TRASH_TALK){
+                            game->battle->state = BATTLE_START;
+                            // Opcional: resetar
+                            // game->battle->dialogues = DIALOGUE_BATTLE_0;
+                        }
+                        // 2. Verificações de "PULO" (Jump)
+                        // (Se as saídas não foram atendidas, checa os pulos)
+                        else if(game->battle->dialogues == DIALOGUE_BATTLE_5){
+                            game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
+                        } 
+                        else if( game->battle->dialogues == DIALOGUE_BATTLE_6) {
+                            game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
+                        } 
+                        else if(game->battle->dialogues == DIALOGUE_BATTLE_7) {
+                            game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
+                        }
+                        // 3. Lógica PADRÃO (Avançar)
+                        // (Só executa se nenhuma das condições especiais acima foi atendida)
+                        else {
+                            game->battle->dialogues++;
+                        }
                     }
                 }
 

@@ -121,9 +121,30 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
 
 }
 
+bool talk_minus_than_75 = false;
+bool talk_minus_than_50 = false;
+bool talk_minus_than_25 = false;
+
 void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font){
+    
+    if(battle->player->entity.hp <= 75 && talk_minus_than_75 == false){
+        battle->state = BATTLE_DIALOGUE;
+        battle->dialogues = DIALOGUE_BATTLE_6;
+        talk_minus_than_75 = true;
+    }
+    if(battle->player->entity.hp <= 50 && talk_minus_than_50 == false){
+        battle->dialogues = DIALOGUE_BATTLE_5;
+        battle->state = BATTLE_DIALOGUE;
+        talk_minus_than_50 = true;
+    }
+    if(battle->player->entity.hp <= 25 && talk_minus_than_25 == false){
+        battle->dialogues = DIALOGUE_BATTLE_7;
+        battle->state = BATTLE_DIALOGUE;
+        talk_minus_than_25 = true;
+    }
+    if(battle->state == BATTLE_DIALOGUE) return;
 
-
+    
     if(event.timer.source == battle->log_timer){
         al_stop_timer(battle->log_timer);
         al_set_timer_count(battle->log_timer, 0);
@@ -132,7 +153,6 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font){
         battle->log_ln2[0] = '\0';
 
     }
-    
 
     if(battle->enemy->entity.hp <= 0){
         battle->turn_state = TURN_EMPTY;

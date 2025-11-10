@@ -22,6 +22,8 @@ typedef struct Battle{
     char log_ln1[256];
     char log_ln2[256];
     ALLEGRO_TIMER* log_timer;
+
+    ALLEGRO_BITMAP* dialogue_sprite;
 } Battle;
 
 void start_battle(Battle* battle, Player* player, Enemy* enemy);

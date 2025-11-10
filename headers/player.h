@@ -14,14 +14,20 @@ struct Game;
 typedef struct {
     const char* name;
     Entity entity;
+
     int iniciative;
+
     Turn_choice turn_choice;
     int max_itens;
     Inventory inventory;
     bool moving;
+
     int attack, defense;
+
     ALLEGRO_BITMAP* hp_heart;
     ALLEGRO_BITMAP* shield;
+    ALLEGRO_BITMAP* portrait;
+    ALLEGRO_BITMAP* player_hp;
 } Player;
 
 void init_player(Player* player, const char* name, int max_hp, int x, int y, int vx, int vy, int attack, int defense, int offset_up, int offset_down, int offset_left, int offset_right);
