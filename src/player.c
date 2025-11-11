@@ -14,8 +14,57 @@ void init_player(Player* player, const char* name, int max_hp, int x, int y, int
     player->iniciative = 10;
     player->attack = attack;
     player->defense = defense;
+    player->base_attack = attack;
+    player->base_defense = defense;
+    player->entity.max_hp = max_hp;
+    player->entity.base_max_hp = max_hp;
+
+    for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
+        player->equipment[i] = NULL;
+    }
 
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
+}
+
+void player_recalculate_stats(Player* player) {
+    
+    player->attack = player->base_attack;
+    player->defense = player->base_defense;
+    player->entity.max_hp = player->entity.base_max_hp;
+
+    for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
+        if (player->equipment[i] != NULL) {
+            player->attack += player->equipment[i]->attack_buff;
+            player->defense += player->equipment[i]->defense_buff;
+            player->iniciative += player->equipment[i]->iniciative_buff;
+            player->entity.max_hp += player->equipment[i]->max_hp_buff;
+        }
+    }
+
+    
+    if (player->entity.hp > player->entity.max_hp) {
+        player->entity.hp = player->entity.max_hp;
+    }
+}
+
+void player_equip_item(Player* player, Item* item_to_equip) {
+    if (item_to_equip->type != ITEM_EQUIPMENT) {
+        printf("Erro: %s nao é um item equipavel!\n", item_to_equip->name);
+        return;
+    }
+    
+    for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
+        if (player->equipment[i] == NULL) {
+            player->equipment[i] = item_to_equip;
+            printf("Equipou: %s\n", item_to_equip->name);
+            
+            
+            player_recalculate_stats(player);
+            return;
+        }
+    }
+
+    printf("Slots de equipamento cheios! Nao foi possivel equipar %s.\n", item_to_equip->name);
 }
 
 void update_player_battle(Player* player, unsigned char* key, float dt){
@@ -111,6 +160,7 @@ void update_player(Player* player, unsigned char* key, float dt){
     Sprite* current = player->entity.sprite[player->entity.anim_state];
     update_sprite(current, dt);
 }
+
 
 void select_item(Player* player, unsigned char* key){
     if(key[ALLEGRO_KEY_H]){

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define MAX_WORLD_ENTITIES 100
+#define MAX_ENEMIES 10
 
 #include "player.h"
 #include "enemy.h"

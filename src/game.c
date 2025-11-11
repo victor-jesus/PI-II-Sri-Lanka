@@ -27,6 +27,12 @@ const char* path_minotaur_attack = "assets/sprites/minotaur_1/attack.png";
 const char* path_minotaur_hit = "assets/sprites/minotaur_1/hurt.png";
 const char* path_minotaur_death = "assets/sprites/minotaur_1/dead.png";
 
+const char* path_skeleton_idle = "assets/sprites/skeleton/idle.png";
+const char* path_skeleton_run = "assets/sprites/skeleton/walk.png";
+const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
+const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
+const char* path_skeleton_death = "assets/sprites/skeleton/dead.png";
+
 const char* path_medusa_idle = "assets/sprites/medusa_1/idle.png";
 const char* path_medusa_walk = "assets/sprites/medusa_1/walk.png";
 const char* path_medusa_attack = "assets/sprites/medusa_1/attack_1.png";
@@ -55,16 +61,13 @@ const char* path_bau = "assets/sprites/enviroment/bau.png";
 const char* path_quadro_bhakara = "assets/sprites/enviroment/quadro-bhaskara.png";
 const char* path_armadura_env = "assets/sprites/enviroment/armadura_1.png";
 
-const char* path_water = "assets/sprites/transparent/water-potion.png";
-const char* path_small_potion = "assets/sprites/transparent/small-potion.png";
-const char* path_big_potion = "assets/sprites/transparent/big-potion.png";
-
 const char* path_heart = "assets/sprites/transparent/heart.png";
 const char* path_shield = "assets/sprites/transparent/shield.png";
 const char* path_shield_enemy = "assets/sprites/transparent/shield_enemy.png";
+const char* path_sword_ui = "assets/sprites/transparent/sword.png";
+
 const char* path_hp_canva_minotaur = "assets/sprites/minotaur_1/minotaur_hp.png";
 const char* path_portrait_minotaur = "assets/sprites/minotaur_1/portrait_minotaur.jpeg";
-
 
 const char* path_portrait_player = "assets/sprites/warrior_2/portrait_player.png";
 const char* path_player_sprite_hp = "assets/sprites/warrior_2/hp_player.png";
@@ -143,7 +146,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     game->battle->timer_end = al_create_timer(5.0);
     game->battle->log_timer = al_create_timer(5.0);
-    game->battle->timer_enemy = al_create_timer(7.0);
+    game->battle->timer_enemy = al_create_timer(3.5);
     game->battle->battle_font = subtitle_font;
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->log_timer));
@@ -157,6 +160,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
 
     game->player->hp_heart = al_load_bitmap(path_heart);
     game->player->shield = al_load_bitmap(path_shield);
+    game->player->sword_ui = al_load_bitmap(path_sword_ui);
 
     game->background = al_load_bitmap("assets/Menu_Design.png");
     
@@ -166,7 +170,8 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     al_identity_transform(&game->camera_transform);
     
     
-    initial_inventory(game);
+    load_item_database();
+    initial_inventory(game); 
 
     // Item* HEAL_SMALL_POTION = create_item(2, "Poção Pequena", "Cura 10 HP.", 10, true, 3, ITEM_SMALL_HEAL);
     // add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
@@ -281,17 +286,9 @@ Entity* create_banner(const char* path, float x, float y, float scale, int frame
     
 
 void initial_inventory(Game* game){
-    Item* HEAL_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
-    add_item(&game->player->inventory, HEAL_POTION, 2);
-    set_entity_pos(HEAL_POTION->entity, 150, 680); 
-
-    Item* HEAL_SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 5, ITEM_SMALL_HEAL);
-    add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
-    set_entity_pos(HEAL_SMALL_POTION->entity, 200, 680);
-
-    Item* WATER_POTION = create_item(path_water, "K", "Garrafa de agua", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
-    add_item(&game->player->inventory, WATER_POTION, 1);
-    set_entity_pos(WATER_POTION->entity, 250, 680);
+    inventory_add_item(&game->player->inventory, BIG_POTION, 2);
+    inventory_add_item(&game->player->inventory, SMALL_POTION, 3);
+    inventory_add_item(&game->player->inventory, WATER, 1);
 }
 
 void render_initial_level(Game* game){
@@ -343,6 +340,8 @@ void load_first_map(Game* game) {
     }
     init_map(game->map, path_map_tile, path_map_tile_floor, path_map_tile_floor_rock);
 
+
+
     const float LEVEL_WIDTH = 6000.0f;
     const float GROUND_Y = (SCREEN_H / 2.0f) - 96.0f;
     const float WALL_Y = (SCREEN_H / 2.0f) - 250.0f;
@@ -361,6 +360,24 @@ void load_first_map(Game* game) {
     Entity* pi_banner_2 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.34f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* central_torch = create_torch(LEVEL_WIDTH * 0.40f, GROUND_Y);
     Entity* knight_armor = create_entity(path_armadura_env, LEVEL_WIDTH * 0.19, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, ENVIRONMENT_NO_MOVE);
+
+    game->enemy = malloc(sizeof(Enemy));
+
+    init_enemy(game->enemy, "Esqueleto", MOB, 700, 505, 5, 5, 5, 100, 30,0,0,0);
+    set_entity_anim(&game->enemy->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 12, 1, 0.06f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.14f);
+    set_entity_anim(&game->enemy->entity, path_skeleton_death, ANIM_DEATH, 15, 1, 0.25f);
+
+    game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+    game->enemy->portrait = al_load_bitmap(path_portrait_minotaur);
+    set_entity_scale(&game->enemy->entity, 3.0);
+
+    game->enemy->hp_heart = al_load_bitmap(path_heart);
+    game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
+    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
     Entity* euler_banner_1 = create_banner(path_banner_e, LEVEL_WIDTH * 0.47f, WALL_Y, 0.3f, 1, 1);
     Entity* second_small_window = create_window(path_window_1, LEVEL_WIDTH * 0.57f, WALL_Y + 50, 2.0f);
@@ -526,14 +543,14 @@ void render_minotaur_level(Game* game){
     game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
     game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
-    
-    
     game->player->entity.x = 200; 
     game->player->entity.flip = 0;
 
     game->player->entity.y = 517; 
 
     start_battle(game->battle, game->player, game->enemy);
+
+    game->battle->state = BATTLE_DIALOGUE;
 
     game->battle->dialogues = 0;
 
@@ -933,15 +950,17 @@ void check_battle(Game* game){
     if (!game->enemy) {
         return; 
     }
+
     if(!game->enemy->entity.isActive) return;
-    // Com mudança no game_state precisaremos refatorar todo o código de state do game
-    //if(game->state == GAMEPLAY_BATTLE && game->battle) return;
+
+    //Com mudança no game_state precisaremos refatorar todo o código de state do game
+    if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle) return;
 
     int dist = game->player->entity.x - game->enemy->entity.x;
 
     if(dist >= -300 && dist <= 300){
         if(dist < 0) game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
-        //game->state = GAMEPLAY_BATTLE;
+        game->gameplay_state = GAMEPLAY_BATTLE;
         start_battle(game->battle, game->player, game->enemy);
     }
 }
@@ -1211,12 +1230,11 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* 
     //     return;
     // }
     
-    if(game->enemy && game->enemy->entity.isActive == true)
+    if(game->enemy && game->enemy->entity.isActive == true){
         update_enemy(game->enemy, dt);
+    }
     
-    
-
-    manage_battle(game->battle, event, game->subtitle_font);
+    manage_battle(game->battle, event, key, game->subtitle_font);
     update_player_battle(game->player, key, dt);
 }
 
@@ -1228,10 +1246,12 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
     
     switch(game->gameplay_state){
         case GAMEPLAY_EXPLORING:
+            player_recalculate_stats(game->player);
             check_map_collision(&game->player->entity, game->map);
             resolve_map_collision(&game->player->entity, game->map);
             break;
         case GAMEPLAY_BATTLE:
+            player_recalculate_stats(game->player);
             update_battle_state(game, event, key, dt);
             resolve_map_collision_battle(&game->player->entity);
             break;
@@ -1255,12 +1275,14 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
             check_battle(game);
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
-                    update_exploring_state(game, key, dt);
-                    break;
-                case GAMEPLAY_NONE:
-                default:
-                    break;
-            }
+                        update_exploring_state(game, key, dt);
+                        break;
+                    case GAMEPLAY_BATTLE:
+                        break;
+                    case GAMEPLAY_NONE:
+                    default:
+                        break;
+                }
             break;
         case GAME_SECOND_MISSION:
             check_battle(game);
@@ -1479,6 +1501,18 @@ void draw_hp_bar_scalable(ALLEGRO_FONT* font, int x, int y, int width, int heigh
     al_draw_text(font, al_map_rgb(255, 255, 255), text_center_x, text_center_y, ALLEGRO_ALIGN_CENTER, hp_text);
 }
 
+void draw_attack(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int attack){
+    al_draw_scaled_bitmap(
+        bitmap,
+        0, 0,
+        32, 32,
+        x, y,
+        24, 24,
+        0
+    );
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x + 35, y + 8, ALLEGRO_ALIGN_CENTER, "%d", attack);
+}
 
 void draw_defense(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int defense){
     al_draw_scaled_bitmap(
@@ -1486,10 +1520,10 @@ void draw_defense(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int 
         0, 0,
         32, 32,
         x, y,
-        32, 32,
+        24, 24,
         0
     );
-    al_draw_textf(font, al_map_rgb(255, 255, 255), x + 65, y + 8, ALLEGRO_ALIGN_CENTER, "%d", defense);
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x + 35, y + 8, ALLEGRO_ALIGN_CENTER, "%d", defense);
 }
 
 void draw_inventory(Player* player, ALLEGRO_FONT* font){
@@ -1668,8 +1702,11 @@ void draw_game(Game* game){
                 213, 100,
                 0
             );
+            
             draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
-            draw_defense(game->player->shield, game->subtitle_font, 30, 686,game->player->defense);
+
+            draw_defense(game->player->shield, game->subtitle_11_font, 30, 686,game->player->defense);
+            draw_attack(game->player->sword_ui, game->subtitle_11_font, 75, 686,game->player->attack);
 
 
             break;
@@ -1683,9 +1720,20 @@ void draw_game(Game* game){
             else if (game->battle->turn_state == TURN_EMPTY && game->battle->state == BATTLE_START)
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, (SCREEN_H / 2) - 35, ALLEGRO_ALIGN_CENTER, "FIM!");
                 
-            if(game->battle->state == BATTLE_WIN) 
+            if(game->battle->state == BATTLE_WIN) {
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você ganhou!");
-            else if(game->battle->state == BATTLE_LOST)
+
+                al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 800, 680, ALLEGRO_ALIGN_CENTER, "Pressione");
+                al_draw_scaled_bitmap(
+                        game->controls,
+                        0, 0,
+                        16, 16,
+                        860, 690,
+                        32, 32,
+                        0 
+                    );   
+                al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 1030, 685, ALLEGRO_ALIGN_CENTER, "para continuar para o jogo!");
+            }else if(game->battle->state == BATTLE_LOST)
                 al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você perdeu!");
 
             if(game->battle->state != BATTLE_DIALOGUE){
@@ -1698,19 +1746,20 @@ void draw_game(Game* game){
                     0
                 );
                 draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
+                draw_hp_bar_scalable(game->subtitle_font, SCREEN_W - 338, 70, 235, 35, game->enemy->entity.hp, game->enemy->entity.max_hp);
 
-                draw_hp_bar_scalable(game->subtitle_11_font, SCREEN_W - 338, 70, 235, 35, game->enemy->entity.hp, game->enemy->entity.max_hp);
-                draw_defense(game->enemy->shield_enemy, game->subtitle_font, 1000, 686,game->enemy->defense);
+                draw_defense(game->player->shield, game->subtitle_11_font, 30, 686,game->player->defense);
+                draw_attack(game->player->sword_ui, game->subtitle_11_font, 75, 686,game->player->attack);
             }
 
-            if(game->battle->turn_state == TURN_PLAYER || game->battle->turn_state == TURN_ENEMY) {
+            if(game->battle->turn_state == TURN_PLAYER || game->battle->turn_state == TURN_ENEMY || game->battle->state == BATTLE_WIN) {
                 if(game->event->timer.source == game->battle->timer_enemy)
                     al_start_timer(game->battle->log_timer);
 
                 al_draw_text(
                     game->subtitle_11_font,
                     al_map_rgb(255, 255, 0), 
-                    SCREEN_W - 200, 
+                    SCREEN_W / 2, 
                     10,
                     ALLEGRO_ALIGN_CENTER, 
                     game->battle->log_ln1
@@ -1719,12 +1768,77 @@ void draw_game(Game* game){
                 al_draw_text(
                     game->subtitle_11_font,
                     al_map_rgb(255, 255, 0),
-                    SCREEN_W - 200, 
-                    27,
+                    SCREEN_W / 2, 
+                    30,
                     ALLEGRO_ALIGN_CENTER, 
                     game->battle->log_ln2
                 );
-                
+
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    50,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln3
+                );
+
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    70,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln4
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    90,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln5
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    110,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln6
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    130,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln7
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    150,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln8
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    170,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln9
+                );
+                al_draw_text(
+                    game->subtitle_11_font,
+                    al_map_rgb(255, 255, 0),
+                    SCREEN_W / 2, 
+                    190,
+                    ALLEGRO_ALIGN_CENTER, 
+                    game->battle->log_ln10
+                );
             }
 
             break;
