@@ -11,6 +11,7 @@ typedef enum{
     GAME_SECOND_MISSION,
     GAME_THIRD_MISSION,
     GAME_BATTLE,
+    GAME_PUZZLE_SCREEN,
     GAME_OVER
 } Game_state;
 

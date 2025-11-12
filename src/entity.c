@@ -17,6 +17,12 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_ty
     entity->isActive = true;
     entity->scale_factor = 1.0f; 
     entity->entity_type = entity_type;
+    entity->puzzle_value = 0;
+
+    entity->is_locked_key = false;
+    entity->is_locked_puzzle = false;
+    
+    entity->puzzle_id = PUZZLE_NONE;
 }
 
 void set_entity_pos(Entity* entity, int x, int y){
@@ -55,7 +61,7 @@ void set_entity_anim(Entity* entity, const char* path, AnimationState animation_
 }
 
 void update_entity(Entity* entity, float dt){
-    if(entity->entity_type == ENVIRONMENT_NO_MOVE) return;
+    if(entity->entity_type == ENVIRONMENT_NO_MOVE || entity->entity_type == EDUCATIONAL) return;
     Sprite* current = entity->sprite[entity->anim_state];
     
     if (!current) {
@@ -114,10 +120,10 @@ void draw_entity(Entity* entity){
 
     draw_sprite(current, dx, dy, entity->flip, entity->scale_factor);
 
-    // float x1 = entity->box.x;
-    // float y1 = entity->box.y;
-    // float x2 = x1 + entity->box.w; 
-    // float y2 = y1 + entity->box.h;  
+    float x1 = entity->box.x;
+    float y1 = entity->box.y;
+    float x2 = x1 + entity->box.w; 
+    float y2 = y1 + entity->box.h;  
 
-    // al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 0, 0), 2);
+    al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 0, 0), 2);
 }

@@ -65,7 +65,12 @@ const char* path_torch = "assets/sprites/map/torch.png";
 const char* path_window_1 = "assets/sprites/map/window_1.png";
 const char* path_window_big = "assets/sprites/map/big_window.png";
 const char* path_bau = "assets/sprites/enviroment/bau.png";
-const char* path_quadro_bhakara = "assets/sprites/enviroment/quadro-bhaskara.png";
+
+const char* path_quadro_bhaskara = "assets/sprites/enviroment/quadro-bhaskara.png";
+const char* path_tabuleta_bhaskara = "assets/sprites/enviroment/tabuleta-bhaskara.png";
+const char* path_tabuleta_bhaskara_2 = "assets/sprites/enviroment/tabulete-bhaskara_2.png";
+
+const char* path_roda = "assets/sprites/enviroment/roda.png";
 const char* path_armadura_env = "assets/sprites/enviroment/armadura_1.png";
 
 const char* path_heart = "assets/sprites/transparent/heart.png";
@@ -183,7 +188,9 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->background = al_load_bitmap("assets/Menu_Design.png");
     
     game->controls = al_load_bitmap(path_key_e);
-    
+    game->puzzle_bhaskara_img = al_load_bitmap(path_quadro_bhaskara);
+    game->puzzle_bhaskara_paper = al_load_bitmap(path_tabuleta_bhaskara);
+    game->puzzle_bhaskara_paper_2 = al_load_bitmap(path_tabuleta_bhaskara_2);
     
     al_identity_transform(&game->camera_transform);
     
@@ -202,11 +209,11 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     // Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
     // add_item(&game->player->inventory, HEAL_WATER, 5);
 
-    // player_equip_item(game->player, KEY_TO_MINOTAUR);
-    // player_equip_item(game->player, KEY_TO_MEDUSA);
-    // player_equip_item(game->player, KEY_TO_ARAUTO);
-    // player_equip_item(game->player, KEY_TO_SECOND_MAP);
-    // player_equip_item(game->player, KEY_TO_THIRD_MAP);
+    player_equip_item(game->player, KEY_TO_MINOTAUR);
+    player_equip_item(game->player, KEY_TO_MEDUSA);
+    player_equip_item(game->player, KEY_TO_ARAUTO);
+    player_equip_item(game->player, KEY_TO_SECOND_MAP);
+    player_equip_item(game->player, KEY_TO_THIRD_MAP);
 
 
     return game;
@@ -262,7 +269,8 @@ void check_map_collision(Entity* entity, Map* map) {
 void resolve_map_collision(Entity* entity, Map* map){
     if(entity->x > (MAP_WIDTH * TILE_W) - 50) entity->x = (MAP_WIDTH * TILE_W) - 50;
     if(entity->x < 0) entity->x = 0;
-    if(entity->y > 710) entity->y = 710;
+    if(entity->y > 490) entity->y = 490;
+    else if(entity->y < 290) entity->y = 290;
 }
 
 void resolve_map_collision_battle(Entity* entity){
@@ -360,7 +368,7 @@ void add_skeleton(Game* game, int x, int y, int attack, int defense){
                 return;
             }
             
-            init_enemy(game->mobs[i], "Esqueleto", MOB, x, y, 5, attack, defense, 100, 30,0,0,0);
+            init_enemy(game->mobs[i], "Esqueleto", MOB, x, y, 5, attack, defense, 100, 0,0,0,0);
             set_entity_anim(&game->mobs[i]->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
             set_entity_anim(&game->mobs[i]->entity, path_skeleton_run, ANIM_RUN, 12, 1, 0.06f);
             set_entity_anim(&game->mobs[i]->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
@@ -414,19 +422,53 @@ void load_first_map(Game* game) {
     const float WALL_Y = (SCREEN_H / 2.0f) - 250.0f;
 
     Entity* bhaskara_frame = malloc(sizeof(Entity));
-    init_entity(bhaskara_frame, LEVEL_WIDTH * 0.05f, WALL_Y, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(bhaskara_frame, path_quadro_bhakara, ANIM_IDLE, 1, 1, 0.1f);
+    init_entity(bhaskara_frame, LEVEL_WIDTH * 0.05f, WALL_Y + 50, 0, 0, 1, EDUCATIONAL);
+    set_entity_anim(bhaskara_frame, path_quadro_bhaskara, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(bhaskara_frame, 1.5);
     set_hit_box(bhaskara_frame, 0, 0, 0, 0);
+    bhaskara_frame->puzzle_id = PUZZLE_BHASKARA;
 
     Entity* first_small_window = create_window(path_window_1, LEVEL_WIDTH * 0.13f, WALL_Y + 50, 2.0f);
 
     Door* minotaur_door = create_door(LEVEL_WIDTH * 0.22f, GROUND_Y, DOOR_MINOTAUR);
-    Entity* central_large_window = create_window(path_window_big, LEVEL_WIDTH * 0.30f, -15, 1.0f);
-    Entity* pi_banner_1 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.26f, WALL_Y - 50, 0.5f, 1, 1);
+    minotaur_door->entity.is_locked_key = true;
+    minotaur_door->entity.is_locked_puzzle = true;
+
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, minotaur_door->entity.x + 120, minotaur_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
+    Entity* dial_2 = malloc(sizeof(Entity));
+    init_entity(dial_2, minotaur_door->entity.x + 240, minotaur_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_2, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_2, 1.5);
+    set_hit_box(dial_2, 0,0,0,0);
+    dial_2->puzzle_id = PUZZLE_DIAL_2;
+
+    Entity* dial_3 = malloc(sizeof(Entity));
+    init_entity(dial_3, minotaur_door->entity.x + 360, minotaur_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_3, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_3, 1.5);
+    set_hit_box(dial_3, 0,0,0,0);
+    dial_3->puzzle_id = PUZZLE_DIAL_3;
+
+    // Entity* central_large_window = create_window(path_window_big, LEVEL_WIDTH * 0.30f, -15, 1.0f);
+    // Entity* pi_banner_1 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.26f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* pi_banner_2 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.34f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* central_torch = create_torch(LEVEL_WIDTH * 0.40f, GROUND_Y);
-    Entity* knight_armor = create_entity(path_armadura_env, LEVEL_WIDTH * 0.19, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, ENVIRONMENT_NO_MOVE);
+    Entity* knight_armor_1 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.42, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_1->puzzle_id = PUZZLE_EQUATION_BHASKARA;
+    
+    Entity* knight_armor_2 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.15, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    minotaur_door->entity.puzzle_id = PUZZLE_DOOR_BHASKARA;
     
     add_skeleton(game, 1000, 500, 5, 5);
     add_skeleton(game, 2000, 400, 5, 5);
@@ -448,11 +490,14 @@ void load_first_map(Game* game) {
     Entity* final_banner_right = create_banner(path_banner, final_door->entity.x + 70, final_door->entity.y, 0.5f, 6, 1);
     
     add_world_entity(game, bhaskara_frame);
-    add_world_entity(game, knight_armor);
+    add_world_entity(game, knight_armor_1);
+    add_world_entity(game, knight_armor_2);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
     add_world_entity(game, first_small_window);
     add_world_entity(game, &minotaur_door->entity);
-    add_world_entity(game, central_large_window);
-    add_world_entity(game, pi_banner_1);
+    // add_world_entity(game, central_large_window);
+    // add_world_entity(game, pi_banner_1);
     add_world_entity(game, pi_banner_2);
     add_world_entity(game, central_torch);
     add_world_entity(game, euler_banner_1);
@@ -464,6 +509,10 @@ void load_first_map(Game* game) {
     add_world_entity(game, final_torch_right);
     add_world_entity(game, final_banner_left);
     add_world_entity(game, final_banner_right);
+
+    add_world_entity(game, dial_1);
+    add_world_entity(game, dial_2);
+    add_world_entity(game, dial_3);
 }
 
 void load_second_map(Game* game) {
@@ -485,12 +534,45 @@ void load_second_map(Game* game) {
     init_map(game->map, path_map_tile_cave_wall, path_map_tile_cave_floor, path_map_tile_cave_floor);
 
     const float LEVEL_WIDTH = 6000.0f;
-    const float GROUND_Y = (SCREEN_H / 2.0f) - 98.0f; // Posição Y base para objetos no chão
-    const float WALL_Y = (SCREEN_H / 2.0f) - 200.0f; // Posição Y base para objetos na parede
+    const float GROUND_Y = (SCREEN_H / 2.0f) - 98.0f;
+    const float WALL_Y = (SCREEN_H / 2.0f) - 200.0f;
 
     Door* start_door = create_door(LEVEL_WIDTH * 0.1f, GROUND_Y, DOOR_RETURN);
     Door* medusa_door = create_door(LEVEL_WIDTH * 0.4f, GROUND_Y, DOOR_MEDUSA);
+    medusa_door->entity.is_locked_key = true;
+    medusa_door->entity.is_locked_puzzle = true;
+
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, medusa_door->entity.x + 120, medusa_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
+    Entity* dial_2 = malloc(sizeof(Entity));
+    init_entity(dial_2, medusa_door->entity.x + 240, medusa_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_2, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_2, 1.5);
+    set_hit_box(dial_2, 0,0,0,0);
+    dial_2->puzzle_id = PUZZLE_DIAL_2;
+
+    Entity* dial_3 = malloc(sizeof(Entity));
+    init_entity(dial_3, medusa_door->entity.x + 360, medusa_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_3, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_3, 1.5);
+    set_hit_box(dial_3, 0,0,0,0);
+    dial_3->puzzle_id = PUZZLE_DIAL_3;
+
     Door* end_door = create_door(LEVEL_WIDTH * 0.9f, GROUND_Y, DOOR_NEXT_LEVEL);
+
+    Entity* knight_armor_1 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.22, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    
+    Entity* knight_armor_2 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.15, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_3->puzzle_id = PUZZLE_EQUATION_BHASKARA;
+
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
 
     game->player->entity.x = start_door->entity.x;
 
@@ -509,6 +591,10 @@ void load_second_map(Game* game) {
     Entity* window_2 = create_window(path_window_1, LEVEL_WIDTH * 0.75f, WALL_Y, 2.0f);
 
     add_world_entity(game, &start_door->entity);
+    add_world_entity(game, knight_armor_1);
+    add_world_entity(game, knight_armor_2);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
     add_world_entity(game, &medusa_door->entity);
     add_world_entity(game, &end_door->entity);
     add_world_entity(game, left_torch);
@@ -516,6 +602,9 @@ void load_second_map(Game* game) {
     add_world_entity(game, window_1);
     add_world_entity(game, center_window);
     add_world_entity(game, window_2);
+    add_world_entity(game, dial_1);
+    add_world_entity(game, dial_2);
+    add_world_entity(game, dial_3);
 }
 
 void load_third_map(Game* game) {
@@ -561,7 +650,7 @@ void load_third_map(Game* game) {
     
     Entity* bhaskara_frame = malloc(sizeof(Entity));
     init_entity(bhaskara_frame, LEVEL_WIDTH * 0.09f, WALL_Y, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(bhaskara_frame, path_quadro_bhakara, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_anim(bhaskara_frame, path_quadro_bhaskara, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(bhaskara_frame, 1.5);
     set_hit_box(bhaskara_frame, 0, 0, 0, 0);
 
@@ -575,11 +664,43 @@ void load_third_map(Game* game) {
     Entity* hall_banner_2 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.75f, WALL_Y - 50, 0.5f, 1, 1);
 
     Door* final_door = create_door(LEVEL_WIDTH * 0.95f, GROUND_Y, DOOR_ARAUTO);
+    final_door->entity.is_locked_key = true;
+    final_door->entity.is_locked_puzzle = true;
+
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, final_door->entity.x + 120, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
+    Entity* dial_2 = malloc(sizeof(Entity));
+    init_entity(dial_2, final_door->entity.x + 240, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_2, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_2, 1.5);
+    set_hit_box(dial_2, 0,0,0,0);
+    dial_2->puzzle_id = PUZZLE_DIAL_2;
+
+    Entity* dial_3 = malloc(sizeof(Entity));
+    init_entity(dial_3, final_door->entity.x + 360, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_3, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_3, 1.5);
+    set_hit_box(dial_3, 0,0,0,0);
+    dial_3->puzzle_id = PUZZLE_DIAL_3;
 
     Entity* final_banner_left = create_banner(path_banner, final_door->entity.x - 200, final_door->entity.y - 100, 0.5f, 6, 1);
     Entity* final_torch_left = create_torch(final_door->entity.x - 120, final_door->entity.y);
     Entity* final_torch_right = create_torch(final_door->entity.x + 120, final_door->entity.y);
     Entity* final_banner_right = create_banner(path_banner, final_door->entity.x + 200, final_door->entity.y - 100, 0.5f, 6, 1);
+
+    Entity* knight_armor_1 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.42, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    
+    Entity* knight_armor_2 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.15, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_3->puzzle_id = PUZZLE_EQUATION_BHASKARA;
+
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
 
     add_world_entity(game, &start_door->entity);
     add_world_entity(game, &easter_egg_door->entity);
@@ -597,6 +718,13 @@ void load_third_map(Game* game) {
     add_world_entity(game, final_torch_left);
     add_world_entity(game, final_torch_right);
     add_world_entity(game, final_banner_right);
+    add_world_entity(game, dial_1);
+    add_world_entity(game, dial_2);
+    add_world_entity(game, dial_3);
+    add_world_entity(game, knight_armor_1);
+    add_world_entity(game, knight_armor_2);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
 }
 
 void render_minotaur_level(Game* game){
@@ -628,6 +756,8 @@ void render_minotaur_level(Game* game){
     game->player->entity.y = 517; 
 
     start_battle(game->battle, game->player, game->enemy);
+
+    game->enemy->entity.y = 405;
 
     game->battle->state = BATTLE_DIALOGUE;
 
@@ -664,6 +794,8 @@ void render_medusa_level(Game* game){
 
     start_battle(game->battle, game->player, game->enemy);
 
+    game->enemy->entity.y = game->player->entity.y - 100;
+
     game->battle->state = BATTLE_DIALOGUE;
 
     game->battle->dialogues = DIALOGUE_MEDUSA_1;
@@ -698,6 +830,8 @@ void render_arauto_level(Game* game){
     game->player->entity.y = 517; 
 
     start_battle(game->battle, game->player, game->enemy);
+
+    game->enemy->entity.y = game->player->entity.y - 200;
 
     game->battle->state = BATTLE_DIALOGUE;
 
@@ -748,6 +882,7 @@ void draw_minotaur_level(Game* game){
             al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Sou o Minotauro,");
             al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "forjado pelos cálculos");
             al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "e sabedoria de Arquimedes.");
+            
             
             break;
         case DIALOGUE_BATTLE_1:
@@ -983,15 +1118,13 @@ void draw_medusa_level(Game* game){
     al_draw_scaled_bitmap(
         game->background,
         0, 0,
-        1920, 1080, // <-- Atenção: usei 1920x1080 como no seu código original
+        1920, 1080,
         0, 0,
         SCREEN_W, SCREEN_H,
         0
     );
 
     al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
-
-    // --- LÓGICA DE DIÁLOGO ADICIONADA ---
 
     if(game->battle->state == BATTLE_DIALOGUE){
         switch (game->battle->dialogues)
@@ -1358,7 +1491,6 @@ void draw_arauto_level(Game* game){
             al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 50, ALLEGRO_ALIGN_LEFT, "devorarão.");
             break;
         
-        // --- DIÁLOGO DE VITÓRIA ---
         case DIALOGUE_ARAUTO_FINAL_1:
             al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
             
@@ -1436,7 +1568,6 @@ void draw_arauto_level(Game* game){
             al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "por merecer. Parabéns jovem!.");
             break;
         
-        // --- DIÁLOGOS RANDÔMICOS ---
         case DIALOGUE_ARAUTO_RANDOM_1:
             al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
             
@@ -1623,9 +1754,9 @@ void menu_options(Game* game){
 bool check_interaction(ALLEGRO_BITMAP* control, Entity* entity_1, Entity* entity_2){
     if(entity_1->box.x + entity_1->box.w >= entity_2->box.x && entity_1->box.x <= entity_2->box.x + entity_2->box.w 
         && entity_1->box.y + entity_1->box.h >= entity_2->box.y && entity_1->box.y <= entity_2->box.y + entity_2->box.h){
-            if(entity_2->entity_type == DOOR){
+            if(entity_2->entity_type == DOOR || entity_2->entity_type == EDUCATIONAL || entity_2->entity_type == PUZZLE_DIAL || entity_2->entity_type == PUZZLE_LEVER){
                 render_control(control, entity_2, INTERACT_E);
-            }
+            } 
             return true;
     }
 
@@ -1670,6 +1801,165 @@ void return_level(Game* game, Door* door_1){
     }
 }
 
+void resolve_interaction_with_puzzle(Game* game, Player* player, Entity* current_entity, unsigned char* key){
+    if(key[ALLEGRO_KEY_E]){
+        switch (current_entity->puzzle_id)
+        {
+        case PUZZLE_BHASKARA:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_BHASKARA; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            game->state = GAME_PUZZLE_SCREEN;
+            break;
+        case PUZZLE_EQUATION_BHASKARA:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_EQUATION_BHASKARA; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            game->state = GAME_PUZZLE_SCREEN;
+            break;
+        default:
+            break;
+        }
+
+
+        key[ALLEGRO_KEY_E] = 0;
+    }
+}
+
+void check_bhaskara_solution(Game* game, Door* door) {
+    
+    int values[3] = {0, 0, 0};
+    int current_val = 0;
+
+    for (int i = 0; i < game->num_world_entities; i++) {
+        Entity* e = game->world_entities[i];
+        if (e && e->isActive) {
+            
+            if (e->entity_type == PUZZLE_DIAL) {
+                if (current_val < 3) {
+                    values[current_val] = e->puzzle_value;
+                    current_val++;
+                }
+            }
+        }
+    }
+
+
+    switch(game->state){
+        case GAME_FIRST_MISSION:
+
+            for(int i = 0; i < 3; i++){
+                printf("%d\n", values[i]);
+            }
+
+            bool found_16 = false;
+            bool found_6 = false;
+            bool found_2 = false;
+
+            for (int i = 0; i < 3; i++) {
+                if (values[i] == 16) found_16 = true;
+                else if (values[i] == 6) found_6 = true;
+                else if (values[i] == 2) found_2 = true;
+            }
+
+            if (found_16 && found_6 && found_2 && door != NULL) {
+                door->entity.is_locked_puzzle = false; 
+                sprintf(game->log_ln1, "Um mecanismo range e a porta se abre!");
+            } else {
+                sprintf(game->log_ln1, "Os números estão incorretos... Nada acontece.");
+            }
+
+            break;
+        case GAME_SECOND_MISSION:
+            for(int i = 0; i < 3; i++){
+                printf("%d\n", values[i]);
+            }
+
+            bool found_4 = false;
+            bool found_3 = false;
+            bool found_5 = false;
+
+            for (int i = 0; i < 3; i++) {
+                if (values[i] == 4) found_4 = true;
+                else if (values[i] == 3) found_3 = true;
+                else if (values[i] == 5) found_5 = true;
+            }
+
+            if (found_4 && found_3 && found_5 && door != NULL) {
+                door->entity.is_locked_puzzle = false; 
+                sprintf(game->log_ln1, "Um mecanismo range e a porta se abre!");
+            } else {
+                sprintf(game->log_ln1, "Os números estão incorretos... Nada acontece.");
+            }
+            break;
+        case GAME_THIRD_MISSION:
+            for(int i = 0; i < 3; i++){
+                printf("%d\n", values[i]);
+            }
+
+            bool found_4_a = false;
+            bool found_3_a = false;
+            bool found_5_a = false;
+
+            for (int i = 0; i < 3; i++) {
+                if (values[i] == 4) found_4_a = true;
+                else if (values[i] == 3) found_3_a = true;
+                else if (values[i] == 5) found_5_a = true;
+            }
+
+            if (found_4_a && found_3_a && found_5_a && door != NULL) {
+                door->entity.is_locked_puzzle = false; 
+                sprintf(game->log_ln1, "Um mecanismo range e a porta se abre!");
+            } else {
+                sprintf(game->log_ln1, "Os números estão incorretos... Nada acontece.");
+            }
+        default:
+            break;
+    }
+    
+ 
+
+}
+
+void handle_player_interaction(Game* game, Player* player, Entity* entity, unsigned char* key){
+    
+    if(key[ALLEGRO_KEY_E]){
+        switch (entity->entity_type)
+        {
+            case PUZZLE_DIAL:
+                entity->puzzle_value++;
+                if (entity->puzzle_value > 20) {
+                    entity->puzzle_value = 0;
+                }
+                break;
+                
+            case PUZZLE_LEVER:
+                //check_bhaskara_solution(game);
+                break;
+            break;
+        
+        default:
+            break;
+        }
+
+        key[ALLEGRO_KEY_E] = 0;
+    }
+
+}
+
+bool player_has_item(Player* player, const char* item_id) {
+    for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
+        if (player->equipment[i] != NULL) {
+            if (player->equipment[i]->type == ITEM_EQUIPMENT && 
+                strcmp(player->equipment[i]->id, item_id) == 0) 
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2, unsigned char* key){
     if (entity_2->entity_type != DOOR) return;
 
@@ -1681,48 +1971,109 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                 return_level(game, door);
                 break;
             case DOOR_MINOTAUR:
-                for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
-                    if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "minotauro_chave") == 0){
+               if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "minotauro_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave do Minotauro.");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        
+                        door->entity.is_locked_key = false; 
+                    } else {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta possui um emblema com um MINOTAURO.");
+                        sprintf(game->log_ln3, "\"Já que está aqui. Avance para depois voltar.\"");
+                    }
+                    
+                    return; 
+                    }
+                    if (door->entity.is_locked_puzzle) {
+                        
+                        al_start_timer(game->timer_game_logs);
+                        check_bhaskara_solution(game, door); 
+                        return;
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
                         game->state = GAME_MINOTAUR_LEVEL;
                         game->gameplay_state = GAMEPLAY_BATTLE;
                         render_minotaur_level(game);
                         return;
-                    } 
-                }
-                al_start_timer(game->timer_game_logs);
-                sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                sprintf(game->log_ln2, "Essa porta possui um emblema com um MINOTAURO.");
-                sprintf(game->log_ln3, "\"Já que está aqui. Avance para depois voltar.\"");
-                break;
-            case DOOR_MEDUSA:
-                for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
-                        if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "medusa_chave") == 0){
-                            game->state = GAME_MEDUSA_LEVEL;
-                            game->gameplay_state = GAMEPLAY_BATTLE;
-                            render_medusa_level(game);
-                            return;
-                        } 
-                        
                     }
-                al_start_timer(game->timer_game_logs);
-                sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                sprintf(game->log_ln2, "Essa porta possui um emblema com uma MEDUSA.");
-                sprintf(game->log_ln3, "\"Boa sorte.\"");
-                break;
+                    
+                    break;
+            case DOOR_MEDUSA:
+                if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "medusa_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave da Medusa.");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        
+                        door->entity.is_locked_key = false; 
+                    } else {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta possui um emblema com uma MEDUSA.");
+                        sprintf(game->log_ln3, "\"Hmm, Interessante.\"");
+                    }
+                    
+                    return; 
+                    }
+                    if (door->entity.is_locked_puzzle) {
+                        
+                        al_start_timer(game->timer_game_logs);
+                        check_bhaskara_solution(game, door); 
+                        return;
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->state = GAME_MEDUSA_LEVEL;
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_medusa_level(game);
+                        return;
+                    }
+                    
+                    break;
             case DOOR_ARAUTO:
-                for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
-                    if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "arauto_chave") == 0){
+               if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "arauto_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave da Medusa.");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        
+                        door->entity.is_locked_key = false; 
+                    } else {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta não possui detalhes.");
+                    }
+                    
+                    return; 
+                    }
+                    if (door->entity.is_locked_puzzle) {
+                        
+                        al_start_timer(game->timer_game_logs);
+                        check_bhaskara_solution(game, door); 
+                        return;
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
                         game->state = GAME_ARAUTO_LEVEL;
                         game->gameplay_state = GAMEPLAY_BATTLE;
                         render_arauto_level(game);
                         return;
-                    } 
+                    }
                     
-                }
-                al_start_timer(game->timer_game_logs);
-                sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                sprintf(game->log_ln2, "Essa porta não possui emblema, parece uma porta simples.");
-                break;
+                    break;
             case DOOR_NEXT_LEVEL:
                 if(game->state == GAME_FIRST_MISSION){
                     for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
@@ -1735,7 +2086,9 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
                     al_start_timer(game->timer_game_logs);
                     sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                    sprintf(game->log_ln2, "Nela está escrito...");
+                    sprintf(game->log_ln2, "Nela está escrito:");
+                    sprintf(game->log_ln3, "Vá em frente!");
+
                 } else if(game->state == GAME_SECOND_MISSION){
 
                      for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
@@ -1748,7 +2101,7 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
                     al_start_timer(game->timer_game_logs);
                     sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                    sprintf(game->log_ln2, "Nela está escrito...");
+                    sprintf(game->log_ln3, "Se conseguir, encontre-se comigo!");
                 }
                 break;
             case DOOR_EASTER_EGG:
@@ -1942,6 +2295,49 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
     }
 }
 
+static void update_puzzle_state(Game* game, unsigned char* key, float dt){
+    
+    if (key[ALLEGRO_KEY_E] || key[ALLEGRO_KEY_ESCAPE]) {
+        
+        key[ALLEGRO_KEY_E] = 0;
+        key[ALLEGRO_KEY_ESCAPE] = 0;
+
+        game->state = game->previous_game_state;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+
+        game->active_puzzle_id = PUZZLE_NONE;
+
+        game->log_ln1[0] = '\0';
+        game->log_ln2[0] = '\0';
+        game->log_ln3[0] = '\0';
+        game->log_ln4[0] = '\0';
+
+
+        return;
+    }
+
+    switch (game->active_puzzle_id) {
+        
+        case PUZZLE_BHASKARA:
+
+            break;
+            
+        case PUZZLE_PYTHAGORAS:
+
+            break;
+
+        case PUZZLE_EQUATION_BHASKARA:
+
+            break;
+        case PUZZLE_NONE:
+        default:
+            game->state = game->previous_game_state;
+            game->active_puzzle_id = PUZZLE_NONE;
+            break;
+    }
+}
+
+
 static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     update_camera(game);
     update_player(game->player, key, dt);
@@ -1957,7 +2353,18 @@ static void update_exploring_state(Game* game, unsigned char* key, float dt) {
                 resolve_interaction_with_door(game, game->player, current_entity, key);
             }
         }
-    }
+
+        if (current_entity && current_entity->entity_type == EDUCATIONAL) {
+            if (check_interaction(game->controls, &game->player->entity, current_entity)) {
+                resolve_interaction_with_puzzle(game, game->player, current_entity, key);
+            }
+        }
+        
+        if(current_entity && current_entity->entity_type == PUZZLE_DIAL)
+            if (check_interaction(game->controls, &game->player->entity, current_entity)) {
+                handle_player_interaction(game, game->player, current_entity, key);
+            }
+        }
 
     for(int i = 0; i < MAX_ENEMIES; i++){
         if(game->mobs[i] && game->mobs[i]->entity.isActive){
@@ -2018,7 +2425,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
     switch(game->gameplay_state){
         case GAMEPLAY_EXPLORING:
             player_recalculate_stats(game->player);
-            check_map_collision(&game->player->entity, game->map);
+            //check_map_collision(&game->player->entity, game->map);
             resolve_map_collision(&game->player->entity, game->map);
             break;
         case GAMEPLAY_BATTLE:
@@ -2029,6 +2436,9 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
                 resolve_map_collision_battle(&game->player->entity);
             else 
                 resolve_map_collision(&game->player->entity, game->map);
+            break;
+        case GAMEPLAY_PUZZLE:
+
             break;
     }
 
@@ -2048,24 +2458,30 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
             break;
         case GAME_FIRST_MISSION:
             
-            check_battle(game);
+            // check_battle(game);
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
-                        update_exploring_state(game, key, dt);
-                        break;
-                    case GAMEPLAY_BATTLE:
-                        break;
-                    case GAMEPLAY_NONE:
-                    default:
-                        break;
+                    update_exploring_state(game, key, dt);
+                    break;
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
+                    break;
+                case GAMEPLAY_BATTLE:
+                    break;
+                case GAMEPLAY_NONE:
+                default:
+                    break;
                 }
             break;
         case GAME_SECOND_MISSION:
-            check_battle(game);
+            // check_battle(game);
             
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
+                    break;
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -2073,18 +2489,23 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
             }
             break;
         case GAME_THIRD_MISSION:
-            check_battle(game);
+            // check_battle(game);
             
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
+                    break;
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
                     break;
             }
             break;
-        
+        case GAME_PUZZLE_SCREEN:
+            update_puzzle_state(game, key, dt);
+            break;
         case GAME_INIT:
         case GAME_OVER:
         default:
@@ -2316,6 +2737,170 @@ void draw_inventory(Player* player, ALLEGRO_FONT* font){
 
 }
 
+
+void draw_puzzle_state(Game* game) {
+    
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 150));
+
+    switch (game->active_puzzle_id) {
+        
+        case PUZZLE_BHASKARA:
+            if (game->puzzle_bhaskara_img) {
+                float img_w = al_get_bitmap_width(game->puzzle_bhaskara_img);
+                float img_h = al_get_bitmap_height(game->puzzle_bhaskara_img);
+                float x = (SCREEN_W - img_w) / 2.0 - 200;
+                float y = (SCREEN_H - img_h) / 2.0 - 200;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_bhaskara_img,
+                    0, 0,
+                    128, 141,
+                    x, y,
+                    453, 500,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê um quadro com a fórmula resolutiva.");
+                sprintf(game->log_ln2, "Quem sabe você precise usar mais para frente.");
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+
+        case PUZZLE_EQUATION_BHASKARA:
+            if(game->previous_game_state == GAME_FIRST_MISSION){
+                if (game->puzzle_bhaskara_paper) {
+                    float img_w = al_get_bitmap_width(game->puzzle_bhaskara_paper);
+                    float img_h = al_get_bitmap_height(game->puzzle_bhaskara_paper);
+                    float x = (SCREEN_W - img_w) / 2.0;
+                    float y = (SCREEN_H - img_h) / 2.0;
+                    
+                    al_draw_scaled_bitmap(
+                        game->puzzle_bhaskara_paper,
+                        0, 0,
+                        256, 384,
+                        x, y,
+                        256, 384,
+                        0
+                    );
+
+                    sprintf(game->log_ln1, "Você vê uma tabuleta sobre a fórmula resolutiva.");
+                    sprintf(game->log_ln2, "Estranho...");
+                } else {
+                    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                                SCREEN_W / 2, SCREEN_H / 2, 
+                                ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+                }
+            } else if(game->previous_game_state == GAME_SECOND_MISSION){
+                if (game->puzzle_bhaskara_paper_2) {
+                    float img_w = al_get_bitmap_width(game->puzzle_bhaskara_paper_2);
+                    float img_h = al_get_bitmap_height(game->puzzle_bhaskara_paper_2);
+                    float x = (SCREEN_W - img_w) / 2.0;
+                    float y = (SCREEN_H - img_h) / 2.0;
+                    
+                    al_draw_scaled_bitmap(
+                        game->puzzle_bhaskara_paper_2,
+                        0, 0,
+                        256, 384,
+                        x, y,
+                        256, 384,
+                        0
+                    );
+
+                    sprintf(game->log_ln1, "Você vê uma tabuleta sobre a fórmula resolutiva.");
+                    sprintf(game->log_ln2, "Estranho...");
+                } else {
+                    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                                SCREEN_W / 2, SCREEN_H / 2, 
+                                ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+                }
+            } else if(game->previous_game_state == GAME_THIRD_MISSION){
+                if (game->puzzle_bhaskara_paper_2) {
+                    float img_w = al_get_bitmap_width(game->puzzle_bhaskara_paper_2);
+                    float img_h = al_get_bitmap_height(game->puzzle_bhaskara_paper_2);
+                    float x = (SCREEN_W - img_w) / 2.0;
+                    float y = (SCREEN_H - img_h) / 2.0;
+                    
+                    al_draw_scaled_bitmap(
+                        game->puzzle_bhaskara_paper_2,
+                        0, 0,
+                        256, 384,
+                        x, y,
+                        256, 384,
+                        0
+                    );
+
+                    sprintf(game->log_ln1, "Você vê uma tabuleta sobre a fórmula resolutiva.");
+                    sprintf(game->log_ln2, "Estranho...");
+                } else {
+                    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                                SCREEN_W / 2, SCREEN_H / 2, 
+                                ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+                }
+            }
+
+            
+            break;
+
+        case PUZZLE_PYTHAGORAS:
+            // TALVEZ EU NAO USE
+
+            // // Lógica similar para o puzzle de Pitágoras, mas ainda não temos sprite
+            // if (game->puzzle_pythagoras_img) {
+            //     float img_w = al_get_bitmap_width(game->puzzle_pythagoras_img);
+            //     float img_h = al_get_bitmap_height(game->puzzle_pythagoras_img);
+            //     float x = (SCREEN_W - img_w) / 2.0;
+            //     float y = (SCREEN_H - img_h) / 2.0;
+            //     al_draw_bitmap(game->puzzle_pythagoras_img, x, y, 0);
+            // }
+            break;
+
+        case PUZZLE_NONE:
+        default:
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), 
+                         SCREEN_W / 2, SCREEN_H / 2, 
+                         ALLEGRO_ALIGN_CENTER, "Nenhum puzzle ativo.");
+            break;
+    }
+
+    
+    int base_y = 20;
+    int bitmap_width = 32;
+    int bitmap_x_start = (SCREEN_W / 2) - (bitmap_width / 2);
+    int text1_x_center = bitmap_x_start - 50;
+    int text2_x_center = bitmap_x_start + 110;
+
+    al_draw_text(
+        game->subtitle_11_font,
+        al_map_rgb(255, 255, 255), 
+        text1_x_center,
+        base_y + 7, 
+        ALLEGRO_ALIGN_CENTER, 
+        "Pressione"
+    );
+
+    al_draw_scaled_bitmap(
+            game->controls,
+            0, 0,
+            16, 16,
+            bitmap_x_start,
+            base_y,     
+            bitmap_width, 32,
+            0 
+        );   
+
+    al_draw_text(
+        game->subtitle_11_font, 
+        al_map_rgb(255, 255, 255),
+        text2_x_center,
+        base_y + 7, 
+        ALLEGRO_ALIGN_CENTER, 
+        "para fechar."
+    );
+}
+
 void draw_game(Game* game){
     ALLEGRO_TRANSFORM identity_transform;
 
@@ -2380,8 +2965,26 @@ void draw_game(Game* game){
                     draw_entity(current_entity);
                 }
 
-                
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
                 if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
                     bool check = check_interaction(game->controls, &game->player->entity, current_entity);
                 }
             }
@@ -2402,6 +3005,36 @@ void draw_game(Game* game){
             al_use_transform(&game->camera_transform);
 
             draw_map(game->map);
+
+            for(int i = 0; i < game->num_world_entities; i++){
+                Entity* current_entity = game->world_entities[i];
+                if(current_entity && current_entity->isActive){
+                    draw_entity(current_entity);
+                }
+
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
+                if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                }
+            }
 
             for(int i = 0; i < game->num_world_entities; i++){
                 Entity* current_entity = game->world_entities[i];
@@ -2431,6 +3064,36 @@ void draw_game(Game* game){
 
             draw_map(game->map);
 
+             for(int i = 0; i < game->num_world_entities; i++){
+                Entity* current_entity = game->world_entities[i];
+                if(current_entity && current_entity->isActive){
+                    draw_entity(current_entity);
+                }
+
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
+                if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                }
+            }
+
             for(int i = 0; i < game->num_world_entities; i++){
                 Entity* current_entity = game->world_entities[i];
                 if(current_entity && current_entity->isActive){
@@ -2454,6 +3117,9 @@ void draw_game(Game* game){
             al_identity_transform(&identity_transform);
             al_use_transform(&identity_transform);
             break;
+        case GAME_PUZZLE_SCREEN:
+            draw_puzzle_state(game);
+            break;
         case GAME_OVER:
             reset_world_entities(game);
 
@@ -2462,27 +3128,62 @@ void draw_game(Game* game){
     }
 
     switch (game->gameplay_state){
-        case GAMEPLAY_EXPLORING:
-            printf("enemies: %d\n", game->world_enemies);
-        
-            // --- BLOCO DE LOG MODIFICADO (EXPLORING) ---
-            int log_x_pos = SCREEN_W - 20; // Posição X (margem direita de 20px)
-            // Pega a altura real da fonte para calcular o espaçamento
+
+        case GAMEPLAY_PUZZLE:
+            int log_x_pos_0 = SCREEN_W - 20;
+
+            int exploring_line_height_0 = al_get_font_line_height(game->subtitle_11_font);
+            int exploring_spacing_0 = exploring_line_height_0 + 2; 
+
+
+            int exploring_base_y_0 = SCREEN_H - 20 - exploring_line_height_0;
+
+            ALLEGRO_COLOR log_color_0 = al_map_rgb(255, 255, 255);
+
+            al_draw_text(
+                game->subtitle_11_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0 - (exploring_spacing_0 * 2),
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln1
+            );
+
+
+            al_draw_text(
+                game->subtitle_11_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0 - exploring_spacing_0,
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln2
+            );
+
+            al_draw_text(
+                game->subtitle_11_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0,
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln3
+            );
+            break;
+        case GAMEPLAY_EXPLORING:        
+            int log_x_pos = SCREEN_W - 20;
+
             int exploring_line_height = al_get_font_line_height(game->subtitle_11_font);
-            // Espaçamento entre linhas (altura da fonte + 2 pixels)
             int exploring_spacing = exploring_line_height + 2; 
 
-            // Posição Y da *última* linha (L3)
-            // Tela (720) - margem inferior (20) - altura da própria linha
+
             int exploring_base_y = SCREEN_H - 20 - exploring_line_height;
 
-            ALLEGRO_COLOR log_color = al_map_rgb(255, 255, 255); // Cor branca
+            ALLEGRO_COLOR log_color = al_map_rgb(255, 255, 255);
 
             al_draw_text(
                 game->subtitle_11_font,
                 log_color,
                 log_x_pos, 
-                exploring_base_y - (exploring_spacing * 2), // Linha 1
+                exploring_base_y - (exploring_spacing * 2),
                 ALLEGRO_ALIGN_RIGHT, 
                 game->log_ln1
             );
@@ -2492,7 +3193,7 @@ void draw_game(Game* game){
                 game->subtitle_11_font,
                 log_color,
                 log_x_pos, 
-                exploring_base_y - exploring_spacing, // Linha 2
+                exploring_base_y - exploring_spacing,
                 ALLEGRO_ALIGN_RIGHT, 
                 game->log_ln2
             );
@@ -2501,11 +3202,10 @@ void draw_game(Game* game){
                 game->subtitle_11_font,
                 log_color,
                 log_x_pos, 
-                exploring_base_y, // Linha 3
+                exploring_base_y,
                 ALLEGRO_ALIGN_RIGHT, 
                 game->log_ln3
             );
-            // --- FIM DO BLOCO MODIFICADO ---
             
             draw_inventory(game->player, game->subtitle_8_font);
 
@@ -2603,79 +3303,77 @@ void draw_game(Game* game){
 
                 draw_defense(game->player->shield, game->subtitle_11_font, 30, 686,game->player->defense);
                 draw_attack(game->player->sword_ui, game->subtitle_11_font, 75, 686,game->player->attack);
+
+                al_draw_text(game->subtitle_8_font, al_map_rgb(255, 255, 255), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Pressione ESPAÇO para atacar");
+                al_draw_text(game->subtitle_8_font, al_map_rgb(255, 255, 255), SCREEN_W - 400, SCREEN_H / 2 - 180, ALLEGRO_ALIGN_LEFT, "Você pode usar um item antes de atacar");
             }
 
             if(game->battle->turn_state == TURN_PLAYER || game->battle->turn_state == TURN_ENEMY || game->battle->state == BATTLE_WIN) {
                 if(game->event->timer.source == game->battle->timer_enemy)
                     al_start_timer(game->battle->log_timer);
 
-                // --- BLOCO DE LOG MODIFICADO (BATTLE) ---
                 int battle_log_x = SCREEN_W - 20;
-                // Pega a altura real da fonte
                 int battle_line_height = al_get_font_line_height(game->subtitle_11_font);
-                // Espaçamento (altura + 2 pixels)
                 int battle_line_spacing = battle_line_height + 2; 
 
-                // Posição Y da *última* linha (L10)
-                // Tela (720) - margem inferior (20) - altura da própria linha
+
                 int battle_base_y = SCREEN_H - 20 - battle_line_height;
 
-                ALLEGRO_COLOR battle_log_color = al_map_rgb(255, 255, 255); // Cor branca
+                ALLEGRO_COLOR battle_log_color = al_map_rgb(255, 255, 255);
 
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 9), // Linha 1
+                    battle_base_y - (battle_line_spacing * 9),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln1
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 8), // Linha 2
+                    battle_base_y - (battle_line_spacing * 8),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln2
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 7), // Linha 3
+                    battle_base_y - (battle_line_spacing * 7),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln3
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 6), // Linha 4
+                    battle_base_y - (battle_line_spacing * 6),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln4
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 5), // Linha 5
+                    battle_base_y - (battle_line_spacing * 5),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln5
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 4), // Linha 6
+                    battle_base_y - (battle_line_spacing * 4),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln6
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 3), // Linha 7
+                    battle_base_y - (battle_line_spacing * 3),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln7
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - (battle_line_spacing * 2), // Linha 8
+                    battle_base_y - (battle_line_spacing * 2),
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln8
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y - battle_line_spacing, // Linha 9
+                    battle_base_y - battle_line_spacing,
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln9
                 );
                 al_draw_text(
                     game->subtitle_11_font, battle_log_color, battle_log_x, 
-                    battle_base_y, // Linha 10
+                    battle_base_y,
                     ALLEGRO_ALIGN_RIGHT, game->battle->log_ln10
                 );
-                // --- FIM DO BLOCO MODIFICADO ---
             }
-
             break;
+        
     }
 }
 
