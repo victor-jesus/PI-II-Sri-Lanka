@@ -19,6 +19,14 @@ void init_player(Player* player, const char* name, int max_hp, int x, int y, int
     player->entity.max_hp = max_hp;
     player->entity.base_max_hp = max_hp;
 
+    player->level = 1;
+    player->xp = 0;
+    player->xp_for_next_level = 100;
+    player->is_level_up = false;
+
+    player->can_act = false;
+    player->can_use_item = false;
+
     for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
         player->equipment[i] = NULL;
     }
@@ -26,8 +34,63 @@ void init_player(Player* player, const char* name, int max_hp, int x, int y, int
     set_hit_box(&player->entity, offset_up, offset_down, offset_left, offset_right);
 }
 
+void add_xp(Player* player, int amount) {
+    if (player->is_level_up) return;
+
+    player->xp += amount;
+
+    level_up(player);
+}
+
+void level_up(Player* player){
+    if (player->xp >= player->xp_for_next_level && !player->is_level_up) {
+        
+        player->xp -= player->xp_for_next_level;
+        player->level++;
+        player->is_level_up = true;
+        
+        player->xp_for_next_level = player->xp_for_next_level * 10; 
+
+        printf("LEVEL UP! Você alcançou o nível %d!\n", player->level);
+    }
+}
+
+bool buff_levels(Player* player){
+    if(!player->is_level_up) return false;
+
+    printf("Aplicando buffs para o Nível %d!\n", player->level);
+
+
+    switch (player->level)
+    {
+    case 2:
+        player->entity.base_max_hp += 10;
+        player->base_attack += 5;
+        player->base_defense += 3;
+        player->iniciative += 2;
+        break;
+    case 3:
+        player->entity.base_max_hp += 15;
+        player->base_attack += 5;
+        player->base_defense += 3;
+        player->iniciative += 3;
+        break;
+    default:
+        player->entity.base_max_hp += 5;
+        player->base_attack += 2;
+        player->base_defense += 1;
+        break;
+    }
+
+    player->is_level_up = false;
+
+    player_recalculate_stats(player);
+    player->entity.hp = player->entity.max_hp; 
+
+    return true;
+}
+
 void player_recalculate_stats(Player* player) {
-    
     player->attack = player->base_attack;
     player->defense = player->base_defense;
     player->entity.max_hp = player->entity.base_max_hp;
@@ -39,9 +102,12 @@ void player_recalculate_stats(Player* player) {
             player->iniciative += player->equipment[i]->iniciative_buff;
             player->entity.max_hp += player->equipment[i]->max_hp_buff;
         }
+    }    
+
+    if (player->is_defending) {
+        player->defense *= 2;
     }
 
-    
     if (player->entity.hp > player->entity.max_hp) {
         player->entity.hp = player->entity.max_hp;
     }
@@ -161,6 +227,22 @@ void update_player(Player* player, unsigned char* key, float dt){
     update_sprite(current, dt);
 }
 
+void select_item_battle(Player* player, unsigned char* key){
+    if(key[ALLEGRO_KEY_H]){
+        player->turn_choice = TURN_BIG_POTION;
+        return;
+    }
+    
+    if(key[ALLEGRO_KEY_J]){
+        player->turn_choice = TURN_SMALL_POTION;
+        return;
+    }
+    
+    if(key[ALLEGRO_KEY_K]){
+        player->turn_choice = TURN_WATER;
+        return;
+    }
+}
 
 void select_item(Player* player, unsigned char* key){
     if(key[ALLEGRO_KEY_H]){
@@ -168,7 +250,7 @@ void select_item(Player* player, unsigned char* key){
             Item* current_item = player->inventory.slots[i].item;
 
             
-            if(current_item->type == ITEM_HEAL){
+            if(current_item != NULL && current_item->type == ITEM_HEAL){
                 if(player->inventory.slots[i].quantity <= 0) return;
 
                 player->entity.hp += current_item->value;

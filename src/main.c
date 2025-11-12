@@ -9,6 +9,7 @@
 #include "game.h"
 #include "time.h"
 #include "screen.h"
+#include "game_state.h"
 
 #define KEY_SEEN 1
 #define KEY_DOWN 2
@@ -92,6 +93,8 @@ int main(){
 
                 if(game->gameplay_state == GAMEPLAY_EXPLORING) {
                     select_item(game->player, key);
+                } else if (game->gameplay_state == GAMEPLAY_BATTLE){
+                    select_item_battle(game->player, key);
                 }
 
                 if(game->state == GAME_INIT){
@@ -103,41 +106,21 @@ int main(){
                 if(game->battle->state == BATTLE_DIALOGUE){ 
                     if(key[ALLEGRO_KEY_E]){
 
-                        // 1. Verificações de "SAÍDA" do diálogo
                         if(game->battle->dialogues == DIALOGUE_BATTLE_FINAL_INTRO){
                             game->battle->state = BATTLE_START;
-                            // Opcional: resetar o diálogo para não re-triggerar
-                            // game->battle->dialogues = DIALOGUE_BATTLE_0; 
-                        } 
-                        else if(game->battle->dialogues == DIALOGUE_AFTER_TRASH_TALK){
+                        } else if(game->battle->dialogues == DIALOGUE_AFTER_TRASH_TALK){
                             game->battle->state = BATTLE_START;
-                            // Opcional: resetar
-                            // game->battle->dialogues = DIALOGUE_BATTLE_0;
-                        }
-                        // 2. Verificações de "PULO" (Jump)
-                        // (Se as saídas não foram atendidas, checa os pulos)
-                        else if(game->battle->dialogues == DIALOGUE_BATTLE_5){
+                        } else if(game->battle->dialogues == DIALOGUE_BATTLE_5){
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        } 
-                        else if( game->battle->dialogues == DIALOGUE_BATTLE_6) {
+                        } else if( game->battle->dialogues == DIALOGUE_BATTLE_6) {
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        } 
-                        else if(game->battle->dialogues == DIALOGUE_BATTLE_7) {
+                        } else if(game->battle->dialogues == DIALOGUE_BATTLE_7) {
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        }
-                        // 3. Lógica PADRÃO (Avançar)
-                        // (Só executa se nenhuma das condições especiais acima foi atendida)
-                        else {
+                        } else {
                             game->battle->dialogues++;
                         }
                     }
                 }
-
-                if(key[ALLEGRO_KEY_Y]) game->player->entity.hp = game->player->entity.hp - 20;
-                if(key[ALLEGRO_KEY_U]) game->player->entity.hp = game->player->entity.hp - 15;
-                if(key[ALLEGRO_KEY_I]) game->player->entity.hp = game->player->entity.hp - 10;
-                if(key[ALLEGRO_KEY_O]) game->player->entity.hp = game->player->entity.hp - 1;
-
 
                 if(key[ALLEGRO_KEY_SPACE] && game->gameplay_state == GAMEPLAY_EXPLORING) {
                     game->player->entity.anim_state = ANIM_ATTACK;
@@ -166,7 +149,6 @@ int main(){
    
         if(!isRunning) break;
 
-        // Render
         if(redraw && al_is_event_queue_empty(queue)){
             al_clear_to_color(al_map_rgb(0, 0, 0));
 

@@ -11,6 +11,8 @@
 #include <stdlib.h> 
 #include "door.h"
 #include "box.h"
+#include <string.h>
+#include "game_state.h"
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -118,6 +120,12 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     
     game->num_world_entities = 0;
     game->init_dialogues = DIALOGUE_NONE;
+
+    game->world_enemies = 0;
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        game->mobs[i] = NULL;
+    }
     
     init_player(game->player, "Estudante", 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 10, 10, 25, 22, 30, 30);
     game->player->portrait = al_load_bitmap(path_portrait_player);
@@ -147,10 +155,12 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->battle->timer_end = al_create_timer(5.0);
     game->battle->log_timer = al_create_timer(5.0);
     game->battle->timer_enemy = al_create_timer(3.5);
+    game->timer_game_logs = al_create_timer(5.0);
     game->battle->battle_font = subtitle_font;
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->log_timer));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_enemy));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_logs));
 
     game->game_font = font;
     game->title_font = title_font;
@@ -170,6 +180,11 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     al_identity_transform(&game->camera_transform);
     
     
+    game->log_ln1[0] = '\0';
+    game->log_ln2[0] = '\0';
+    game->log_ln3[0] = '\0';
+    game->log_ln4[0] = '\0';
+
     load_item_database();
     initial_inventory(game); 
 
@@ -232,6 +247,8 @@ void check_map_collision(Entity* entity, Map* map) {
 
 void resolve_map_collision(Entity* entity, Map* map){
     if(entity->x > (MAP_WIDTH * TILE_W) - 50) entity->x = (MAP_WIDTH * TILE_W) - 50;
+    if(entity->x < 0) entity->x = 0;
+    if(entity->y > 710) entity->y = 710;
 }
 
 void resolve_map_collision_battle(Entity* entity){
@@ -319,6 +336,41 @@ void render_initial_level(Game* game){
     game->init_dialogues = DIALOGUE_1;
 }
 
+void add_skeleton(Game* game, int x, int y, int attack, int defense){
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if(game->mobs[i] == NULL){
+            game->mobs[i] = malloc(sizeof(Enemy));
+
+            if (game->mobs[i] == NULL) {
+                printf("ERRO: Falha ao alocar memória para o esqueleto!\n");
+                return;
+            }
+            
+            init_enemy(game->mobs[i], "Esqueleto", MOB, x, y, 5, attack, defense, 100, 30,0,0,0);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_run, ANIM_RUN, 12, 1, 0.06f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.14f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_death, ANIM_DEATH, 15, 1, 0.25f);
+    
+            game->mobs[i]->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+            set_entity_scale(&game->mobs[i]->entity, 3.0);
+    
+            game->mobs[i]->hp_heart = al_load_bitmap(path_heart);
+            game->mobs[i]->shield_enemy = al_load_bitmap(path_shield_enemy);
+            
+            game->world_enemies++;
+            return;
+        }
+    }
+}
+
+void remove_all_mobs(Game* game){
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        free(game->mobs[i]);
+        game->mobs[i] = NULL;
+    }
+}
 
 /*
     Refatorar as funções de criar entidades e implementar posição relacionada ao eixo X (LEVEL_WIDTH * porcentagem)
@@ -338,9 +390,8 @@ void load_first_map(Game* game) {
                 game->map->tiles[y][x] = TILE_WALL;
         }
     }
+
     init_map(game->map, path_map_tile, path_map_tile_floor, path_map_tile_floor_rock);
-
-
 
     const float LEVEL_WIDTH = 6000.0f;
     const float GROUND_Y = (SCREEN_H / 2.0f) - 96.0f;
@@ -361,23 +412,14 @@ void load_first_map(Game* game) {
     Entity* central_torch = create_torch(LEVEL_WIDTH * 0.40f, GROUND_Y);
     Entity* knight_armor = create_entity(path_armadura_env, LEVEL_WIDTH * 0.19, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, ENVIRONMENT_NO_MOVE);
 
-    game->enemy = malloc(sizeof(Enemy));
+    
+    add_skeleton(game, 1000, 500, 5, 5);
+    add_skeleton(game, 2000, 500, 5, 5);
+    add_skeleton(game, 3200, 500, 5, 5);
+    add_skeleton(game, 3800, 500, 5, 5);
+    add_skeleton(game, 5800, 500, 5, 5);
 
-    init_enemy(game->enemy, "Esqueleto", MOB, 700, 505, 5, 5, 5, 100, 30,0,0,0);
-    set_entity_anim(&game->enemy->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_run, ANIM_RUN, 12, 1, 0.06f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.14f);
-    set_entity_anim(&game->enemy->entity, path_skeleton_death, ANIM_DEATH, 15, 1, 0.25f);
-
-    game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
-    game->enemy->portrait = al_load_bitmap(path_portrait_minotaur);
-    set_entity_scale(&game->enemy->entity, 3.0);
-
-    game->enemy->hp_heart = al_load_bitmap(path_heart);
-    game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
-    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
-    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
+    
 
     Entity* euler_banner_1 = create_banner(path_banner_e, LEVEL_WIDTH * 0.47f, WALL_Y, 0.3f, 1, 1);
     Entity* second_small_window = create_window(path_window_1, LEVEL_WIDTH * 0.57f, WALL_Y + 50, 2.0f);
@@ -527,7 +569,7 @@ void render_minotaur_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Minotauro de arquimedes", BOSSES, 700, 405, 5, 10, 25, 200, 30,0,0,0);
+    init_enemy(game->enemy, "Minotauro de arquimedes", MINOTAUR, 700, 405, 5, 10, 25, 200, 30,0,0,0);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
@@ -554,9 +596,6 @@ void render_minotaur_level(Game* game){
 
     game->battle->dialogues = 0;
 
-    al_register_event_source(game->queue, game->battle->timer_end);
-
-
 }
 
 void render_medusa_level(Game* game){
@@ -565,7 +604,7 @@ void render_medusa_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Medusa de Hipátia", BOSSES, 800, 400, 5, 10, 10, 100, 0,0,0,0);
+    init_enemy(game->enemy, "Medusa de Hipátia", MEDUSA, 800, 400, 5, 10, 10, 100, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_medusa_idle, ANIM_IDLE, 7, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_walk, ANIM_RUN, 13, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_medusa_attack, ANIM_ATTACK, 16, 1, 0.1f);
@@ -589,7 +628,7 @@ void render_arauto_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Arauto", BOSSES, 800, 400, 5, 100, 10, 10, 0,0,0,0);
+    init_enemy(game->enemy, "Arauto", ARAUTO, 800, 400, 5, 100, 10, 10, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 6, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_walk, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_arauto_attack, ANIM_ATTACK, 6, 1, 0.1f);
@@ -947,21 +986,26 @@ Btn_state is_mouse_in_btn(Game* game){
 } 
 
 void check_battle(Game* game){
-    if (!game->enemy) {
-        return; 
-    }
 
-    if(!game->enemy->entity.isActive) return;
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if (!game->mobs[i]) {
+            continue; 
+        }
+    
+        if(!game->mobs[i]->entity.isActive) {
+            continue;
+        }
 
-    //Com mudança no game_state precisaremos refatorar todo o código de state do game
-    if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle) return;
-
-    int dist = game->player->entity.x - game->enemy->entity.x;
-
-    if(dist >= -300 && dist <= 300){
-        if(dist < 0) game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
-        game->gameplay_state = GAMEPLAY_BATTLE;
-        start_battle(game->battle, game->player, game->enemy);
+        //Com mudança no game_state precisaremos refatorar todo o código de state do game
+        if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle) return;
+    
+        int dist = game->player->entity.x - game->mobs[i]->entity.x;
+    
+        if(dist >= -300 && dist <= 300){
+            if(dist < 0) game->mobs[i]->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+            game->gameplay_state = GAMEPLAY_BATTLE;
+            start_battle(game->battle, game->player, game->mobs[i]);
+        }
     }
 }
 
@@ -1031,7 +1075,7 @@ void return_level(Game* game, Door* door_1){
     }
 }
 
-void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_2, unsigned char* key){
+void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2, unsigned char* key){
     if (entity_2->entity_type != DOOR) return;
 
     Door* door = (Door*) entity_2;
@@ -1042,9 +1086,17 @@ void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_
                 return_level(game, door);
                 break;
             case DOOR_MINOTAUR:
-                game->state = GAME_MINOTAUR_LEVEL;
-                game->gameplay_state = GAMEPLAY_BATTLE;
-                render_minotaur_level(game);
+                for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
+                    if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "minotauro_chave") == 0){
+                        game->state = GAME_MINOTAUR_LEVEL;
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_minotaur_level(game);
+                        return;
+                    } 
+                }
+                al_start_timer(game->timer_game_logs);
+                sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
+                sprintf(game->log_ln2, "Essa porta possui um emblema com um MINOTAURO.");
                 break;
             case DOOR_MEDUSA:
                 game->state = GAME_MEDUSA_LEVEL;
@@ -1056,8 +1108,17 @@ void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_
                 break;
             case DOOR_NEXT_LEVEL:
                 if(game->state == GAME_FIRST_MISSION){
-                    game->state = GAME_SECOND_MISSION;
-                    load_second_map(game);
+                    for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
+                        if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "segundomapa_chave") == 0){
+                            game->state = GAME_SECOND_MISSION;
+                            game->gameplay_state = GAMEPLAY_EXPLORING;
+                            load_second_map(game);
+                            return;
+                        } 
+                    }
+                    al_start_timer(game->timer_game_logs);
+                    sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
+                    sprintf(game->log_ln2, "Nela está escrito...");
                 } else if(game->state == GAME_SECOND_MISSION){
                     game->state = GAME_THIRD_MISSION;
                     load_third_map(game);
@@ -1098,24 +1159,40 @@ void update_camera(Game* game) {
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    if(game->battle->state == BATTLE_DIALOGUE){
+   if(game->battle->state == BATTLE_DIALOGUE){
         return;
     }
 
     if(game->battle->state == BATTLE_NONE){
-        update_player(game->player, key, dt);
-    }
+        game->state = GAME_FIRST_MISSION;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_first_map(game);
 
-    if (game->player->entity.x > SCREEN_W / 2) {
-        game->player->entity.x = SCREEN_W / 2;
-    }
-
-    if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
-        if (game->enemy) {
-            destroy_enemy(game->enemy);
-            game->enemy = NULL;
+        for(int i = 0; i < game->num_world_entities; i++) {
+            Entity* current_entity = game->world_entities[i];
+            if(current_entity && current_entity->entity_type == DOOR) {
+                Door* door = (Door*) current_entity;
+                if(door->door_type == DOOR_MINOTAUR) {
+                    set_entity_pos(&game->player->entity, door->entity.x, door->entity.y);
+                    break; 
+                }
+            }
         }
-
+        return;
+    }
+    if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
+        // Se a batalha AINDA não terminou (ou seja, o jogador FUGIU)
+        if (game->battle->enemy) {
+            destroy_enemy(game->battle->enemy); // Destrói o boss
+            game->enemy = NULL;
+            game->battle->enemy = NULL; // Limpa o ponteiro da batalha
+        }
+        
+        // Reseta os estados e volta para o mapa 1
+        game->battle->state = BATTLE_NONE;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_first_map(game);
+        game->state = GAME_FIRST_MISSION;
 
         load_first_map(game); 
         game->state = GAME_FIRST_MISSION;
@@ -1130,6 +1207,7 @@ static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
             }
         }
     }
+
 }
 
 static void update_medusa_level(Game* game, unsigned char* key, float dt) {
@@ -1208,19 +1286,29 @@ static void update_exploring_state(Game* game, unsigned char* key, float dt) {
 
         if (current_entity && current_entity->entity_type == DOOR) {
             if (check_interaction(game->controls, &game->player->entity, current_entity)) {
-                resolve_interaction_with_door(game, &game->player->entity, current_entity, key);
+                resolve_interaction_with_door(game, game->player, current_entity, key);
             }
         }
     }
 
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_enemy(game->enemy, dt);
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if(game->mobs[i] && game->mobs[i]->entity.isActive){
+            update_enemy(game->mobs[i], dt);
+        }
     }
 }
 
 static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* key, float dt) {
+    Enemy* enemy_in_battle = game->battle->enemy;
+
     if (game->battle->state == BATTLE_NONE) {
         game->gameplay_state = GAMEPLAY_EXPLORING;
+
+        if(enemy_in_battle && !enemy_in_battle->entity.isActive && enemy_in_battle->enemy_type != MOB){
+            destroy_enemy(enemy_in_battle);
+            game->enemy = NULL;
+            game->battle->enemy = NULL;
+        }
         return;
     }
 
@@ -1230,18 +1318,33 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* 
     //     return;
     // }
     
-    if(game->enemy && game->enemy->entity.isActive == true){
-        update_enemy(game->enemy, dt);
+    if(enemy_in_battle && enemy_in_battle->entity.isActive == true){
+        update_enemy(enemy_in_battle, dt);
     }
     
-    manage_battle(game->battle, event, key, game->subtitle_font);
+    manage_battle(game->battle, event, game->state, key, game->subtitle_font, &game->world_enemies);
     update_player_battle(game->player, key, dt);
 }
 
 void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) {
     read_mouse(game);
 
-    if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
+    bool is_up_level = buff_levels(game->player);
+
+    if(is_up_level){
+        sprintf(game->log_ln1, "Você upou para o nível %d", game->player->level);
+        sprintf(game->log_ln2, "Todas as suas estatisticas foram aumentadas");
+        al_start_timer(game->timer_game_logs);
+    }
+
+    if(event.timer.source == game->timer_game_logs){
+        game->log_ln1[0] = '\0';
+        game->log_ln2[0] = '\0';
+        game->log_ln3[0] = '\0';
+        game->log_ln4[0] = '\0';
+
+        al_stop_timer(game->timer_game_logs);
+        al_set_timer_count(game->timer_game_logs, 0);
     }
     
     switch(game->gameplay_state){
@@ -1253,7 +1356,11 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
         case GAMEPLAY_BATTLE:
             player_recalculate_stats(game->player);
             update_battle_state(game, event, key, dt);
-            resolve_map_collision_battle(&game->player->entity);
+
+            if(game->battle->enemy && game->battle->enemy->enemy_type != MOB)
+                resolve_map_collision_battle(&game->player->entity);
+            else 
+                resolve_map_collision(&game->player->entity, game->map);
             break;
     }
 
@@ -1612,8 +1719,10 @@ void draw_game(Game* game){
             
             draw_entity(&game->player->entity);
             
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
             }
 
             al_identity_transform(&identity_transform);
@@ -1639,8 +1748,10 @@ void draw_game(Game* game){
             
             draw_entity(&game->player->entity);
             
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
             }
 
             al_identity_transform(&identity_transform);
@@ -1665,8 +1776,10 @@ void draw_game(Game* game){
             
             draw_entity(&game->player->entity);
             
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
             }
 
             al_identity_transform(&identity_transform);
@@ -1681,6 +1794,22 @@ void draw_game(Game* game){
 
     switch (game->gameplay_state){
         case GAMEPLAY_EXPLORING:
+            al_draw_text(
+                game->subtitle_11_font,
+                al_map_rgb(255, 255, 0),
+                SCREEN_W / 2, 
+                100,
+                ALLEGRO_ALIGN_CENTER, 
+                game->log_ln1
+            );
+            al_draw_text(
+                game->subtitle_11_font,
+                al_map_rgb(255, 255, 0),
+                SCREEN_W / 2, 
+                120,
+                ALLEGRO_ALIGN_CENTER, 
+                game->log_ln2
+            );
             
             draw_inventory(game->player, game->subtitle_8_font);
 
@@ -1703,6 +1832,10 @@ void draw_game(Game* game){
                 0
             );
             
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), SCREEN_W - 450, SCREEN_H - 30, ALLEGRO_ALIGN_LEFT, "Nível atual: %d", game->player->level);
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), SCREEN_W - 450, SCREEN_H - 20, ALLEGRO_ALIGN_LEFT, "XP atual: %d", game->player->xp);
+            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), SCREEN_W - 450, SCREEN_H - 10, ALLEGRO_ALIGN_LEFT, "XP restante para próximo nível: %d", game->player->xp_for_next_level - game->player->xp);
+
             draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
 
             draw_defense(game->player->shield, game->subtitle_11_font, 30, 686,game->player->defense);
@@ -1711,6 +1844,7 @@ void draw_game(Game* game){
 
             break;
         case GAMEPLAY_BATTLE:
+            Enemy* enemy_in_battle = game->battle->enemy;
             draw_inventory(game->player, game->subtitle_8_font);
 
             if(game->battle->turn_state == TURN_PLAYER && game->battle->state == BATTLE_START)
@@ -1745,8 +1879,13 @@ void draw_game(Game* game){
                     213, 100,
                     0
                 );
+
+                
+
                 draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
-                draw_hp_bar_scalable(game->subtitle_font, SCREEN_W - 338, 70, 235, 35, game->enemy->entity.hp, game->enemy->entity.max_hp);
+
+                
+                draw_hp_bar_scalable(game->subtitle_font, SCREEN_W - 338, 70, 235, 35, enemy_in_battle->entity.hp, enemy_in_battle->entity.max_hp);
 
                 draw_defense(game->player->shield, game->subtitle_11_font, 30, 686,game->player->defense);
                 draw_attack(game->player->sword_ui, game->subtitle_11_font, 75, 686,game->player->attack);
@@ -1858,6 +1997,14 @@ void destroy_game(Game* game) {
     if (game->enemy) {
         destroy_enemy(game->enemy);
         game->enemy = NULL;
+    }
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if(game->mobs[i]){
+            destroy_enemy(game->mobs[i]);
+            game->mobs[i] = NULL;
+        }
+
     }
 
     if (game->player) {

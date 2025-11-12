@@ -9,9 +9,11 @@ void init_enemy(Enemy* enemy, const char* name, Enemy_type enemy_type, int x, in
     enemy->iniciative = 0;
     enemy->attack = attack;
     enemy->defense = defense;
+    enemy->is_battle = false;
 
     set_hit_box(&enemy->entity, offset_up, offset_down, offset_left, offset_right);
 }
+
 
 /*
     Aqui vamos atualizar conforme uma função que cria um sistema de "IA" para o modo exploração e batalha

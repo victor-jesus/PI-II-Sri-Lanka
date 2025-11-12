@@ -8,6 +8,8 @@
 typedef enum {
     MOB,
     BOSSES,
+    MINOTAUR,
+    MEDUSA,
     ARAUTO
 } Enemy_type;
 
@@ -22,8 +24,8 @@ typedef struct {
     Enemy_type enemy_type;
     int attack, defense;
     ALLEGRO_BITMAP* hp_canva;
-
     ALLEGRO_BITMAP* portrait;
+    bool is_battle;
 } Enemy;
 
 void init_enemy(Enemy* enemy, const char* name, Enemy_type enemy_type, int x, int y, int vx, int attack, int defense, int hp, int offset_up, int offset_down, int offset_left, int offset_right);

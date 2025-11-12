@@ -8,6 +8,7 @@
 #include <allegro5/allegro5.h>
 #include <stdbool.h>
 #include "allegro5/allegro_font.h"
+#include "game_state.h"
 
 typedef struct Battle{
     Player* player;
@@ -37,7 +38,7 @@ typedef struct Battle{
 } Battle;
 
 void start_battle(Battle* battle, Player* player, Enemy* enemy);
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, unsigned char* key, ALLEGRO_FONT* font);
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies);
 void destroy_battle(Battle* battle);
 
 #endif

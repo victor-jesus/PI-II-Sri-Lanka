@@ -5,26 +5,14 @@
 #include <stdbool.h>
 
 #define MAX_WORLD_ENTITIES 100
-#define MAX_ENEMIES 10
 
+#include "enemies.h"
 #include "player.h"
 #include "enemy.h"
 #include "battle.h"
 #include "map.h"
 #include "door.h"
-
-typedef enum{
-    GAME_MENU,
-    GAME_INIT,
-    GAME_MINOTAUR_LEVEL,
-    GAME_MEDUSA_LEVEL,
-    GAME_ARAUTO_LEVEL,
-    GAME_FIRST_MISSION,
-    GAME_SECOND_MISSION,
-    GAME_THIRD_MISSION,
-    GAME_BATTLE,
-    GAME_OVER
-} Game_state;
+#include "game_state.h"
 
 typedef enum{
     DIALOGUE_1,
@@ -62,6 +50,8 @@ typedef struct {
     Game_state state;
     Player* player;
     Enemy* enemy;
+    Enemy* mobs[MAX_ENEMIES];
+    int world_enemies;
     Battle* battle;
     Mouse mouse;
     Button btn_init, btn_options, btn_exit;
@@ -81,6 +71,12 @@ typedef struct {
     ALLEGRO_BITMAP* background;
     ALLEGRO_EVENT_QUEUE* queue;
     ALLEGRO_EVENT* event;
+
+    ALLEGRO_TIMER* timer_game_logs;
+    char log_ln1[256];
+    char log_ln2[256];
+    char log_ln3[256];
+    char log_ln4[256];
 } Game;
 
 

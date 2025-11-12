@@ -28,16 +28,25 @@ typedef struct {
 } Item;
 
 Item* create_item(const char* path, const char* id, const char* name, const char* description, double value, bool stackable, int max_stack, Item_type type);
-
-
 void load_item_database();
-// Em item.h
-
 
 extern Item* BIG_POTION;
 extern Item* SMALL_POTION;
 extern Item* WATER;
-extern Item* AMULET_OF_STRENGTH;
+
+// MINOTAUR
+extern Item* KEY_TO_MINOTAUR;
+extern Item* KEY_TO_SECOND_MAP;
 extern Item* AMULET_OF_MINOTAUR;
+extern Item* AMULET_OF_STRENGTH_MINOR;
+
+// COMMON
+extern Item* AMULET_OF_STRENGTH;
 extern Item* AMULET_OF_PROTECTION;
+
+// MEDUSA
+extern Item* AMULET_OF_STRENGTH_MAJOR;
+extern Item* AMULET_OF_MEDUSA;
+extern Item* AMULET_OF_PROTECTION_MAJOR;
+
 #endif

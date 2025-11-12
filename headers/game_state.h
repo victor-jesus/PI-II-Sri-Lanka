@@ -1,0 +1,17 @@
+#ifndef GAME_STATE_H
+#define GAME_STATE_H
+
+typedef enum{
+    GAME_MENU,
+    GAME_INIT,
+    GAME_MINOTAUR_LEVEL,
+    GAME_MEDUSA_LEVEL,
+    GAME_ARAUTO_LEVEL,
+    GAME_FIRST_MISSION,
+    GAME_SECOND_MISSION,
+    GAME_THIRD_MISSION,
+    GAME_BATTLE,
+    GAME_OVER
+} Game_state;
+
+#endif
