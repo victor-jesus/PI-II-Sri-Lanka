@@ -18,14 +18,13 @@ void init_player(Player* player, const char* name, int max_hp, int x, int y, int
     player->base_defense = defense;
     player->entity.max_hp = max_hp;
     player->entity.base_max_hp = max_hp;
+    player->is_defending = false;
+    player->original_defense = player->defense;
 
     player->level = 1;
     player->xp = 0;
     player->xp_for_next_level = 100;
     player->is_level_up = false;
-
-    player->can_act = false;
-    player->can_use_item = false;
 
     for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
         player->equipment[i] = NULL;
@@ -76,9 +75,10 @@ bool buff_levels(Player* player){
         player->iniciative += 3;
         break;
     default:
-        player->entity.base_max_hp += 5;
-        player->base_attack += 2;
-        player->base_defense += 1;
+        player->entity.base_max_hp += 10;
+        player->base_attack += 5;
+        player->base_defense += 5;
+        player->iniciative += 5;
         break;
     }
 
@@ -103,10 +103,6 @@ void player_recalculate_stats(Player* player) {
             player->entity.max_hp += player->equipment[i]->max_hp_buff;
         }
     }    
-
-    if (player->is_defending) {
-        player->defense *= 2;
-    }
 
     if (player->entity.hp > player->entity.max_hp) {
         player->entity.hp = player->entity.max_hp;

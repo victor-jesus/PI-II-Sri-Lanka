@@ -36,8 +36,8 @@ typedef struct {
     ALLEGRO_BITMAP* player_hp;
     ALLEGRO_BITMAP* sword_ui;
 
-    bool can_act, can_use_item;
     bool is_defending;
+    int original_defense;
 } Player;
 
 void init_player(Player* player, const char* name, int max_hp, int x, int y, int vx, int vy, int attack, int defense, int offset_up, int offset_down, int offset_left, int offset_right);

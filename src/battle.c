@@ -21,11 +21,14 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
 
     battle->dropped_itens = false;
 
-    battle->player->can_act = true;
-    battle->player->can_use_item = true;
+    battle->can_act = true;
+    battle->can_use_item = true;
 
     battle->player->entity.anim_state = ANIM_IDLE;
     battle->enemy->entity.anim_state = ANIM_IDLE;
+
+    battle->enemy->entity.y = battle->player->entity.y + (battle->player->entity.box.h / 2);
+
 
     battle->log_ln1[0] = '\0';
     battle->log_ln2[0] = '\0';
@@ -62,18 +65,71 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->enemy->turn_choice = TURN_NONE;
 }
 
-Turn_choice enemy_choice(Battle* battle){
-    return TURN_ATTACK;
+Turn_choice enemy_choice(Battle* battle) {
+    Enemy* enemy = battle->enemy;
+    Player* player = battle->player;
+    
+    int enemy_hp_percent = (int)(((float)enemy->entity.hp / (float)enemy->entity.max_hp) * 100);
+    int player_hp_percent = (int)(((float)player->entity.hp / (float)player->entity.max_hp) * 100);
+
+    int chance = roll(D_20); 
+
+    switch (enemy->enemy_type) {
+        
+        case MOB: 
+            // Se estiver com pouca vida, tem 50% de chance de defender
+            if (enemy_hp_percent < 40 && chance > 10) { 
+                return TURN_DEFEND;
+            }
+            
+            return TURN_ATTACK;
+
+        case MINOTAUR: 
+            if (enemy_hp_percent < 25) {
+                return TURN_ATTACK;
+            }
+            
+            if (chance > 14) { 
+                return TURN_DEFEND;
+            }
+            return TURN_ATTACK;
+            
+        case MEDUSA:
+            
+            if (player_hp_percent > 75 && chance > 10) {
+                return TURN_DEFEND;
+            }
+            
+            if (enemy_hp_percent < 30 && chance > 10) {
+                return TURN_DEFEND;
+            }
+            return TURN_ATTACK;
+
+        case ARAUTO: 
+            
+            if (player_hp_percent < 25 && chance > 4) { 
+                return TURN_ATTACK; 
+            }
+            
+            if (enemy_hp_percent < 40 && chance > 10) {
+                return TURN_DEFEND;
+            }
+            
+            if (chance > 15) {
+                return TURN_DEFEND;
+            }
+            return TURN_ATTACK;
+
+        case BOSSES: 
+        default:
+            
+            if (chance > 14) { 
+                return TURN_DEFEND;
+            }
+            return TURN_ATTACK;
+    }
 }
 
-typedef enum {
-    HIT,
-    MISS
-} Attack_hit;
-
-void use_item(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Player* player, Enemy* enemy, Turn_state turn_state){
-
-}
 
 void attack_state(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Player* player, Enemy* enemy, Turn_state turn_state){
     int d20;
@@ -139,12 +195,12 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
     switch (battle->turn_state)
     {
     case TURN_PLAYER:
-        if(choice == TURN_ATTACK && battle->player->can_act == true){
+        if(choice == TURN_ATTACK && battle->can_act == true){
             attack_state(battle, event, battle->battle_font, battle->player, battle->enemy, battle->turn_state);
-            battle->player->can_act = false;
+            battle->can_act = false;
             battle->turn_state = TURN_ENEMY;
         } else {
-            if(battle->player->can_use_item == false) return;
+            if(battle->can_use_item == false) return;
         
             if (choice == TURN_BIG_POTION){
                 for(int i = 0; i < MAX_ITENS; i++){
@@ -158,7 +214,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                         printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
                         sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
 
-                        battle->player->can_use_item = false;
+                        battle->can_use_item = false;
 
                         return;
                     }
@@ -175,7 +231,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                     printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
                     sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
 
-                    battle->player->can_use_item = false;
+                    battle->can_use_item = false;
 
                     return;
                 }
@@ -192,7 +248,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                         printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
                         sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
 
-                        battle->player->can_use_item = false;
+                        battle->can_use_item = false;
 
                         return;
                     }
@@ -202,124 +258,243 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
 
         battle->player->turn_choice = TURN_NONE; 
         break;
+    case TURN_ENEMY:
+      
     default:
         break;
     }
 }
 
+void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
+    int rand_chance = rand() % 10 + 1;
+
+    int qtd_xp = 50;
+    add_xp(battle->player, qtd_xp);
+    sprintf(battle->log_ln10, "Você ganhou %d XP", qtd_xp);
+    
+    if(*world_enemies <= 1 && battle && game_state == GAME_FIRST_MISSION){
+        player_equip_item(battle->player, KEY_TO_MINOTAUR);
+        printf("Chave\n");
+        
+        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_MINOTAUR->name);
+        sprintf(battle->log_ln3, "%s", KEY_TO_MINOTAUR->description);
+    } else if(*world_enemies <= 1 && battle && game_state == GAME_SECOND_MISSION){
+        player_equip_item(battle->player, KEY_TO_MEDUSA);
+        printf("Chave\n");
+        
+        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_MEDUSA->name);
+        sprintf(battle->log_ln3, "%s", KEY_TO_MEDUSA->description);
+    } else if(*world_enemies <= 1 && battle && game_state == GAME_THIRD_MISSION){
+        player_equip_item(battle->player, KEY_TO_ARAUTO);
+        printf("Chave\n");
+        
+        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_ARAUTO->name);
+        sprintf(battle->log_ln3, "%s", KEY_TO_ARAUTO->description);
+    }
+
+    rand_chance = rand() % 10 + 1;
+    printf("rand_chance: %d\n", rand_chance);
+    if(rand_chance >= 6){
+        int qtd = rand() % 4 + 1;
+        inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
+
+        sprintf(battle->log_ln5, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", SMALL_POTION->name, qtd);
+
+        player_equip_item(battle->player, AMULET_OF_STRENGTH);
+        
+        sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_STRENGTH->name);
+
+        sprintf(battle->log_ln8, "Buffs/Debuffs:");
+
+        sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
+
+        
+    } else {
+        sprintf(battle->log_ln3, "O %s não dropou itens.", battle->enemy->name);
+    }
+}
+
+void minotaur_death(Battle* battle){
+        int rand_chance = rand() % 10 + 1;
+        
+        int qtd_xp = 1000;
+        add_xp(battle->player, qtd_xp);
+        sprintf(battle->log_ln4, "Você ganhou %d XP", qtd_xp);
+
+        player_equip_item(battle->player, KEY_TO_SECOND_MAP);
+        printf("Chave\n");
+        
+        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, 1);
+        sprintf(battle->log_ln3, "%s", KEY_TO_SECOND_MAP->description);
+        
+        int qtd = rand() % 4 + 1;
+        inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
+
+        sprintf(battle->log_ln3, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+
+        player_equip_item(battle->player, AMULET_OF_MINOTAUR);
+        sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
+
+        sprintf(battle->log_ln7, "Buffs/Debuffs:");
+
+        sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
+}
+
+void medusa_death(Battle* battle){
+    int rand_chance = rand() % 10 + 1;
+        
+    int qtd_xp = 10000;
+    add_xp(battle->player, qtd_xp);
+    sprintf(battle->log_ln4, "Você ganhou %d XP", qtd_xp);
+
+    player_equip_item(battle->player, KEY_TO_THIRD_MAP);
+    printf("Chave\n");
+    
+    sprintf(battle->log_ln1, "A %s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_THIRD_MAP->name, 1);
+    sprintf(battle->log_ln3, "%s", KEY_TO_THIRD_MAP->description);
+    
+    int qtd = rand() % 6 + 1;
+    inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
+
+    sprintf(battle->log_ln3, "A %s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+
+    player_equip_item(battle->player, AMULET_OF_MEDUSA);
+    sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MEDUSA->name);
+
+    sprintf(battle->log_ln7, "Buffs/Debuffs:");
+
+    sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MEDUSA->attack_buff, AMULET_OF_MEDUSA->defense_buff, AMULET_OF_MEDUSA->iniciative_buff, AMULET_OF_MEDUSA->max_hp_buff);
+}
 
 void drop_itens(Battle* battle, int* world_enemies, Game_state game_state){
     if(battle->dropped_itens) return;
     battle->dropped_itens = true;
-    
-    int rand_chance, qtd, qtd_xp;
-    
+        
     switch (battle->enemy->enemy_type){
         case MOB:
-            qtd_xp = 50;
-            add_xp(battle->player, qtd_xp);
-            sprintf(battle->log_ln10, "Você ganhou %d", qtd_xp);
+            mob_death(battle, world_enemies, game_state);
+            *world_enemies -= 1;
+        break;
+        case MINOTAUR:
+            minotaur_death(battle);
+            break;
+
+        case MEDUSA:
+            medusa_death(battle);
+            break;
+
+        default:
+            break;
+    }    
+}
+
+void enemy_action(Battle* battle, ALLEGRO_EVENT event){
+        al_start_timer(battle->timer_enemy);
+
+        if(event.timer.source == battle->timer_enemy) {
+            al_stop_timer(battle->timer_enemy); 
+            al_set_timer_count(battle->timer_enemy, 0);
+
+            if (battle->enemy->is_defending) {
+                battle->enemy->defense = battle->enemy->original_defense;
+                battle->enemy->is_defending = false;
+            }
+
+            Turn_choice choice = enemy_choice(battle);
             
-            if(*world_enemies <= 1 && battle && game_state == GAME_FIRST_MISSION){
-                player_equip_item(battle->player, KEY_TO_MINOTAUR);
-                printf("Chave\n");
+            switch (choice)
+            {
+            case TURN_ATTACK:
+                int d20 = roll(D_20);
+
+                if (d20 == 1) {
+                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+                    
+                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ERRO CRÍTICO!", d20);
+                    sprintf(battle->log_ln3, "O inimigo errou feio!");
+                } else if (d20 == 20) {
+                    int damage;
+                    if(battle->enemy->enemy_type == MINOTAUR){
+                        damage = (roll(D_10) + battle->enemy->attack) * 2;
+                    } else if(battle->enemy->enemy_type == MEDUSA){
+                        damage = (roll(D_6) + roll(D_6) + battle->enemy->attack) * 2;
+                    } else if(battle->enemy->enemy_type == ARAUTO){
+                        damage = (roll(D_8) + roll(D_8) + battle->enemy->attack) * 2;
+                    } else if(battle->enemy->enemy_type == MOB){
+                        damage = (roll(D_6) + battle->enemy->attack) * 2;
+                    }
+                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+
+                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ACERTO CRÍTICO!", d20);
+                    sprintf(battle->log_ln3, "Inimigo causou %d de dano!", damage);
+                    take_damage(&battle->player->entity, damage);
+                } else { 
+                    int damage;
+                    if(battle->enemy->enemy_type == MINOTAUR){
+                        damage = (roll(D_10) + battle->enemy->attack);
+                    } else if(battle->enemy->enemy_type == MEDUSA){
+                        damage = (roll(D_6) + roll(D_6) + battle->enemy->attack);
+                    } else if(battle->enemy->enemy_type == ARAUTO){
+                        damage = (roll(D_8) + roll(D_8) + battle->enemy->attack);
+                    } else if(battle->enemy->enemy_type == MOB){
+                        damage = (roll(D_4) + battle->enemy->attack);
+                    }
+
+                    int attack_total = d20 + battle->enemy->attack;
+
+                    if (attack_total >= battle->player->defense) { 
+                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+
+                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Acertou!", d20, battle->enemy->attack, attack_total);
+                        sprintf(battle->log_ln3, "Inimigo causou %d de dano.", damage);
+                        take_damage(&battle->player->entity, damage);
+                    } else { 
+                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+
+                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Errou!", d20, battle->enemy->attack, attack_total);
+                        sprintf(battle->log_ln3, "Sua defesa: %d", battle->player->defense);
+                    }
+                }
+                battle->enemy->entity.anim_state = ANIM_ATTACK;
+                break;
+            case TURN_DEFEND:
+                sprintf(battle->log_ln1, "O inimigo %s se prepara!", battle->enemy->name);
+                sprintf(battle->log_ln2, "A defesa dele dobrou por 1 turno!");
+                sprintf(battle->log_ln3, "A defesa dele antes: %d", battle->enemy->original_defense);
                 
-                sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-                sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_MINOTAUR->name);
-                sprintf(battle->log_ln3, "%s", KEY_TO_MINOTAUR->description);
+                battle->enemy->defense *= 2;
+                battle->enemy->is_defending = true;
+                battle->enemy->entity.anim_state = ANIM_IDLE;
+
+                sprintf(battle->log_ln4, "A defesa dele agora: %d", battle->enemy->defense);
+            default:
+                break;
             }
 
-            rand_chance = rand() % 10 + 1;
-            printf("rand_chance: %d\n", rand_chance);
-            if(rand_chance >= 6){
-                qtd = rand() % 4 + 1;
-                inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
+            battle->enemy->turn_choice = TURN_NONE;
+            battle->turn_state = TURN_PLAYER;
 
-                sprintf(battle->log_ln5, "O %s dropou um item.", battle->enemy->name);
-                sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", SMALL_POTION->name, qtd);
+            battle->can_act = true;
+            battle->can_use_item = true;
 
-                player_equip_item(battle->player, AMULET_OF_STRENGTH);
-                
-                sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_STRENGTH->name);
-
-                sprintf(battle->log_ln8, "Buffs/Debuffs:");
-
-                sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
-
-               
-            } else {
-                sprintf(battle->log_ln3, "O %s não dropou itens.", battle->enemy->name);
+            if (battle->player->is_defending) {
+                battle->player->defense = battle->player->original_defense;
+                battle->player->is_defending = false;
             }
-        break;
-    case MINOTAUR:
-        rand_chance = rand() % 10 + 1;
-        
-        qtd_xp = 1000;
-        add_xp(battle->player, qtd_xp);
-        sprintf(battle->log_ln4, "Você ganhou %d", qtd_xp);
-
-        player_equip_item(battle->player, KEY_TO_SECOND_MAP);
-        printf("Chave\n");
-        
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, qtd);
-        sprintf(battle->log_ln3, "%s", KEY_TO_SECOND_MAP->description);
-        
-        qtd = rand() % 4 + 1;
-        inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
-
-        sprintf(battle->log_ln3, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
-
-        player_equip_item(battle->player, AMULET_OF_MINOTAUR);
-        sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
-
-        sprintf(battle->log_ln7, "Buffs/Debuffs:");
-
-        sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
-        
-        break;
-
-    case MEDUSA:
-        rand_chance = rand() % 10 + 1;
-        
-        qtd_xp = 10000;
-        add_xp(battle->player, qtd_xp);
-        sprintf(battle->log_ln4, "Você ganhou %d", qtd_xp);
-
-        player_equip_item(battle->player, KEY_TO_SECOND_MAP);
-        printf("Chave\n");
-        
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, qtd);
-        sprintf(battle->log_ln3, "%s", KEY_TO_SECOND_MAP->description);
-        
-        qtd = rand() % 4 + 1;
-        inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
-
-        sprintf(battle->log_ln3, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
-
-        player_equip_item(battle->player, AMULET_OF_MINOTAUR);
-        sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
-
-        sprintf(battle->log_ln7, "Buffs/Debuffs:");
-
-        sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
-        
-        break;
-
-    default:
-        break;
-    }
-
-    *world_enemies -= 1;
+        }
 }
 
 bool talk_minus_than_75 = false;
 bool talk_minus_than_50 = false;
 bool talk_minus_than_25 = false;
-
 void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies){
     if(battle->player->entity.hp <= 75 && talk_minus_than_75 == false && battle->enemy->enemy_type == MINOTAUR){
         battle->state = BATTLE_DIALOGUE;
@@ -336,6 +511,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
         battle->state = BATTLE_DIALOGUE;
         talk_minus_than_25 = true;
     }
+    
     if(battle->state == BATTLE_DIALOGUE) return;
 
     
@@ -347,7 +523,6 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
     if(battle->enemy->entity.hp <= 0){
         
         drop_itens(battle, world_enemies, game_state);
-        //calculate_xp(battle);
 
         battle->turn_state = TURN_EMPTY;
        
@@ -373,64 +548,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
 
 
     if(battle->turn_state == TURN_ENEMY) {
-        al_start_timer(battle->timer_enemy);
-        if(event.timer.source == battle->timer_enemy) {
-            al_stop_timer(battle->timer_enemy); 
-            al_set_timer_count(battle->timer_enemy, 0);
-
-            Turn_choice choice = enemy_choice(battle);
-            
-            if(choice == TURN_ATTACK) {
-                int d20 = roll(D_20);
-                if (d20 == 1) {
-                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-                    
-                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ERRO CRÍTICO!", d20);
-                    sprintf(battle->log_ln3, "O inimigo errou feio!");
-                } else if (d20 == 20) {
-                    int damage;
-                    if(battle->enemy->enemy_type == MINOTAUR){
-                        damage = (roll(D_10) + battle->enemy->attack) * 2;
-                    } else if(battle->enemy->enemy_type == MOB){
-                        damage = (roll(D_6) + battle->enemy->attack) * 2;
-                    }
-                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-
-                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ACERTO CRÍTICO!", d20);
-                    sprintf(battle->log_ln3, "Inimigo causou %d de dano!", damage);
-                    take_damage(&battle->player->entity, damage);
-                } else { 
-                    int damage;
-                    if(battle->enemy->enemy_type == MINOTAUR){
-                        damage = (roll(D_10) + battle->enemy->attack);
-                    } else if(battle->enemy->enemy_type == MOB){
-                        damage = (roll(D_6) + battle->enemy->attack);
-                    }
-
-                    int attack_total = d20 + battle->enemy->attack;
-
-                    if (attack_total >= battle->player->defense) { 
-                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-
-                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Acertou!", d20, battle->enemy->attack, attack_total);
-                        sprintf(battle->log_ln3, "Inimigo causou %d de dano.", damage);
-                        take_damage(&battle->player->entity, damage);
-                    } else { 
-                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-
-                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Errou!", d20, battle->enemy->attack, attack_total);
-                        sprintf(battle->log_ln3, "Sua defesa: %d", battle->player->defense);
-                    }
-                }
-                battle->enemy->entity.anim_state = ANIM_ATTACK;
-            }
-
-            battle->enemy->turn_choice = TURN_NONE;
-            battle->turn_state = TURN_PLAYER;
-
-            battle->player->can_act = true;
-            battle->player->can_use_item = true;
-        }
+        enemy_action(battle, event);
         return;
     }
 
@@ -439,6 +557,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
         return;
     }
 }
+
 
 void destroy_battle(Battle* battle){
     free(battle);

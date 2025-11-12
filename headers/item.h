@@ -35,8 +35,6 @@ extern Item* SMALL_POTION;
 extern Item* WATER;
 
 // MINOTAUR
-extern Item* KEY_TO_MINOTAUR;
-extern Item* KEY_TO_SECOND_MAP;
 extern Item* AMULET_OF_MINOTAUR;
 extern Item* AMULET_OF_STRENGTH_MINOR;
 
@@ -48,5 +46,13 @@ extern Item* AMULET_OF_PROTECTION;
 extern Item* AMULET_OF_STRENGTH_MAJOR;
 extern Item* AMULET_OF_MEDUSA;
 extern Item* AMULET_OF_PROTECTION_MAJOR;
+
+// Keys
+extern Item* KEY_TO_MINOTAUR;
+extern Item* KEY_TO_MEDUSA;
+extern Item* KEY_TO_ARAUTO;
+extern Item* KEY_TO_SECOND_MAP;
+extern Item* KEY_TO_THIRD_MAP;
+extern Item* KEY_TO_EASTER_EGG;
 
 #endif

@@ -9,14 +9,24 @@ Item* AMULET_OF_STRENGTH_MINOR;
 Item* AMULET_OF_STRENGTH;
 Item* AMULET_OF_PROTECTION;
 Item* AMULET_OF_MINOTAUR;
-Item* KEY_TO_MINOTAUR;
+Item* AMULET_OF_STRENGTH_MAJOR;
+Item* AMULET_OF_MEDUSA;
+Item* AMULET_OF_PROTECTION_MAJOR;
+
+
 Item* KEY_TO_SECOND_MAP;
+Item* KEY_TO_THIRD_MAP;
+
+Item* KEY_TO_MINOTAUR;
+Item* KEY_TO_MEDUSA;
+Item* KEY_TO_ARAUTO;
+Item* KEY_TO_EASTER_EGG;
 
 void load_item_database() {
-    BIG_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
+    BIG_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 10, ITEM_HEAL);
     set_entity_pos(BIG_POTION->entity, 550, 680); 
 
-    SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 5, ITEM_SMALL_HEAL);
+    SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 15, ITEM_SMALL_HEAL);
     set_entity_pos(SMALL_POTION->entity, 600, 680);
 
     WATER = create_item(path_water, "K", "Garrafa de agua", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
@@ -34,11 +44,11 @@ void load_item_database() {
     AMULET_OF_PROTECTION->iniciative_buff = 0;
     AMULET_OF_PROTECTION->max_hp_buff = 10;
 
-    AMULET_OF_MINOTAUR = create_item(path_amulet_atk, "Amuleto do minotauro", "Amuleto do minotauro.", " Você sente como se alguém estivesse gritando dentro dele. +15 de Defesa +20 Ataque +5 Iniciativa", 5, false, 1, ITEM_EQUIPMENT);
+    AMULET_OF_MINOTAUR = create_item(path_amulet_atk, "Amuleto do minotauro", "Amuleto do minotauro.", "Você sente como se alguém estivesse gritando dentro dele. +15 de Defesa +20 Ataque +5 Iniciativa +15 hp", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_MINOTAUR->attack_buff = 20;
     AMULET_OF_MINOTAUR->defense_buff = 15;
     AMULET_OF_MINOTAUR->iniciative_buff = 5;
-    AMULET_OF_MINOTAUR->max_hp_buff = 10;
+    AMULET_OF_MINOTAUR->max_hp_buff = 15;
 
     KEY_TO_MINOTAUR = create_item(path_amulet_atk, "minotauro_chave", "Chave para a porta do minotauro.", "Chave simples e enferrujada", 0, false, 1, ITEM_EQUIPMENT);
     KEY_TO_MINOTAUR->attack_buff = 0;
@@ -51,6 +61,50 @@ void load_item_database() {
     KEY_TO_SECOND_MAP->defense_buff = 0;
     KEY_TO_SECOND_MAP->iniciative_buff = 0;
     KEY_TO_SECOND_MAP->max_hp_buff = 0;
+
+    KEY_TO_THIRD_MAP = create_item(path_amulet_atk, "terceiromapa_chave", "Chave para a ultima porta.", "Chave com adornos.", 0, false, 1, ITEM_EQUIPMENT);
+    KEY_TO_THIRD_MAP->attack_buff = 0;
+    KEY_TO_THIRD_MAP->defense_buff = 0;
+    KEY_TO_THIRD_MAP->iniciative_buff = 0;
+    KEY_TO_THIRD_MAP->max_hp_buff = 0;
+
+    KEY_TO_MEDUSA = create_item(path_amulet_atk, "medusa_chave", "Chave para a ultima porta.", "Chave com adornos.", 0, false, 1, ITEM_EQUIPMENT);
+    KEY_TO_MEDUSA->attack_buff = 0;
+    KEY_TO_MEDUSA->defense_buff = 0;
+    KEY_TO_MEDUSA->iniciative_buff = 0;
+    KEY_TO_MEDUSA->max_hp_buff = 0;
+
+    KEY_TO_ARAUTO = create_item(path_amulet_atk, "arauto_chave", "Chave para a ultima porta.", "Chave com adornos.", 0, false, 1, ITEM_EQUIPMENT);
+    KEY_TO_ARAUTO->attack_buff = 0;
+    KEY_TO_ARAUTO->defense_buff = 0;
+    KEY_TO_ARAUTO->iniciative_buff = 0;
+    KEY_TO_ARAUTO->max_hp_buff = 0;
+
+    KEY_TO_EASTER_EGG = create_item(path_amulet_atk, "easteregg_chave", "Chave para a ultima porta.", "Chave com adornos.", 0, false, 1, ITEM_EQUIPMENT);
+    KEY_TO_EASTER_EGG->attack_buff = 0;
+    KEY_TO_EASTER_EGG->defense_buff = 0;
+    KEY_TO_EASTER_EGG->iniciative_buff = 0;
+    KEY_TO_EASTER_EGG->max_hp_buff = 0;
+
+    AMULET_OF_MEDUSA = create_item(path_amulet_atk, "Amuleto da medusa", "Amuleto da Medusa.", "Amuleto com intenso brilho verde, você guarda dentro da sua bolsa. +35 de Defesa +40 de Ataque +20 de Iniciativa +30 hp", 5, false, 1, ITEM_EQUIPMENT);
+    AMULET_OF_MEDUSA->attack_buff = 35;
+    AMULET_OF_MEDUSA->defense_buff = 40;
+    AMULET_OF_MEDUSA->iniciative_buff = 20;
+    AMULET_OF_MEDUSA->max_hp_buff = 30;
+
+    AMULET_OF_STRENGTH_MAJOR = create_item(path_amulet_atk, "Amuleto de grande força", "Amuleto de Grande Força", "+25 de Ataque +3 de Defesa +5 Iniciativa +5 de HP", 5, false, 1, ITEM_EQUIPMENT);
+    AMULET_OF_STRENGTH_MAJOR->attack_buff = 25;
+    AMULET_OF_STRENGTH_MAJOR->defense_buff = 3; 
+    AMULET_OF_STRENGTH_MAJOR->iniciative_buff = 5;
+    AMULET_OF_STRENGTH_MAJOR->max_hp_buff = 5;
+
+    AMULET_OF_PROTECTION_MAJOR = create_item(path_amulet_def, "Amuleto de Proteção Maior", "Amuleto de Proteção Maior", "+25 de Defesa +5 de Ataque +15 de HP", 5, false, 1, ITEM_EQUIPMENT);
+    AMULET_OF_PROTECTION_MAJOR->attack_buff = 5;
+    AMULET_OF_PROTECTION_MAJOR->defense_buff = 25; 
+    AMULET_OF_PROTECTION_MAJOR->iniciative_buff = 0;
+    AMULET_OF_PROTECTION_MAJOR->max_hp_buff = 15;
+
+
 }
 
 Item* create_item(const char* path, const char* id, const char* name, const char* description, double value, bool stackable, int max_stack, Item_type type){

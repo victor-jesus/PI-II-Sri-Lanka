@@ -103,20 +103,56 @@ int main(){
                     }
                 }
 
+                // Em main.c, dentro do 'case ALLEGRO_EVENT_KEY_DOWN:'
+
                 if(game->battle->state == BATTLE_DIALOGUE){ 
                     if(key[ALLEGRO_KEY_E]){
 
+                        // --- Lógica de SAÍDA (Comum a todos) ---
                         if(game->battle->dialogues == DIALOGUE_BATTLE_FINAL_INTRO){
                             game->battle->state = BATTLE_START;
-                        } else if(game->battle->dialogues == DIALOGUE_AFTER_TRASH_TALK){
+                        } 
+                        else if(game->battle->dialogues == DIALOGUE_AFTER_TRASH_TALK){
                             game->battle->state = BATTLE_START;
-                        } else if(game->battle->dialogues == DIALOGUE_BATTLE_5){
+                        } 
+                        
+                        // --- Lógica de PULO (Minotauro HP Baixo) ---
+                        else if(game->battle->dialogues == DIALOGUE_BATTLE_5){
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        } else if( game->battle->dialogues == DIALOGUE_BATTLE_6) {
+                        } 
+                        else if( game->battle->dialogues == DIALOGUE_BATTLE_6) {
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        } else if(game->battle->dialogues == DIALOGUE_BATTLE_7) {
+                        } 
+                        else if(game->battle->dialogues == DIALOGUE_BATTLE_7) {
                             game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
-                        } else {
+                        }
+
+                        // --- LÓGICA DE PULO (Medusa - ADICIONADO) ---
+                        else if(game->battle->dialogues == DIALOGUE_MEDUSA_5) { // É o último diálogo da introdução
+                            game->battle->dialogues = DIALOGUE_BATTLE_FINAL_INTRO; // Pula para "Pressione E para começar"
+                        }
+                        else if(game->battle->dialogues == DIALOGUE_MEDUSA_FINAL_3) { // É o último diálogo de vitória
+                            game->battle->dialogues = DIALOGUE_BATTLE_FINAL_INTRO; // Reutiliza o "Pressione E"
+                        }
+                        else if(game->battle->dialogues == DIALOGUE_MEDUSA_RANDOM_1 ||
+                                game->battle->dialogues == DIALOGUE_MEDUSA_RANDOM_2 ||
+                                game->battle->dialogues == DIALOGUE_MEDUSA_RANDOM_3) {
+                            game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK; // Pula para "Pressione E para retomar"
+                        }
+                        else if(game->battle->dialogues == DIALOGUE_ARAUTO_5) { // Intro Fim
+                            game->battle->dialogues = DIALOGUE_BATTLE_FINAL_INTRO;
+                        }
+                        else if(game->battle->dialogues == DIALOGUE_ARAUTO_FINAL_5) { // Vitória Fim
+                            game->battle->dialogues = DIALOGUE_BATTLE_FINAL_INTRO; 
+                        }
+                        else if(game->battle->dialogues == DIALOGUE_ARAUTO_RANDOM_1 ||
+                                game->battle->dialogues == DIALOGUE_ARAUTO_RANDOM_2 ||
+                                game->battle->dialogues == DIALOGUE_ARAUTO_RANDOM_3) {
+                            game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
+                        }
+                        // --- FIM DA ADIÇÃO ---
+
+                        else {
                             game->battle->dialogues++;
                         }
                     }

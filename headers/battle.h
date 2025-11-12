@@ -34,6 +34,9 @@ typedef struct Battle{
     ALLEGRO_TIMER* log_timer;
     ALLEGRO_BITMAP* dialogue_sprite;
 
+    bool can_act, can_use_item;
+    bool is_defending;
+
     bool dropped_itens;
 } Battle;
 

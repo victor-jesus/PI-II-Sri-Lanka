@@ -26,6 +26,9 @@ typedef struct {
     ALLEGRO_BITMAP* hp_canva;
     ALLEGRO_BITMAP* portrait;
     bool is_battle;
+
+    bool is_defending;
+    int original_defense;
 } Enemy;
 
 void init_enemy(Enemy* enemy, const char* name, Enemy_type enemy_type, int x, int y, int vx, int attack, int defense, int hp, int offset_up, int offset_down, int offset_left, int offset_right);

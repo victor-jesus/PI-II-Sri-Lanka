@@ -10,6 +10,8 @@ void init_enemy(Enemy* enemy, const char* name, Enemy_type enemy_type, int x, in
     enemy->attack = attack;
     enemy->defense = defense;
     enemy->is_battle = false;
+    enemy->is_defending = false;
+    enemy->original_defense = enemy->defense;
 
     set_hit_box(&enemy->entity, offset_up, offset_down, offset_left, offset_right);
 }
