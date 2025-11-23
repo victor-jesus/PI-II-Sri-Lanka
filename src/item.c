@@ -24,13 +24,16 @@ Item* KEY_TO_EASTER_EGG;
 
 void load_item_database() {
     BIG_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 10, ITEM_HEAL);
-    set_entity_pos(BIG_POTION->entity, 550, 680); 
+    set_entity_scale(BIG_POTION->entity, 1.5);
+    set_entity_pos(BIG_POTION->entity, 530, 640); 
 
     SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 15, ITEM_SMALL_HEAL);
-    set_entity_pos(SMALL_POTION->entity, 600, 680);
+    set_entity_scale(SMALL_POTION->entity, 1.5);
+    set_entity_pos(SMALL_POTION->entity, 600, 640);
 
     WATER = create_item(path_water, "K", "Garrafa de agua", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
-    set_entity_pos(WATER->entity, 650, 680);
+    set_entity_scale(WATER->entity, 1.5);
+    set_entity_pos(WATER->entity, 670, 640);
 
     AMULET_OF_STRENGTH = create_item(path_amulet_atk, "Amuleto de força", "Amuleto da Força", "+5 de Ataque", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_STRENGTH->attack_buff = 5;

@@ -63,10 +63,11 @@ typedef struct {
     ALLEGRO_FONT* subtitle_8_font;
     ALLEGRO_FONT* subtitle_11_font;
     ALLEGRO_TRANSFORM camera_transform; 
-
+    
     Init_dialogues init_dialogues;
     Gameplay_state gameplay_state;
     ALLEGRO_BITMAP* controls;
+
     Entity* world_entities[MAX_WORLD_ENTITIES];
     int num_world_entities;
     ALLEGRO_BITMAP* background;
@@ -74,10 +75,14 @@ typedef struct {
     ALLEGRO_EVENT* event;
 
     ALLEGRO_TIMER* timer_game_logs;
+    ALLEGRO_TIMER* timer_game_tips;
     char log_ln1[256];
     char log_ln2[256];
     char log_ln3[256];
     char log_ln4[256];
+    char log_ln_tip_1[256];
+    char log_ln_tip_2[256];
+    char log_ln_tip_3[256];
 
     Game_state previous_game_state;
     Puzzle_id active_puzzle_id;
@@ -87,6 +92,10 @@ typedef struct {
     ALLEGRO_BITMAP* puzzle_bhaskara_paper;
     ALLEGRO_BITMAP* puzzle_bhaskara_paper_2;
     ALLEGRO_BITMAP* puzzle_pitagoras_paper_3;
+
+    ALLEGRO_FONT* log_font;
+    ALLEGRO_FONT* log_font_20;
+    bool can_draw;
 } Game;
 
 
