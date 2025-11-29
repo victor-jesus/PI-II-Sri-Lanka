@@ -121,6 +121,16 @@ void reset_world_entities(Game* game){
     game->num_world_entities = 0;
 }
 
+void initial_inventory(Game* game){
+    inventory_add_item(&game->player->inventory, BIG_POTION, 2);
+    inventory_add_item(&game->player->inventory, SMALL_POTION, 3);
+    inventory_add_item(&game->player->inventory, WATER, 1);
+}
+
+void change_game_state(Game* game, Game_state game_state){
+    game->state = game_state;
+}
+
 Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_EVENT* event, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
@@ -327,13 +337,6 @@ Entity* create_banner(const char* path, float x, float y, float scale, int frame
     set_hit_box(banner, 0, 0, 0, 0);
     return banner;
 }
-    
-
-void initial_inventory(Game* game){
-    inventory_add_item(&game->player->inventory, BIG_POTION, 2);
-    inventory_add_item(&game->player->inventory, SMALL_POTION, 3);
-    inventory_add_item(&game->player->inventory, WATER, 1);
-}
 
 void render_initial_level(Game* game){
     reset_world_entities(game);
@@ -406,10 +409,6 @@ void log_tips(Game* game){
     al_start_timer(game->timer_game_tips);
 
     game->can_draw = false;
-}
-
-void change_game_state(Game* game, Game_state game_state){
-    game->state = game_state;
 }
 
 /*
