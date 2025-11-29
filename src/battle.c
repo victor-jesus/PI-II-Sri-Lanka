@@ -28,7 +28,7 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->enemy->entity.anim_state = ANIM_IDLE;
 
     battle->enemy->entity.y = battle->player->entity.y + (battle->player->entity.box.h / 2);
-
+    battle->opt_player = 1;
 
     battle->log_ln1[0] = '\0';
     battle->log_ln2[0] = '\0';
@@ -40,6 +40,8 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->log_ln8[0] = '\0';
     battle->log_ln9[0] = '\0';
     battle->log_ln10[0] = '\0';
+
+    battle->is_selecting_item = false;
 
     battle->state = BATTLE_START;
 
@@ -186,9 +188,47 @@ void attack_state(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Playe
     }
 }
 
+// Retorna a quantidade de itens consumíveis válidos no inventário
+int count_consumable_items(Player* player) {
+    int count = 0;
+    for (int i = 0; i < MAX_ITENS; i++) {
+        Item* item = player->inventory.slots[i].item;
+        // Verifica se existe, se é consumível e se tem quantidade > 0
+        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
+            if (player->inventory.slots[i].quantity > 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+// Retorna o índice real no inventário ("slot") baseado no índice visual do menu
+// Exemplo: Se o item selecionado no menu é o 2º, essa função acha em qual slot do inventário ele está
+int get_inventory_slot_by_menu_index(Player* player, int menu_index) {
+    int current_valid_index = 0;
+    for (int i = 0; i < MAX_ITENS; i++) {
+        Item* item = player->inventory.slots[i].item;
+        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
+            if (player->inventory.slots[i].quantity > 0) {
+                if (current_valid_index == menu_index) {
+                    return i; // Retorna o índice real do slot
+                }
+                current_valid_index++;
+            }
+        }
+    }
+    return -1; // Não encontrado
+}
+
 void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
 
     if (choice == TURN_NONE) return;
+
+    if (battle->player->is_defending) {
+        battle->player->defense = battle->enemy->original_defense;
+        battle->player->is_defending = false;
+    }
 
     // Depois separar cada elemnto em função, inclusive o uso de itens passando o tipo do item
     // REFATORAR ESSE CÓDIGO
@@ -198,6 +238,15 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
         if(choice == TURN_ATTACK && battle->can_act == true){
             attack_state(battle, event, battle->battle_font, battle->player, battle->enemy, battle->turn_state);
             battle->can_act = false;
+            battle->turn_state = TURN_ENEMY;
+        } else if(choice == TURN_DEFEND){
+            sprintf(battle->log_ln1, "%s se prepara!", battle->player->name);
+            sprintf(battle->log_ln2, "Sua defesa dobrou por 1 turno!");
+            
+            battle->player->defense *= 2;
+            battle->player->is_defending = true;
+            battle->player->entity.anim_state = ANIM_IDLE;
+
             battle->turn_state = TURN_ENEMY;
         } else {
             if(battle->can_use_item == false) return;
@@ -220,22 +269,22 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                     }
                 }
             } else if (choice == TURN_SMALL_POTION){
-            for(int i = 0; i < MAX_ITENS; i++){
-                Item* current_item = battle->player->inventory.slots[i].item;
+                for(int i = 0; i < MAX_ITENS; i++){
+                    Item* current_item = battle->player->inventory.slots[i].item;
 
-                if(current_item != NULL && current_item->type == ITEM_SMALL_HEAL){
-                    if(battle->player->inventory.slots[i].quantity <= 0) return;
+                    if(current_item != NULL && current_item->type == ITEM_SMALL_HEAL){
+                        if(battle->player->inventory.slots[i].quantity <= 0) return;
 
-                    battle->player->entity.hp += current_item->value;
-                    battle->player->inventory.slots[i].quantity--;
-                    printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
-                    sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
+                        battle->player->entity.hp += current_item->value;
+                        battle->player->inventory.slots[i].quantity--;
+                        printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
+                        sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
 
-                    battle->can_use_item = false;
+                        battle->can_use_item = false;
 
-                    return;
+                        return;
+                    }
                 }
-            }
             } else if (choice == TURN_WATER){
                 for(int i = 0; i < MAX_ITENS; i++){
                     Item* current_item = battle->player->inventory.slots[i].item;
@@ -518,6 +567,9 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
     if(event.timer.source == battle->log_timer){
         al_stop_timer(battle->log_timer);
         al_set_timer_count(battle->log_timer, 0);   
+    } else if (event.timer.source == battle->error_timer){
+        al_stop_timer(battle->error_timer);
+        al_set_timer_count(battle->error_timer, 0);   
     }
 
     if(battle->enemy->entity.hp <= 0){
@@ -561,4 +613,8 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
 
 void destroy_battle(Battle* battle){
     free(battle);
+
+    if (battle->error_timer) {
+        al_destroy_timer(battle->error_timer);
+    }
 }

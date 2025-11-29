@@ -26,6 +26,7 @@ typedef enum{
 
 typedef enum{
     GAMEPLAY_BATTLE,
+    GAMEPLAY_PAUSE,
     GAMEPLAY_EXPLORING,
     GAMEPLAY_PUZZLE,
     GAMEPLAY_NONE
@@ -85,6 +86,8 @@ typedef struct {
     char log_ln_tip_3[256];
 
     Game_state previous_game_state;
+    Gameplay_state previous_gameplay_state;
+
     Puzzle_id active_puzzle_id;
 
     ALLEGRO_BITMAP* puzzle_bhaskara_img;

@@ -3,6 +3,8 @@
 
 typedef enum{
     GAME_MENU,
+    GAME_PAUSE,
+    GAME_TUTORIAL,
     GAME_INIT,
     GAME_MINOTAUR_LEVEL,
     GAME_MEDUSA_LEVEL,
