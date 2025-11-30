@@ -10,19 +10,17 @@
 #include "time.h"
 #include "screen.h"
 #include "game_state.h"
-#include "inventory.h" // Necessário para count_consumable_items
+#include "inventory.h"
 
 #define KEY_SEEN 1
 #define KEY_DOWN 2
 
-// --- FUNÇÕES AUXILIARES DE INICIALIZAÇÃO ---
+// FUNÇÕES AUXILIARES DE INICIALIZAÇÃO
 void must_init(bool test, char* description){
     if(test) return;
     printf("Não foi possível inicializar %s\n", description);
     exit(1);
 }
-
-// --- FUNÇÕES DE INPUT DA BATALHA ---
 
 // 1. Input dos Diálogos de Batalha
 void handle_battle_dialogue_input(Game* game, unsigned char* key) {
@@ -36,13 +34,13 @@ void handle_battle_dialogue_input(Game* game, unsigned char* key) {
        game->battle->dialogues == DIALOGUE_ARAUTO_FINAL_5) {
         game->battle->state = BATTLE_START;
     } 
-    // Lógica de PULO (Minotauro)
+    // Lógica de PULO(Minotauro)
     else if(game->battle->dialogues == DIALOGUE_BATTLE_5 || 
             game->battle->dialogues == DIALOGUE_BATTLE_6 || 
             game->battle->dialogues == DIALOGUE_BATTLE_7) {
         game->battle->dialogues = DIALOGUE_AFTER_TRASH_TALK;
     }
-    // Lógica de PULO (Medusa)
+    // Lógica de PULO  (Medusa)
     else if(game->battle->dialogues == DIALOGUE_MEDUSA_5) {
         game->battle->dialogues = DIALOGUE_BATTLE_FINAL_INTRO;
     }
@@ -62,20 +60,20 @@ void handle_battle_dialogue_input(Game* game, unsigned char* key) {
     }
 }
 
-// 2. Input do Submenu de Itens (Seleção e Uso)
+// 2. Input do Submenu de Itens
 void handle_battle_item_menu(Game* game, unsigned char* key) {
-    int real_item_count = count_consumable_items(game->player);
+    int real_item_count = count_consumable_items(&game->player->inventory);
     int total_options = real_item_count + 1; // +1 para o botão VOLTAR
 
-    // Navegação (Cima/Baixo)
-    if(key[ALLEGRO_KEY_DOWN]){
+    // Navegação
+    if(key[ALLEGRO_KEY_DOWN] || key[ALLEGRO_KEY_S]){
         if(game->battle->item_selection_index < total_options - 1){
             game->battle->item_selection_index++;
         } else {
             game->battle->item_selection_index = 0;
         }
     } 
-    else if (key[ALLEGRO_KEY_UP]){
+    else if (key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_W]){
         if(game->battle->item_selection_index > 0){
             game->battle->item_selection_index--;
         } else {
@@ -83,7 +81,7 @@ void handle_battle_item_menu(Game* game, unsigned char* key) {
         }
     }
 
-    // Confirmação (Enter/Space)
+    // Confirmação
     if(key[ALLEGRO_KEY_E] || key[ALLEGRO_KEY_ENTER] || key[ALLEGRO_KEY_SPACE]){
         // Opção VOLTAR selecionada
         if (game->battle->item_selection_index == real_item_count) {
@@ -91,7 +89,7 @@ void handle_battle_item_menu(Game* game, unsigned char* key) {
         } 
         // Item selecionado
         else if (total_options > 0) {
-            int slot_index = get_inventory_slot_by_menu_index(game->player, game->battle->item_selection_index);
+            int slot_index = get_inventory_slot_by_menu_index(&game->player->inventory, game->battle->item_selection_index);
             
             if (slot_index != -1) {
                 Item* item_usado = game->player->inventory.slots[slot_index].item;
@@ -141,12 +139,9 @@ void handle_battle_main_menu(Game* game, unsigned char* key) {
                 game->battle->is_selecting_item = true;
                 game->battle->item_selection_index = 0;
             } else {
-                // --- REFATORADO PARA ALLEGRO_TIMER ---
-                // Se o timer não estiver rodando, inicia ele
                 if (!al_get_timer_started(game->battle->error_timer)) {
                     al_start_timer(game->battle->error_timer);
                     
-                    // Opcional: Tocar som de erro
                 }
             }
             break;
@@ -169,11 +164,10 @@ void handle_battle_main_menu(Game* game, unsigned char* key) {
     }
 }
 
-// --- ROTEADOR CENTRAL DE INPUT ---
 void handle_input(Game* game, unsigned char* key) {
     // 1. Input de Exploração
     if(game->gameplay_state == GAMEPLAY_EXPLORING) {
-        select_item(game->player, key); // Atalhos H, J, K no mapa
+        select_item(game->player, key);
     } 
     // 2. Input de Batalha (Atalhos H, J, K)
     else if (game->gameplay_state == GAMEPLAY_BATTLE){

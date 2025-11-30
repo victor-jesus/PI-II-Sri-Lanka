@@ -175,39 +175,6 @@ void attack_state(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Playe
     }
 }
 
-// Retorna a quantidade de itens consumíveis válidos no inventário
-int count_consumable_items(Player* player) {
-    int count = 0;
-    for (int i = 0; i < MAX_ITENS; i++) {
-        Item* item = player->inventory.slots[i].item;
-        // Verifica se existe, se é consumível e se tem quantidade > 0
-        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
-            if (player->inventory.slots[i].quantity > 0) {
-                count++;
-            }
-        }
-    }
-    return count;
-}
-
-// Retorna o índice real no inventário ("slot") baseado no índice visual do menu
-// Exemplo: Se o item selecionado no menu é o 2º, essa função acha em qual slot do inventário ele está
-int get_inventory_slot_by_menu_index(Player* player, int menu_index) {
-    int current_valid_index = 0;
-    for (int i = 0; i < MAX_ITENS; i++) {
-        Item* item = player->inventory.slots[i].item;
-        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
-            if (player->inventory.slots[i].quantity > 0) {
-                if (current_valid_index == menu_index) {
-                    return i; // Retorna o índice real do slot
-                }
-                current_valid_index++;
-            }
-        }
-    }
-    return -1; // Não encontrado
-}
-
 void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
 
     if (choice == TURN_NONE) return;

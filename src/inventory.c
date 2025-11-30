@@ -51,3 +51,36 @@ bool inventory_add_item(Inventory* inventory, Item* item_to_add, int amount) {
     }
     return true; 
 }
+
+// Retorna a quantidade de itens consumíveis válidos no inventário
+int count_consumable_items(Inventory* inventory) {
+    int count = 0;
+    for (int i = 0; i < MAX_ITENS; i++) {
+        Item* item = inventory->slots[i].item;
+        // Verifica se existe, se é consumível e se tem quantidade > 0
+        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
+            if (inventory->slots[i].quantity > 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+// Retorna o índice real no inventário ("slot") baseado no índice visual do menu
+// Exemplo: Se o item selecionado no menu é o 2º, essa função acha em qual slot do inventário ele está
+int get_inventory_slot_by_menu_index(Inventory* inventory, int menu_index) {
+    int current_valid_index = 0;
+    for (int i = 0; i < MAX_ITENS; i++) {
+        Item* item = inventory->slots[i].item;
+        if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER)) {
+            if (inventory->slots[i].quantity > 0) {
+                if (current_valid_index == menu_index) {
+                    return i; // Retorna o índice real do slot
+                }
+                current_valid_index++;
+            }
+        }
+    }
+    return -1;
+}
