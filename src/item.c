@@ -48,10 +48,10 @@ void load_item_database() {
     AMULET_OF_PROTECTION->max_hp_buff = 10;
 
     AMULET_OF_MINOTAUR = create_item(path_amulet_atk, "Amuleto do minotauro", "Amuleto do minotauro.", "Você sente como se alguém estivesse gritando dentro dele. +15 de Defesa +20 Ataque +5 Iniciativa +15 hp", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_MINOTAUR->attack_buff = 20;
-    AMULET_OF_MINOTAUR->defense_buff = 15;
-    AMULET_OF_MINOTAUR->iniciative_buff = 5;
-    AMULET_OF_MINOTAUR->max_hp_buff = 15;
+    AMULET_OF_MINOTAUR->attack_buff = 30;
+    AMULET_OF_MINOTAUR->defense_buff = 25;
+    AMULET_OF_MINOTAUR->iniciative_buff = 10;
+    AMULET_OF_MINOTAUR->max_hp_buff = 40;
 
     KEY_TO_MINOTAUR = create_item(path_amulet_atk, "minotauro_chave", "Chave para a porta do minotauro.", "Chave simples e enferrujada", 0, false, 1, ITEM_EQUIPMENT);
     KEY_TO_MINOTAUR->attack_buff = 0;
@@ -93,7 +93,7 @@ void load_item_database() {
     AMULET_OF_MEDUSA->attack_buff = 35;
     AMULET_OF_MEDUSA->defense_buff = 40;
     AMULET_OF_MEDUSA->iniciative_buff = 20;
-    AMULET_OF_MEDUSA->max_hp_buff = 30;
+    AMULET_OF_MEDUSA->max_hp_buff = 60;
 
     AMULET_OF_STRENGTH_MAJOR = create_item(path_amulet_atk, "Amuleto de grande força", "Amuleto de Grande Força", "+25 de Ataque +3 de Defesa +5 Iniciativa +5 de HP", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_STRENGTH_MAJOR->attack_buff = 25;
@@ -105,7 +105,7 @@ void load_item_database() {
     AMULET_OF_PROTECTION_MAJOR->attack_buff = 5;
     AMULET_OF_PROTECTION_MAJOR->defense_buff = 25; 
     AMULET_OF_PROTECTION_MAJOR->iniciative_buff = 0;
-    AMULET_OF_PROTECTION_MAJOR->max_hp_buff = 15;
+    AMULET_OF_PROTECTION_MAJOR->max_hp_buff = 20;
 
 
 }

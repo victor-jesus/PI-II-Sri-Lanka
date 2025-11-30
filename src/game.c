@@ -177,11 +177,11 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->battle = malloc(sizeof(Battle));
 
     game->battle->timer_end = al_create_timer(5.0);
-    game->battle->log_timer = al_create_timer(5.0);
-    game->battle->timer_enemy = al_create_timer(1.5);
-    game->timer_game_logs = al_create_timer(5.0);
-    game->timer_game_tips = al_create_timer(10.0);
-    game->battle->error_timer = al_create_timer(0.5);
+    game->battle->log_timer = al_create_timer(10.0);
+    game->battle->timer_enemy = al_create_timer(3.5);
+    game->timer_game_logs = al_create_timer(6.0);
+    game->timer_game_tips = al_create_timer(12.0);
+    game->battle->error_timer = al_create_timer(0.3);
     game->battle->battle_font = subtitle_font;
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->log_timer));
@@ -216,6 +216,8 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->log_ln2[0] = '\0';
     game->log_ln3[0] = '\0';
     game->log_ln4[0] = '\0';
+    game->log_ln5[0] = '\0';
+
 
     load_item_database();
     initial_inventory(game); 
@@ -593,9 +595,8 @@ void load_second_map(Game* game) {
 
     game->player->entity.x = start_door->entity.x;
 
-    add_skeleton(game, 1300, 500, 20, 20);
-    add_skeleton(game, 2400, 500, 20, 20);
-    add_skeleton(game, 3200, 500, 20, 20);
+    add_skeleton(game, 1300, 500, 10, 20);
+    add_skeleton(game, 2400, 500, 10, 20);
 
     Entity* left_torch = create_torch(start_door->entity.x - 120, start_door->entity.y);
     Entity* right_torch = create_torch(start_door->entity.x + 120, start_door->entity.y);
@@ -1988,25 +1989,34 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
 
                         al_start_timer(game->timer_game_logs);
                         sprintf(game->log_ln1, "Você usa a chave do Minotauro.");
-                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
-                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
-                        
+                        sprintf(game->log_ln2, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
+
                         door->entity.is_locked_key = false; 
                     } else {
 
                         al_start_timer(game->timer_game_logs);
                         sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
                         sprintf(game->log_ln2, "Essa porta possui um emblema com um MINOTAURO.");
-                        sprintf(game->log_ln3, "\"Já que está aqui. Avance para depois voltar.\"");
+                        sprintf(game->log_ln3, "\"Derrote meus servos.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
                     }
-                    
                     return; 
-                    }
-                    if (door->entity.is_locked_puzzle) {
-                        
+                }
+                    if (door->entity.is_locked_puzzle) { 
                         al_start_timer(game->timer_game_logs);
                         check_bhaskara_solution(game, door); 
-                        return;
+
+                     
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
@@ -2023,8 +2033,10 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
 
                         al_start_timer(game->timer_game_logs);
                         sprintf(game->log_ln1, "Você usa a chave da Medusa.");
-                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
                         sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
                         
                         door->entity.is_locked_key = false; 
                     } else {
@@ -2037,11 +2049,15 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     
                     return; 
                     }
-                    if (door->entity.is_locked_puzzle) {
-                        
+                    if (door->entity.is_locked_puzzle) { 
                         al_start_timer(game->timer_game_logs);
                         check_bhaskara_solution(game, door); 
-                        return;
+
+                     
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
@@ -2058,8 +2074,10 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
 
                         al_start_timer(game->timer_game_logs);
                         sprintf(game->log_ln1, "Você usa a chave da Medusa.");
-                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
                         sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
                         
                         door->entity.is_locked_key = false; 
                     } else {
@@ -2071,11 +2089,15 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     
                     return; 
                     }
-                    if (door->entity.is_locked_puzzle) {
-                        
+                    if (door->entity.is_locked_puzzle) { 
                         al_start_timer(game->timer_game_logs);
                         check_bhaskara_solution(game, door); 
-                        return;
+
+                     
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
@@ -2098,8 +2120,8 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
                     al_start_timer(game->timer_game_logs);
                     sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
-                    sprintf(game->log_ln2, "Nela está escrito:");
-                    sprintf(game->log_ln3, "Vá em frente!");
+                    sprintf(game->log_ln2, "Está escrito na porta!");
+                    sprintf(game->log_ln3, "\"Volte!\"");
 
                 } else if(game->state == GAME_SECOND_MISSION){
 
@@ -2323,6 +2345,7 @@ static void update_puzzle_state(Game* game, unsigned char* key, float dt){
         game->log_ln2[0] = '\0';
         game->log_ln3[0] = '\0';
         game->log_ln4[0] = '\0';
+        game->log_ln5[0] = '\0';
 
         game->log_ln_tip_1[0] = '\0';
         game->log_ln_tip_2[0] = '\0';
@@ -2432,6 +2455,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
         game->log_ln2[0] = '\0';
         game->log_ln3[0] = '\0';
         game->log_ln4[0] = '\0';
+        game->log_ln5[0] = '\0';
         game->log_ln_tip_1[0] = '\0';
         game->log_ln_tip_2[0] = '\0';
         game->log_ln_tip_3[0] = '\0';
@@ -2680,7 +2704,7 @@ void draw_menu(Game* game){
     al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn1y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "INICIAR");
 
     al_draw_rectangle(btn2x - (btn_w / 2), btn2y, btn2x + (btn_w / 2), btn2y + btn_h, al_map_rgb(255, 255, 0), 2);
-    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "OPÇÕES");
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "TUTORIAL");
 
     al_draw_rectangle(btn3x - (btn_w / 2), btn3y, btn3x + (btn_w / 2), btn3y + btn_h, al_map_rgb(255, 255, 0), 2);
     al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn3y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "SAIR");
@@ -2751,15 +2775,19 @@ void draw_inventory(Player* player, ALLEGRO_FONT* font){
         
         if(current_item == NULL) continue;
 
-        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%d", player->inventory.slots[i].quantity);
-        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x + current_item->entity->box.w, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%s", current_item->id);
-
-        draw_entity(current_item->entity);
         float x1 = current_item->entity->box.x - 10;
         float y1 = current_item->entity->box.y;
         float x2 = x1 + current_item->entity->box.w + 20; 
         float y2 = y1 + current_item->entity->box.h + 10;  
 
+        al_draw_filled_rectangle(x1, y1, x2, y2, al_map_rgba(50, 50, 50, 200));
+        draw_entity(current_item->entity);
+
+
+        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%d", player->inventory.slots[i].quantity);
+        al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x + current_item->entity->box.w, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%s", current_item->id);
+
+        
         al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 255, 255), 2);
     }
 
@@ -2815,7 +2843,8 @@ void draw_puzzle_state(Game* game) {
                     );
 
                     sprintf(game->log_ln1, "Você vê uma tabuleta sobre a fórmula resolutiva.");
-                    sprintf(game->log_ln2, "Estranho...");
+                    sprintf(game->log_ln2, "Talvez o resultado sirva para algo.");
+                    
                 } else {
                     al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
                                 SCREEN_W / 2, SCREEN_H / 2, 
@@ -2938,34 +2967,52 @@ void draw_logs(Game* game){
 
     int exploring_base_y = 100 - exploring_line_height;
 
-    ALLEGRO_COLOR log_color = al_map_rgb(255, 255, 0);
+    ALLEGRO_COLOR log_color = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR log_color_highlighted = al_map_rgb(255,255,0);
 
     al_draw_text(
         game->subtitle_font,
         log_color,
         log_x_pos, 
-        exploring_base_y - (exploring_spacing * 2),
+        exploring_base_y - (exploring_spacing * 4),
         ALLEGRO_ALIGN_RIGHT, 
         game->log_ln1
     );
 
-
     al_draw_text(
         game->subtitle_font,
         log_color,
         log_x_pos, 
-        exploring_base_y - exploring_spacing,
+        exploring_base_y - (exploring_spacing * 3),
         ALLEGRO_ALIGN_RIGHT, 
         game->log_ln2
     );
 
     al_draw_text(
         game->subtitle_font,
+        log_color_highlighted,
+        log_x_pos, 
+        exploring_base_y - (exploring_spacing * 2),
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln3
+    );
+
+        al_draw_text(
+        game->subtitle_font,
+        log_color,
+        log_x_pos, 
+        exploring_base_y - exploring_spacing,
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln4
+    );
+
+        al_draw_text(
+        game->subtitle_font,
         log_color,
         log_x_pos, 
         exploring_base_y,
         ALLEGRO_ALIGN_RIGHT, 
-        game->log_ln3
+        game->log_ln5
     );
 }
 
@@ -3192,30 +3239,12 @@ void draw_battle(Game* game){
         al_draw_text(
             game->subtitle_11_font,
             al_map_rgb(255, 255, 0),
-            text1_x_center,
-            base_y + 7,
+            SCREEN_W - 150,
+            SCREEN_H - 40,
             ALLEGRO_ALIGN_CENTER, 
-            "Pressione"
+            "Pressione ENTER para continuar o jogo"
         );
 
-        al_draw_scaled_bitmap(
-                game->controls,
-                0, 0,
-                16, 16,
-                bitmap_x_start,
-                base_y,
-                bitmap_width, 32,
-                0 
-            );   
-
-        al_draw_text(
-            game->subtitle_11_font, 
-            al_map_rgb(255, 255, 0), 
-            text2_x_center,
-            base_y + 7, 
-            ALLEGRO_ALIGN_CENTER, 
-            "para continuar para o jogo!"
-        );
 
     }else if(game->battle->state == BATTLE_LOST)
         al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você perdeu!");
@@ -3251,7 +3280,8 @@ void draw_battle(Game* game){
 
         int battle_base_y = (SCREEN_H / 2) - 100 - battle_line_height;
 
-        ALLEGRO_COLOR battle_log_color = al_map_rgb(255, 255, 0);
+        ALLEGRO_COLOR battle_log_color = al_map_rgb(255, 255, 255);
+        ALLEGRO_COLOR battle_log_color_highlighted = al_map_rgb(255,255,0);
 
         al_draw_text(
             game->subtitle_font, battle_log_color, battle_log_x, 
@@ -3310,45 +3340,37 @@ void draw_battle(Game* game){
 
 void draw_tutorial(Game* game){
     // --- CORES ---
-    ALLEGRO_COLOR color_border = al_map_rgb(255, 0, 0);       // Vermelho (conforme imagem)
-    ALLEGRO_COLOR color_bg = al_map_rgba(10, 10, 10, 245);    // Fundo escuro quase opaco para leitura
+    ALLEGRO_COLOR color_border = al_map_rgb(255, 0, 0);       // Vermelho
+    ALLEGRO_COLOR color_bg = al_map_rgba(10, 10, 10, 245);    // Fundo escuro
     ALLEGRO_COLOR color_text = al_map_rgb(255, 255, 255);     // Texto branco
     ALLEGRO_COLOR color_title = al_map_rgb(255, 255, 0);      // Amarelo para destaques
 
-    // --- DIMENSÕES E LAYOUT ---
     float pad = 40.0f; // Margem da borda da tela
     float x1 = pad;
     float y1 = pad;
     float x2 = SCREEN_W - pad;
     float y2 = SCREEN_H - pad;
 
-    // Divisória Vertical (Separa esquerda da direita) - 50% da tela
+    // Divisória Vertical
     float mid_x = SCREEN_W / 2.0f; 
     
-    // Divisória Horizontal (Separa direita cima da direita baixo) - 55% da altura (ajuste visual)
+    // Divisória Horizontal
     float mid_y = (SCREEN_H / 2.0f) + 50.0f; 
 
-    // Altura da linha para espaçamento
+    // Altura da linha
     int line_h = al_get_font_line_height(game->subtitle_font) + 4;
-
-    // --- 1. DESENHO DAS CAIXAS (LAYOUT) ---
-    
+ 
     // Fundo Geral
     al_draw_filled_rectangle(x1, y1, x2, y2, color_bg);
-
-    // Borda Externa Vermelha (Grossa)
+    // Borda Externa Vermelha
     al_draw_rectangle(x1, y1, x2, y2, color_border, 4);
-
-    // Linha Vertical (Preta na imagem, mas usarei Vermelho ou Branco para contraste no fundo escuro)
-    // Se quiser exatamente igual a imagem no papel branco, mude para preto, 
-    // mas em jogo fundo escuro + linha vermelha fica melhor.
+    // Linha Vertical
     al_draw_line(mid_x, y1, mid_x, y2, color_border, 3);
-
-    // Linha Horizontal (Apenas no lado direito)
+    // Linha Horizontal
     al_draw_line(mid_x, mid_y, x2, mid_y, color_border, 3);
 
 
-    // --- 2. TEXTO: LADO ESQUERDO (CONTEXTO / LORE) ---
+    // TEXTO: LADO ESQUERDO
     float text_x = x1 + 20;
     float text_y = y1 + 20;
     float text_w = (mid_x - x1) - 40; // Largura disponível
@@ -3368,7 +3390,7 @@ void draw_tutorial(Game* game){
     al_draw_multiline_text(game->subtitle_font, color_text, text_x, text_y, text_w, line_h, ALLEGRO_ALIGN_LEFT, texto_lore);
 
 
-    // --- 3. TEXTO: LADO DIREITO SUPERIOR (SISTEMA DE BATALHA) ---
+    // TEXTO: LADO DIREITO SUPERIOR
     text_x = mid_x + 20;
     text_y = y1 + 20;
     text_w = (x2 - mid_x) - 40;
@@ -3388,7 +3410,7 @@ void draw_tutorial(Game* game){
     al_draw_multiline_text(game->subtitle_font, color_text, text_x, text_y, text_w, line_h, ALLEGRO_ALIGN_LEFT, texto_batalha);
 
 
-    // --- 4. TEXTO: LADO DIREITO INFERIOR (DANO E DADOS) ---
+    // TEXTO: LADO DIREITO INFERIOR
     text_y = mid_y + 20; // Pula para a parte de baixo
 
     al_draw_text(game->subtitle_font, color_title, text_x + (text_w/2), text_y, ALLEGRO_ALIGN_CENTER, "CÁLCULO DE DANO");
@@ -3411,9 +3433,9 @@ void draw_tutorial(Game* game){
 void draw_pause(Game* game){
     al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(125, 125, 125, 50));
 
-    al_draw_textf(game->title_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Jogo pausado.");
+    al_draw_textf(game->title_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Jogo pausado.");
 
-    al_draw_textf(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H - 20, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar.");
+    al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, SCREEN_H - 20, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar.");
 }
 
 void draw_game(Game* game){
@@ -3666,7 +3688,7 @@ void draw_game(Game* game){
             ALLEGRO_COLOR log_color_0 = al_map_rgb(255, 255, 255);
 
             al_draw_text(
-                game->log_font_20,
+                game->subtitle_font,
                 log_color_0,
                 log_x_pos_0, 
                 exploring_base_y_0 - (exploring_spacing_0 * 2),
@@ -3675,7 +3697,7 @@ void draw_game(Game* game){
             );
 
             al_draw_text(
-                game->log_font_20,
+                game->subtitle_font,
                 log_color_0,
                 log_x_pos_0, 
                 exploring_base_y_0 - exploring_spacing_0,
@@ -3684,7 +3706,7 @@ void draw_game(Game* game){
             );
 
             al_draw_text(
-                game->log_font_20,
+                game->subtitle_font,
                 log_color_0,
                 log_x_pos_0, 
                 exploring_base_y_0,

@@ -122,6 +122,10 @@ void handle_battle_item_menu(Game* game, unsigned char* key) {
         game->battle->is_selecting_item = false;
         key[ALLEGRO_KEY_ESCAPE] = 0; // Previne fechar o jogo
     }
+
+    key[ALLEGRO_KEY_E] = 0;
+    key[ALLEGRO_KEY_SPACE] = 0;
+    key[ALLEGRO_KEY_ENTER] = 0;
 }
 
 // 3. Input do Menu Principal de Batalha (Atacar/Defender/Item)
@@ -186,6 +190,7 @@ void handle_input(Game* game, unsigned char* key) {
         if(key[ALLEGRO_KEY_E]){
             game->init_dialogues++;
         }
+        key[ALLEGRO_KEY_E] = 0;
     }
 
     // 4. Lógica Principal de Batalha

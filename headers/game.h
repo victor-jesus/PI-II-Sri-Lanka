@@ -81,6 +81,7 @@ typedef struct {
     char log_ln2[256];
     char log_ln3[256];
     char log_ln4[256];
+    char log_ln5[256];
     char log_ln_tip_1[256];
     char log_ln_tip_2[256];
     char log_ln_tip_3[256];

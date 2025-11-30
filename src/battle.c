@@ -279,23 +279,17 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
         player_equip_item(battle->player, KEY_TO_MINOTAUR);
         printf("Chave\n");
         
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_MINOTAUR->name);
-        sprintf(battle->log_ln3, "%s", KEY_TO_MINOTAUR->description);
+        sprintf(battle->log_ln1, "O %s dropou um %s", battle->enemy->name, KEY_TO_MINOTAUR->name);
     } else if(*world_enemies <= 1 && battle && game_state == GAME_SECOND_MISSION){
         player_equip_item(battle->player, KEY_TO_MEDUSA);
         printf("Chave\n");
         
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_MEDUSA->name);
-        sprintf(battle->log_ln3, "%s", KEY_TO_MEDUSA->description);
+        sprintf(battle->log_ln1, "O %s dropou um %s", battle->enemy->name, KEY_TO_MINOTAUR->name, KEY_TO_MEDUSA->name);
     } else if(*world_enemies <= 1 && battle && game_state == GAME_THIRD_MISSION){
         player_equip_item(battle->player, KEY_TO_ARAUTO);
         printf("Chave\n");
         
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_ARAUTO->name);
-        sprintf(battle->log_ln3, "%s", KEY_TO_ARAUTO->description);
+        sprintf(battle->log_ln1, "O %s dropou um %s", battle->enemy->name, KEY_TO_MINOTAUR->name, KEY_TO_MINOTAUR->name);
     }
 
     rand_chance = rand() % 10 + 1;
@@ -304,12 +298,12 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
 
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário. Quantidade: %d", SMALL_POTION->name, qtd);
+        sprintf(battle->log_ln1, "%s dropou %s.", battle->enemy->name, SMALL_POTION->name);
+        sprintf(battle->log_ln2, "Quantidade: %d", qtd);
 
         player_equip_item(battle->player, AMULET_OF_STRENGTH);
         
-        sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", AMULET_OF_STRENGTH->name);
+        sprintf(battle->log_ln1, "%s dropou %s.", battle->enemy->name, AMULET_OF_STRENGTH->name);
 
         sprintf(battle->log_ln4, "Buffs/Debuffs:");
 
@@ -317,7 +311,7 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
 
         
     } else {
-        sprintf(battle->log_ln1, "O %s não dropou itens.", battle->enemy->name);
+        sprintf(battle->log_ln1, "%s não dropou itens.", battle->enemy->name);
     }
 }
 
@@ -329,20 +323,17 @@ void minotaur_death(Battle* battle){
         sprintf(battle->log_ln1, "Você ganhou %d XP", qtd_xp);
 
         player_equip_item(battle->player, KEY_TO_SECOND_MAP);
-        printf("Chave\n");
         
-        sprintf(battle->log_ln2, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, 1);
-        sprintf(battle->log_ln4, "%s", KEY_TO_SECOND_MAP->description);
+        sprintf(battle->log_ln2, "%s dropou %s", battle->enemy->name, KEY_TO_SECOND_MAP->name);
         
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-        sprintf(battle->log_ln5, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+        sprintf(battle->log_ln2, "%s dropou %s", battle->enemy->name, BIG_POTION->name);
+        sprintf(battle->log_ln6, "Quantidade: %d", qtd);
 
         player_equip_item(battle->player, AMULET_OF_MINOTAUR);
-        sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
+        sprintf(battle->log_ln7, "%s dropou %s", battle->enemy->name, AMULET_OF_MINOTAUR->name);
 
         sprintf(battle->log_ln8, "Buffs/Debuffs:");
 
@@ -357,20 +348,17 @@ void medusa_death(Battle* battle){
     sprintf(battle->log_ln1, "Você ganhou %d XP", qtd_xp);
 
     player_equip_item(battle->player, KEY_TO_THIRD_MAP);
-    printf("Chave\n");
     
-    sprintf(battle->log_ln2, "A %s dropou um item.", battle->enemy->name);
-    sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", KEY_TO_THIRD_MAP->name, 1);
-    sprintf(battle->log_ln4, "%s", KEY_TO_THIRD_MAP->description);
-    
+    sprintf(battle->log_ln2, "%s dropou um %s", battle->enemy->name, KEY_TO_THIRD_MAP->name);
+
     int qtd = rand() % 6 + 1;
     inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-    sprintf(battle->log_ln5, "A %s dropou um item.", battle->enemy->name);
-    sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+    sprintf(battle->log_ln5, "%s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln6, "Quantidade: %d", qtd);
 
     player_equip_item(battle->player, AMULET_OF_MEDUSA);
-    sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_MEDUSA->name);
+    sprintf(battle->log_ln2, "%s dropou um %s", battle->enemy->name, AMULET_OF_MEDUSA->name);
 
     sprintf(battle->log_ln8, "Buffs/Debuffs:");
 
@@ -529,7 +517,7 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
 
         battle->enemy->entity.anim_state = ANIM_DEATH;    
         battle->state = BATTLE_WIN;
-        if(key[ALLEGRO_KEY_E]){
+        if(key[ALLEGRO_KEY_ENTER]){
             battle->enemy->entity.isActive = false;
             battle->state = BATTLE_NONE;
             battle->log_ln1[0] = '\0';
