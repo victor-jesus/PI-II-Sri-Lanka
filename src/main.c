@@ -282,14 +282,17 @@ int main(){
                 // Chama a função refatorada de input
                 handle_input(game, key);
 
-                if(key[ALLEGRO_KEY_ESCAPE] && game->state != GAME_MENU && game->gameplay_state != GAMEPLAY_BATTLE){
+                if(key[ALLEGRO_KEY_ESCAPE] && game->gameplay_state == GAMEPLAY_EXPLORING){
                     game->previous_gameplay_state = game->gameplay_state;
                     game->gameplay_state = GAMEPLAY_PAUSE;
+                    key[ALLEGRO_KEY_ESCAPE] = 0;
                 }
 
-                if(key[ALLEGRO_KEY_B] && game->gameplay_state == GAMEPLAY_PAUSE){
-                    game->gameplay_state = game->previous_gameplay_state;
-                    key[ALLEGRO_KEY_B] = 0;
+                if(game->gameplay_state == GAMEPLAY_PAUSE){
+                    if(key[ALLEGRO_KEY_ESCAPE]){
+                        game->gameplay_state = game->previous_gameplay_state;
+                        key[ALLEGRO_KEY_ESCAPE] = 0;
+                    } 
                 }
 
                 if(key[ALLEGRO_KEY_ESCAPE] && game->state == GAME_MENU && !game->battle->is_selecting_item){

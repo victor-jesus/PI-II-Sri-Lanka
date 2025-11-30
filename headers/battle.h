@@ -53,6 +53,7 @@ typedef struct Battle{
     char log_ln8[256];
     char log_ln9[256];
     char log_ln10[256];
+    char log_damage[256];
 
 } Battle;
 

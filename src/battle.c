@@ -142,49 +142,36 @@ void attack_state(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_FONT* font, Playe
             int attack_total = d20 + player->attack;
 
             if (d20 == 1) {
-            sprintf(battle->log_ln1, "Rolagem Dado: %d.", d20);
+                sprintf(battle->log_ln1, "Rolagem dado: %d", d20);
+                sprintf(battle->log_ln2, "ERRO CRÍTICO!");
+            } else if (d20 == 20) {
+                int damage = (roll(D_8) + player->attack) * 2; 
 
-            sprintf(battle->log_ln2, "Ataque: %d. ERRO CRÍTICO!", d20);
-            sprintf(battle->log_ln3, "Você errou feio!");
-
-        } else if (d20 == 20) {
-            int damage = (roll(D_8) + player->attack) * 2; 
-
-            sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->player->name, battle->player->attack);
-
-
-            sprintf(battle->log_ln2, "Ataque: %d. ACERTO CRÍTICO!", d20);
-            sprintf(battle->log_ln3, "Você causou %d de dano!", damage);
-            take_damage(&enemy->entity, damage);
-
-        } else {
-            int attack_total = d20 + player->attack;
-            
-            if (attack_total >= enemy->defense) {
-                int damage = roll(D_8) + player->attack; 
-
-                sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->player->name, battle->player->attack);
-
-                sprintf(battle->log_ln2, "Ataque: %d+%d=%d. Acertou!", d20, player->attack, attack_total);
-                sprintf(battle->log_ln3, "Você causou %d de dano.", damage);
+                sprintf(battle->log_ln1, "Dano: %d", damage);
                 take_damage(&enemy->entity, damage);
             } else {
+                int attack_total = d20 + player->attack;
                 
-                sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->player->name, battle->player->attack);
+                if (attack_total >= enemy->defense) {
+                    int damage = roll(D_8) + player->attack; 
 
-                sprintf(battle->log_ln2, "Ataque: %d+%d=%d. Errou!", d20, player->attack, attack_total);
-                sprintf(battle->log_ln3, "Defesa do inimigo: %d", enemy->defense);
+                    sprintf(battle->log_ln1, "Rolagem dado: %d", d20);
+                    sprintf(battle->log_ln2, "%s acertou!", battle->player->name);
+                    sprintf(battle->log_ln3, "%s causou %d de dano!", battle->player->name, damage);
+                    take_damage(&enemy->entity, damage);
+                } else {
+                    sprintf(battle->log_ln2, " Errou!", d20, player->attack, attack_total);
+                }
             }
-        }
 
-        battle->player->entity.anim_state = ANIM_ATTACK;
-        // battle->turn_state = TURN_ENEMY;
-        // battle->player->turn_choice = TURN_NONE;
-        break;
-    case TURN_ENEMY:
+            battle->player->entity.anim_state = ANIM_ATTACK;
+            // battle->turn_state = TURN_ENEMY;
+            // battle->player->turn_choice = TURN_NONE;
+            break;
+        case TURN_ENEMY:
         
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -261,7 +248,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                         battle->player->entity.hp += current_item->value;
                         battle->player->inventory.slots[i].quantity--;
                         printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
-                        sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
+                        sprintf(battle->log_ln1, "Você usou a %s", current_item->name);
 
                         battle->can_use_item = false;
 
@@ -278,7 +265,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                         battle->player->entity.hp += current_item->value;
                         battle->player->inventory.slots[i].quantity--;
                         printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
-                        sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
+                        sprintf(battle->log_ln1, "Você usou a %s", current_item->name);
 
                         battle->can_use_item = false;
 
@@ -295,7 +282,7 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
                         battle->player->entity.hp += current_item->value;
                         battle->player->inventory.slots[i].quantity--;
                         printf("Quantidade: %d\n", battle->player->inventory.slots[i].quantity);
-                        sprintf(battle->log_ln5, "Você usou a %s", current_item->name);
+                        sprintf(battle->log_ln1, "Você usou a %s", current_item->name);
 
                         battle->can_use_item = false;
 
@@ -350,20 +337,20 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
 
-        sprintf(battle->log_ln5, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", SMALL_POTION->name, qtd);
+        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário. Quantidade: %d", SMALL_POTION->name, qtd);
 
         player_equip_item(battle->player, AMULET_OF_STRENGTH);
         
-        sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_STRENGTH->name);
+        sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", AMULET_OF_STRENGTH->name);
 
-        sprintf(battle->log_ln8, "Buffs/Debuffs:");
+        sprintf(battle->log_ln4, "Buffs/Debuffs:");
 
-        sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
+        sprintf(battle->log_ln5, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
 
         
     } else {
-        sprintf(battle->log_ln3, "O %s não dropou itens.", battle->enemy->name);
+        sprintf(battle->log_ln1, "O %s não dropou itens.", battle->enemy->name);
     }
 }
 
@@ -372,27 +359,27 @@ void minotaur_death(Battle* battle){
         
         int qtd_xp = 1000;
         add_xp(battle->player, qtd_xp);
-        sprintf(battle->log_ln4, "Você ganhou %d XP", qtd_xp);
+        sprintf(battle->log_ln1, "Você ganhou %d XP", qtd_xp);
 
         player_equip_item(battle->player, KEY_TO_SECOND_MAP);
         printf("Chave\n");
         
-        sprintf(battle->log_ln1, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, 1);
-        sprintf(battle->log_ln3, "%s", KEY_TO_SECOND_MAP->description);
+        sprintf(battle->log_ln2, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", KEY_TO_SECOND_MAP->name, 1);
+        sprintf(battle->log_ln4, "%s", KEY_TO_SECOND_MAP->description);
         
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-        sprintf(battle->log_ln3, "O %s dropou um item.", battle->enemy->name);
-        sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+        sprintf(battle->log_ln5, "O %s dropou um item.", battle->enemy->name);
+        sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
 
         player_equip_item(battle->player, AMULET_OF_MINOTAUR);
-        sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
+        sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_MINOTAUR->name);
 
-        sprintf(battle->log_ln7, "Buffs/Debuffs:");
+        sprintf(battle->log_ln8, "Buffs/Debuffs:");
 
-        sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
+        sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
 }
 
 void medusa_death(Battle* battle){
@@ -400,27 +387,27 @@ void medusa_death(Battle* battle){
         
     int qtd_xp = 10000;
     add_xp(battle->player, qtd_xp);
-    sprintf(battle->log_ln4, "Você ganhou %d XP", qtd_xp);
+    sprintf(battle->log_ln1, "Você ganhou %d XP", qtd_xp);
 
     player_equip_item(battle->player, KEY_TO_THIRD_MAP);
     printf("Chave\n");
     
-    sprintf(battle->log_ln1, "A %s dropou um item.", battle->enemy->name);
-    sprintf(battle->log_ln2, "Item: %s adicionado ao inventário.", KEY_TO_THIRD_MAP->name, 1);
-    sprintf(battle->log_ln3, "%s", KEY_TO_THIRD_MAP->description);
+    sprintf(battle->log_ln2, "A %s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln3, "Item: %s adicionado ao inventário.", KEY_TO_THIRD_MAP->name, 1);
+    sprintf(battle->log_ln4, "%s", KEY_TO_THIRD_MAP->description);
     
     int qtd = rand() % 6 + 1;
     inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-    sprintf(battle->log_ln3, "A %s dropou um item.", battle->enemy->name);
-    sprintf(battle->log_ln4, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
+    sprintf(battle->log_ln5, "A %s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln6, "Item: %s adicionado ao inventário. Quantidade: %d", BIG_POTION->name, qtd);
 
     player_equip_item(battle->player, AMULET_OF_MEDUSA);
-    sprintf(battle->log_ln5, "Item: %s adicionado ao inventário.", AMULET_OF_MEDUSA->name);
+    sprintf(battle->log_ln7, "Item: %s adicionado ao inventário.", AMULET_OF_MEDUSA->name);
 
-    sprintf(battle->log_ln7, "Buffs/Debuffs:");
+    sprintf(battle->log_ln8, "Buffs/Debuffs:");
 
-    sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MEDUSA->attack_buff, AMULET_OF_MEDUSA->defense_buff, AMULET_OF_MEDUSA->iniciative_buff, AMULET_OF_MEDUSA->max_hp_buff);
+    sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MEDUSA->attack_buff, AMULET_OF_MEDUSA->defense_buff, AMULET_OF_MEDUSA->iniciative_buff, AMULET_OF_MEDUSA->max_hp_buff);
 }
 
 void drop_itens(Battle* battle, int* world_enemies, Game_state game_state){
@@ -465,10 +452,9 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
                 int d20 = roll(D_20);
 
                 if (d20 == 1) {
-                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+                    sprintf(battle->log_ln1, "Rolagem dado: %ds", d20, battle->enemy->name, battle->enemy->attack);
                     
-                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ERRO CRÍTICO!", d20);
-                    sprintf(battle->log_ln3, "O inimigo errou feio!");
+                    sprintf(battle->log_ln2, "ERRO CRÍTICO!");
                 } else if (d20 == 20) {
                     int damage;
                     if(battle->enemy->enemy_type == MINOTAUR){
@@ -480,9 +466,9 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
                     } else if(battle->enemy->enemy_type == MOB){
                         damage = (roll(D_6) + battle->enemy->attack) * 2;
                     }
-                    sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
+                    sprintf(battle->log_ln1, "Rolagem dado: %d", d20, battle->enemy->name, battle->enemy->attack);
 
-                    sprintf(battle->log_ln2, "Ataque Inimigo: %d. ACERTO CRÍTICO!", d20);
+                    sprintf(battle->log_ln2, "ACERTO CRÍTICO!", d20);
                     sprintf(battle->log_ln3, "Inimigo causou %d de dano!", damage);
                     take_damage(&battle->player->entity, damage);
                 } else { 
@@ -500,15 +486,13 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
                     int attack_total = d20 + battle->enemy->attack;
 
                     if (attack_total >= battle->player->defense) { 
-                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-
-                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Acertou!", d20, battle->enemy->attack, attack_total);
+                        sprintf(battle->log_ln1, "Rolagem dado: %d", d20, battle->enemy->name, battle->enemy->attack);
+                        sprintf(battle->log_ln2, "%s acertou", battle->enemy->name);
                         sprintf(battle->log_ln3, "Inimigo causou %d de dano.", damage);
                         take_damage(&battle->player->entity, damage);
                     } else { 
-                        sprintf(battle->log_ln1, "Rolagem Dado: %d. Ataque %s: %d", d20, battle->enemy->name, battle->enemy->attack);
-
-                        sprintf(battle->log_ln2, "Ataque Inimigo: %d+%d=%d. Errou!", d20, battle->enemy->attack, attack_total);
+                        sprintf(battle->log_ln1, "Rolagem dado: %d", d20, battle->enemy->name, battle->enemy->attack);
+                        sprintf(battle->log_ln2, "%s acertou", battle->enemy->name);
                         sprintf(battle->log_ln3, "Sua defesa: %d", battle->player->defense);
                     }
                 }
@@ -516,14 +500,11 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
                 break;
             case TURN_DEFEND:
                 sprintf(battle->log_ln1, "O inimigo %s se prepara!", battle->enemy->name);
-                sprintf(battle->log_ln2, "A defesa dele dobrou por 1 turno!");
-                sprintf(battle->log_ln3, "A defesa dele antes: %d", battle->enemy->original_defense);
+                sprintf(battle->log_ln2, "A defesa de %s dobrou por 1 turno!", battle->enemy->name);
                 
                 battle->enemy->defense *= 2;
                 battle->enemy->is_defending = true;
                 battle->enemy->entity.anim_state = ANIM_IDLE;
-
-                sprintf(battle->log_ln4, "A defesa dele agora: %d", battle->enemy->defense);
             default:
                 break;
             }
