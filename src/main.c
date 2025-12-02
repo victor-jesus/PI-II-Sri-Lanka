@@ -211,6 +211,24 @@ void handle_input(Game* game, unsigned char* key) {
     }
 }
 
+void handle_pause(unsigned char* key, Game *game)
+{
+    if (key[ALLEGRO_KEY_ESCAPE] && game->gameplay_state == GAMEPLAY_EXPLORING)
+    {
+        game->previous_gameplay_state = game->gameplay_state;
+        game->gameplay_state = GAMEPLAY_PAUSE;
+        key[ALLEGRO_KEY_ESCAPE] = 0;
+    }
+
+    if (game->gameplay_state == GAMEPLAY_PAUSE)
+    {
+        if (key[ALLEGRO_KEY_ESCAPE])
+        {
+            game->gameplay_state = game->previous_gameplay_state;
+            key[ALLEGRO_KEY_ESCAPE] = 0;
+        }
+    }
+}
 
 // --- MAIN ---
 int main(){
@@ -249,12 +267,14 @@ int main(){
     bool isRunning = true;
     bool redraw = true;
     ALLEGRO_EVENT event;
+
     unsigned char key[ALLEGRO_KEY_MAX];
     memset(key, 0, sizeof(key));
 
     Game* game = create_game(GAME_MENU, font, title, subtitle, queue, &event, 200, SCREEN_H / 2, 5, 100);
 
     al_start_timer(fps);
+
 
     // Loop Principal
     while(isRunning){
@@ -281,18 +301,7 @@ int main(){
                 // Chama a função refatorada de input
                 handle_input(game, key);
 
-                if(key[ALLEGRO_KEY_ESCAPE] && game->gameplay_state == GAMEPLAY_EXPLORING){
-                    game->previous_gameplay_state = game->gameplay_state;
-                    game->gameplay_state = GAMEPLAY_PAUSE;
-                    key[ALLEGRO_KEY_ESCAPE] = 0;
-                }
-
-                if(game->gameplay_state == GAMEPLAY_PAUSE){
-                    if(key[ALLEGRO_KEY_ESCAPE]){
-                        game->gameplay_state = game->previous_gameplay_state;
-                        key[ALLEGRO_KEY_ESCAPE] = 0;
-                    } 
-                }
+                handle_pause(key, game);
 
                 if(key[ALLEGRO_KEY_ESCAPE] && game->state == GAME_MENU && !game->battle->is_selecting_item){
                     isRunning = false;

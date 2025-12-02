@@ -332,16 +332,16 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
 
-        sprintf(battle->log_ln1, "%s dropou %s.", battle->enemy->name, SMALL_POTION->name);
-        sprintf(battle->log_ln2, "Quantidade: %d", qtd);
+        sprintf(battle->log_ln2, "%s dropou %s.", battle->enemy->name, SMALL_POTION->name);
+        sprintf(battle->log_ln3, "Quantidade: %d", qtd);
 
         player_equip_item(battle->player, AMULET_OF_STRENGTH);
         
-        sprintf(battle->log_ln1, "%s dropou %s.", battle->enemy->name, AMULET_OF_STRENGTH->name);
+        sprintf(battle->log_ln4, "%s dropou %s.", battle->enemy->name, AMULET_OF_STRENGTH->name);
 
-        sprintf(battle->log_ln4, "Buffs/Debuffs:");
+        sprintf(battle->log_ln5, "Buffs/Debuffs:");
 
-        sprintf(battle->log_ln5, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
+        sprintf(battle->log_ln6, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_STRENGTH->attack_buff, AMULET_OF_STRENGTH->defense_buff, AMULET_OF_STRENGTH->iniciative_buff, AMULET_OF_STRENGTH->max_hp_buff);
 
         
     } else {

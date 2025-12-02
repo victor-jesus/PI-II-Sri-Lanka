@@ -36,16 +36,16 @@ void load_item_database() {
     set_entity_pos(WATER->entity, 670, 640);
 
     AMULET_OF_STRENGTH = create_item(path_amulet_atk, "Amuleto de força", "Amuleto da Força", "+5 de Ataque", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_STRENGTH->attack_buff = 5;
-    AMULET_OF_STRENGTH->defense_buff = 0; 
+    AMULET_OF_STRENGTH->attack_buff = 10;
+    AMULET_OF_STRENGTH->defense_buff = 5; 
     AMULET_OF_STRENGTH->iniciative_buff = 4;
-    AMULET_OF_STRENGTH->max_hp_buff = 5;
+    AMULET_OF_STRENGTH->max_hp_buff = 7;
 
     AMULET_OF_PROTECTION = create_item(path_amulet_def, "Amuleto de Defesa", "Amuleto da Proteção", "+5 de Defesa", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_PROTECTION->attack_buff = 0;
-    AMULET_OF_PROTECTION->defense_buff = 5; 
+    AMULET_OF_PROTECTION->attack_buff = 2;
+    AMULET_OF_PROTECTION->defense_buff = 10; 
     AMULET_OF_PROTECTION->iniciative_buff = 0;
-    AMULET_OF_PROTECTION->max_hp_buff = 10;
+    AMULET_OF_PROTECTION->max_hp_buff = 15;
 
     AMULET_OF_MINOTAUR = create_item(path_amulet_atk, "Amuleto do minotauro", "Amuleto do minotauro.", "Você sente como se alguém estivesse gritando dentro dele. +15 de Defesa +20 Ataque +5 Iniciativa +15 hp", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_MINOTAUR->attack_buff = 30;
@@ -90,22 +90,22 @@ void load_item_database() {
     KEY_TO_EASTER_EGG->max_hp_buff = 0;
 
     AMULET_OF_MEDUSA = create_item(path_amulet_atk, "Amuleto da medusa", "Amuleto da Medusa.", "Amuleto com intenso brilho verde, você guarda dentro da sua bolsa. +35 de Defesa +40 de Ataque +20 de Iniciativa +30 hp", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_MEDUSA->attack_buff = 35;
+    AMULET_OF_MEDUSA->attack_buff = 40;
     AMULET_OF_MEDUSA->defense_buff = 40;
     AMULET_OF_MEDUSA->iniciative_buff = 20;
     AMULET_OF_MEDUSA->max_hp_buff = 60;
 
     AMULET_OF_STRENGTH_MAJOR = create_item(path_amulet_atk, "Amuleto de grande força", "Amuleto de Grande Força", "+25 de Ataque +3 de Defesa +5 Iniciativa +5 de HP", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_STRENGTH_MAJOR->attack_buff = 25;
-    AMULET_OF_STRENGTH_MAJOR->defense_buff = 3; 
+    AMULET_OF_STRENGTH_MAJOR->attack_buff = 30;
+    AMULET_OF_STRENGTH_MAJOR->defense_buff = 5; 
     AMULET_OF_STRENGTH_MAJOR->iniciative_buff = 5;
-    AMULET_OF_STRENGTH_MAJOR->max_hp_buff = 5;
+    AMULET_OF_STRENGTH_MAJOR->max_hp_buff = 10;
 
     AMULET_OF_PROTECTION_MAJOR = create_item(path_amulet_def, "Amuleto de Proteção Maior", "Amuleto de Proteção Maior", "+25 de Defesa +5 de Ataque +15 de HP", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_PROTECTION_MAJOR->attack_buff = 5;
-    AMULET_OF_PROTECTION_MAJOR->defense_buff = 25; 
+    AMULET_OF_PROTECTION_MAJOR->defense_buff = 30; 
     AMULET_OF_PROTECTION_MAJOR->iniciative_buff = 0;
-    AMULET_OF_PROTECTION_MAJOR->max_hp_buff = 20;
+    AMULET_OF_PROTECTION_MAJOR->max_hp_buff = 24;
 
 
 }

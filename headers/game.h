@@ -51,8 +51,8 @@ typedef struct{
 typedef struct {
     Game_state state;
     Player* player;
-    Enemy* enemy;
-    Enemy* mobs[MAX_ENEMIES];
+    Enemy* enemy; // BOSSES
+    Enemy* mobs[MAX_ENEMIES]; // MOBS
     int world_enemies;
     Battle* battle;
     Mouse mouse;
@@ -67,7 +67,7 @@ typedef struct {
     
     Init_dialogues init_dialogues;
     Gameplay_state gameplay_state;
-    ALLEGRO_BITMAP* controls;
+    ALLEGRO_BITMAP* controls; // BITMAP PARA TECLAS DO TECLADO 
 
     Entity* world_entities[MAX_WORLD_ENTITIES];
     int num_world_entities;
@@ -100,6 +100,9 @@ typedef struct {
     ALLEGRO_FONT* log_font;
     ALLEGRO_FONT* log_font_20;
     bool can_draw;
+
+    bool is_minotaur_dead, is_medusa_dead, is_arauto_dead;
+    bool is_first_level_mobs_dead, is_second_level_mobs_dead, is_third_level_mobs_dead;
 } Game;
 
 
