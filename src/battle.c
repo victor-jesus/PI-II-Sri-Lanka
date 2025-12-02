@@ -67,6 +67,40 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
     battle->enemy->turn_choice = TURN_NONE;
 }
 
+void end_battle(Battle* battle, Player* player, Enemy* enemy){
+    battle->player = player;
+    battle->enemy = enemy;
+
+    battle->enemy->is_battle = false;
+
+    battle->dropped_itens = false;
+
+    battle->can_act = false;
+    battle->can_use_item = false;
+
+    battle->player->entity.anim_state = ANIM_IDLE;
+    battle->enemy->entity.anim_state = ANIM_IDLE;
+
+    battle->enemy->entity.y = battle->player->entity.y + (battle->player->entity.box.h / 2);
+    battle->opt_player = 1;
+
+    battle->log_ln1[0] = '\0';
+    battle->log_ln2[0] = '\0';
+    battle->log_ln3[0] = '\0';
+    battle->log_ln4[0] = '\0';
+    battle->log_ln5[0] = '\0';
+    battle->log_ln6[0] = '\0';
+    battle->log_ln7[0] = '\0';
+    battle->log_ln8[0] = '\0';
+    battle->log_ln9[0] = '\0';
+    battle->log_ln10[0] = '\0';
+
+    battle->is_selecting_item = false;
+
+    battle->state = BATTLE_END;
+
+}
+
 Turn_choice enemy_choice(Battle* battle) {
     Enemy* enemy = battle->enemy;
     Player* player = battle->player;
@@ -447,7 +481,7 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
                         take_damage(&battle->player->entity, damage);
                     } else { 
                         sprintf(battle->log_ln1, "Rolagem dado: %d", d20, battle->enemy->name, battle->enemy->attack);
-                        sprintf(battle->log_ln2, "%s acertou", battle->enemy->name);
+                        sprintf(battle->log_ln2, "%s errou", battle->enemy->name);
                         sprintf(battle->log_ln3, "Sua defesa: %d", battle->player->defense);
                     }
                 }

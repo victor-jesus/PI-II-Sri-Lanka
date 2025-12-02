@@ -15,7 +15,8 @@ typedef enum{
     GAME_BATTLE,
     GAME_PUZZLE_SCREEN,
     GAME_OVER,
-    GAME_END
+    GAME_END,
+    GAME_CLOSE
 } Game_state;
 
 #endif

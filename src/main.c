@@ -264,7 +264,7 @@ int main(){
             case ALLEGRO_EVENT_TIMER:
                 update_game(game, key, event, (1.0/60));
                 
-                if(game->state == GAME_OVER){
+                if(game->state == GAME_CLOSE){
                     isRunning = false;
                     break;
                 }
