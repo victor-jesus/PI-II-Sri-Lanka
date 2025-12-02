@@ -22,7 +22,7 @@ Para alcançar esse saber supremo, além de resolver enigmas e superar obstácul
 Uma dica valiosa, jovem estudante: o território do Arauto é repleto de mistérios e perigos, mas a cada passo, seu raciocínio e seu conhecimento podem revelar pistas ocultas, tornando você mais forte e preparado para dominar a arte matemática por completo.
 
 
-![Screenshot do Jogo](link-da-imagem-screenshot.png)
+![imagem do Jogo](images/Tela_inicial.png)
 
 ## Funcionalidades
 - 🗺️ Exploração de mapas estilo caverna medieval  
@@ -34,12 +34,12 @@ Uma dica valiosa, jovem estudante: o território do Arauto é repleto de mistér
   ## Tecnologias Usadas
 - 🖥️ Linguagem C  
 - 🎮 Biblioteca Allegro para gráficos e interação  
-- 📝 Git para versionamento e controle
+- 📝 Git GitHub para versionamento e controle
 
   ## Como Jogar
 - Use as teclas direcionais para mover seu personagem pelo mapa.  
 - Encontre enigmas que exigem resolução de problemas matemáticos para continuar.  
-- Durante as batalhas por turnos, escolha entre atacar, usar um item ou aguardar.  
+- Durante as batalhas por turnos, escolha entre atacar, usar um item ou se defender.  
 - Resolva os enigmas e derrote os bosses para avançar na história e conquistar o conhecimento supremo.  
 - Utilize dicas encontradas no mapa para facilitar os desafios mais complexos. 
 
@@ -55,9 +55,12 @@ Confira o vídeo demonstrativo do jogo:
 
 ## Referências
 - Biblioteca Allegro: https://liballeg.org  
-- Dungeons & Dragons (inspiração para o sistema de batalha): https://www.dndbeyond.com  
+- Dungeons & Dragons (inspiração para o sistema de batalha): https://www.dndbeyond.com
+- CraftPix (assets gráficos): https://craftpix.net/  
+- Itch.io (mercado e comunidade de jogos independentes): https://itch.io  
 
 ## Contato
-Seu Nome - [LinkedIn](https://www.linkedin.com/in/seuperfil) - seu.email@exemplo.com
+Seu Nome - [LinkedIn](https://www.linkedin.com/in/seuperfil) 
+
 
 
