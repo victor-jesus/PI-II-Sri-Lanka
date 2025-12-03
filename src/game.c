@@ -258,11 +258,13 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     // Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
     // add_item(&game->player->inventory, HEAL_WATER, 5);
 
+    /*
     player_equip_item(game->player, KEY_TO_MINOTAUR);
     player_equip_item(game->player, KEY_TO_MEDUSA);
     player_equip_item(game->player, KEY_TO_ARAUTO);
     player_equip_item(game->player, KEY_TO_SECOND_MAP);
     player_equip_item(game->player, KEY_TO_THIRD_MAP);
+    */
 
 
     return game;
@@ -1712,7 +1714,27 @@ Btn_state is_mouse_in_btn(Game* game){
 } 
 
 void check_battle(Game* game){
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!game->mobs[i]) {
+            continue;
+        }
 
+        if (!game->mobs[i]->entity.isActive) {
+            continue;
+        }
+
+        //Com mudança no game_state precisaremos refatorar todo o código de state do game
+        if (game->gameplay_state == GAMEPLAY_BATTLE && game->battle) return;
+
+        int dist = game->player->entity.x - game->mobs[i]->entity.x;
+
+        if (dist >= -300 && dist <= 300) {
+
+            if (dist < 0) game->mobs[i]->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+            game->gameplay_state = GAMEPLAY_BATTLE;
+            start_battle(game->battle, game->player, game->mobs[i]);
+        }
+    }
 }
 
 void menu_options(Game* game){
