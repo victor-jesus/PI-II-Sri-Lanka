@@ -3,7 +3,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_ttf.h>s
 #include <allegro5/allegro_image.h>
 #include <allegro5/mouse.h>
 #include "game.h"
@@ -323,7 +323,12 @@ int main(){
         }
     }
 
+    // Limpeza
     destroy_game(game);
+    if(title) al_destroy_font(title);
+    if(subtitle) al_destroy_font(subtitle);
+    if(font) al_destroy_font(font);
+    if(subtitle_8) al_destroy_font(subtitle_8);
     al_destroy_display(display);
     al_destroy_timer(fps);
     al_destroy_event_queue(queue);

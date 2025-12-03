@@ -1,8 +1,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <sprite.h>
-#include <animation_state.h>
+#include "sprite.h"
+#include "animation_state.h"
 #include <stdbool.h>
 #include "box.h"
 
