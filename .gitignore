@@ -1,0 +1,49 @@
+# --- Arquivos temporários do CMake ---
+build/CMakeFiles/
+build/CMakeCache.txt
+build/cmake_install.cmake
+build/Makefile
+build/game
+build/game.exe
+
+# --- Compilados ---
+src/*.o
+src/*.obj
+src/*.exe
+src/*.dll
+src/*.so
+src/*.a
+src/*.lib
+src/*.out
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ilk
+
+# --- Visual Studio ---
+.vs/
+*.user
+*.suo
+*.db
+*.opendb
+*.vc.db
+*.ipch
+*.aps
+
+# --- Pacotes NuGet -----
+packages/
+
+# --- Pastas de Compilação ---
+x64/
+Debug/
+Release/
+build/
+bin/
+obj/
+
+# --- OS generated files ---
+.DS_Store
+Thumbs.db
+desktop.ini
