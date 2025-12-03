@@ -754,7 +754,7 @@ void render_minotaur_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Minotauro de arquimedes", MINOTAUR, 700, 405, 5, 10, 25, 150, 30,0,0,0);
+    init_enemy(game->enemy, "Minotauro de arquimedes", MINOTAUR, 700, 405, 5, 20, 25, 150, 30,0,0,0);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
@@ -1845,10 +1845,10 @@ void resolve_interaction_with_puzzle(Game* game, Player* player, Entity* current
 }
 
 void check_first_equation(Game* game, Door* door){
-    int result = 3;
+    int result = 20;
     int current_val = 0;
 
-    bool found_3 = false;
+    bool found_20 = false;
 
      for (int i = 0; i < game->num_world_entities; i++) {
         Entity* e = game->world_entities[i];
@@ -1860,9 +1860,9 @@ void check_first_equation(Game* game, Door* door){
         }
     }
 
-    if (current_val == 3) found_3 = true;
+    if (current_val == result) found_20 = true;
     
-    if (found_3 && door != NULL) {
+    if (found_20 && door != NULL) {
         door->entity.is_locked_puzzle = false; 
         sprintf(game->log_ln1, "Um mecanismo range!");
     } else {
@@ -1885,7 +1885,7 @@ void check_second_equation(Game* game, Door* door){
         }
     }
 
-    if (current_val == 12) found_12 = true;
+    if (current_val == result) found_12 = true;
 
     if (found_12 && door != NULL) {
         door->entity.is_locked_puzzle = false; 
@@ -2056,8 +2056,8 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
 
                         al_start_timer(game->timer_game_logs);
                         sprintf(game->log_ln1, "Você usa a chave da Medusa.");
-                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
-                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln2, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln3, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
                         sprintf(game->log_ln4, "Está escrito na porta");
                         sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
                         
@@ -2331,6 +2331,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
 
     if(game->battle->state == BATTLE_NONE){
         change_game_state(game, GAME_END);
+        return;
         // game->gameplay_state = GAMEPLAY_EXPLORING;
         // load_third_map(game);
 
@@ -2346,6 +2347,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
         // }
         // return;
     }
+
     if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
         
         if (game->battle->enemy) {
@@ -2647,6 +2649,13 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
 
                 key[ALLEGRO_KEY_ENTER] = 0;
             }
+            break;
+        case GAME_END:
+            if(key[ALLEGRO_KEY_ENTER]){
+
+                change_game_state(game, GAME_CLOSE);
+            }
+            break;
         default:
             break;
     }
@@ -3856,6 +3865,7 @@ void draw_game(Game* game){
             al_draw_text(game->subtitle_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Muito obrigado por jogar!");
 
             al_draw_text(game->subtitle_11_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, - 50, ALLEGRO_ALIGN_CENTER, "Desenvolvido pelos caras!");
+            return;
     }
 
     switch (game->gameplay_state){
