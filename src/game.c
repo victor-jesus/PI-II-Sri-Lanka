@@ -828,7 +828,7 @@ void render_arauto_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, "Arauto", ARAUTO, 800, 400, 5, 100, 100, 500, 0,0,0,0);
+    init_enemy(game->enemy, "Arauto", ARAUTO, 800, 400, 5, 90, 100, 500, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 5, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_walk, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_arauto_attack, ANIM_ATTACK, 6, 1, 0.1f);
@@ -1120,15 +1120,6 @@ void draw_minotaur_level(Game* game){
         default:
             break;
         }
-    } else {
-        al_draw_scaled_bitmap(
-            game->enemy->hp_canva,
-            0, 0,
-            895, 470,
-            SCREEN_W - 380, 20,
-            324, 170,
-            0
-        );
     }
 
 }
@@ -1389,15 +1380,6 @@ void draw_medusa_level(Game* game){
             break;
         }
 
-    } else {
-        al_draw_scaled_bitmap(
-            game->enemy->hp_canva,
-            0, 0,
-            895, 470,
-            SCREEN_W - 380, 20,
-            324, 170,
-            0
-        );
     }
 
 }
@@ -1670,16 +1652,6 @@ void draw_arauto_level(Game* game){
         default:
             break;
         }
-    } else {
-
-        al_draw_scaled_bitmap(
-            game->enemy->hp_canva,
-            0, 0,
-            895, 470,
-            SCREEN_W - 380, 20,
-            324, 170,
-            0
-        );
     }
 
 
@@ -2477,15 +2449,15 @@ void reset_level(Game* game, Game_state game_state){
     switch(game_state){
         default:
             game->state = game->previous_game_state;
-        case GAME_FIRST_MISSION:
+        case GAME_MINOTAUR_LEVEL:
             game->is_first_level_mobs_dead = false;
             load_first_map(game);
             break;
-        case GAME_SECOND_MISSION:
+        case GAME_MEDUSA_LEVEL:
             game->is_second_level_mobs_dead = false;
             load_second_map(game);
             break;
-        case GAME_THIRD_MISSION:
+        case GAME_ARAUTO_LEVEL:
             game->is_third_level_mobs_dead = false;
             load_third_map(game);
             break;
@@ -2502,9 +2474,13 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* 
         }
     }
 
-    if(is_player_dead(game->player)){
+    bool is_dead = is_player_dead(game->player);
+    if(is_dead) al_start_timer(game->timer_death);
+
+    if(event.timer.source == game->timer_death){
         if(game->state != GAME_OVER) game->previous_game_state = game->state;
 
+        
         change_game_state(game, GAME_OVER);
         return;
     }

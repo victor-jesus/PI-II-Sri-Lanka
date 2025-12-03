@@ -36,14 +36,14 @@ void load_item_database() {
     set_entity_pos(WATER->entity, 670, 640);
 
     AMULET_OF_STRENGTH = create_item(path_amulet_atk, "Amuleto de força", "Amuleto da Força", "+5 de Ataque", 5, false, 1, ITEM_EQUIPMENT);
-    AMULET_OF_STRENGTH->attack_buff = 10;
-    AMULET_OF_STRENGTH->defense_buff = 5; 
+    AMULET_OF_STRENGTH->attack_buff = 5;
+    AMULET_OF_STRENGTH->defense_buff = 2; 
     AMULET_OF_STRENGTH->iniciative_buff = 4;
     AMULET_OF_STRENGTH->max_hp_buff = 7;
 
     AMULET_OF_PROTECTION = create_item(path_amulet_def, "Amuleto de Defesa", "Amuleto da Proteção", "+5 de Defesa", 5, false, 1, ITEM_EQUIPMENT);
     AMULET_OF_PROTECTION->attack_buff = 2;
-    AMULET_OF_PROTECTION->defense_buff = 10; 
+    AMULET_OF_PROTECTION->defense_buff = 5; 
     AMULET_OF_PROTECTION->iniciative_buff = 0;
     AMULET_OF_PROTECTION->max_hp_buff = 15;
 

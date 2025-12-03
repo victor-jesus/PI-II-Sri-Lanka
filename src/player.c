@@ -133,6 +133,17 @@ void update_player_battle(Player* player, unsigned char* key, float dt){
     update_hit_box(&player->entity);
     player->moving = false;
 
+    if(player->entity.anim_state == ANIM_DEATH){
+
+        Sprite* death = player->entity.sprite[ANIM_DEATH];
+
+        if(death->current_frame < death->cols - 1)
+            update_sprite(death, dt);
+            return;
+
+        return;
+    }
+
     if(player->entity.anim_state == ANIM_HIT){
         Sprite* hit = player->entity.sprite[ANIM_HIT];
         update_sprite(hit, dt);
@@ -156,7 +167,7 @@ void update_player_battle(Player* player, unsigned char* key, float dt){
         }
         return;
     }
-    
+
     Sprite* current = player->entity.sprite[player->entity.anim_state];
     update_sprite(current, dt);
 }

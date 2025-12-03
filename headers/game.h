@@ -78,6 +78,7 @@ typedef struct {
     ALLEGRO_TIMER* timer_game_logs;
     ALLEGRO_TIMER* timer_game_tips;
     ALLEGRO_TIMER* timer_game_can_draw_tips;
+    ALLEGRO_TIMER* timer_death;
     char log_ln1[256];
     char log_ln2[256];
     char log_ln3[256];

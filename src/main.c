@@ -169,14 +169,9 @@ void handle_battle_main_menu(Game* game, unsigned char* key) {
 }
 
 void handle_input(Game* game, unsigned char* key) {
-    // 1. Input de Exploração
     if(game->gameplay_state == GAMEPLAY_EXPLORING) {
         select_item(game->player, key);
     } 
-    // 2. Input de Batalha (Atalhos H, J, K)
-    else if (game->gameplay_state == GAMEPLAY_BATTLE){
-        select_item_battle(game->player, key); 
-    }
 
     if(game->state == GAME_TUTORIAL){
         if(key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_B]){
