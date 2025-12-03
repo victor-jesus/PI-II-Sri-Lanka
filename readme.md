@@ -6,8 +6,6 @@
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias Usadas](#tecnologias-usadas)
 - [Como Jogar](#como-jogar)
-- [Demonstração](#demonstração)
-- [Instalação](#instalação)
 - [Referências](#referências)
 - [Contato](#contato)
 
@@ -41,26 +39,21 @@ Uma dica valiosa, jovem estudante: o território do Arauto é repleto de mistér
 - Encontre enigmas que exigem resolução de problemas matemáticos para continuar.  
 - Durante as batalhas por turnos, escolha entre atacar, usar um item ou se defender.  
 - Resolva os enigmas e derrote os bosses para avançar na história e conquistar o conhecimento supremo.  
-- Utilize dicas encontradas no mapa para facilitar os desafios mais complexos. 
-
-## Demonstração
-Confira o vídeo demonstrativo do jogo:  
-[![Watch the video](https://img.youtube.com/vi/seu-video-id/hqdefault.jpg)](https://www.youtube.com/watch?v=seu-video-id)
-
-## Instalação
-1. Clone o repositório: https://github.com/victor-jesus/PI-II-Sri-Lanka.git
-2. Instale a biblioteca Allegro no seu sistema.  
-3. Compile e execute conforme o `Makefile`.
+- Utilize dicas encontradas no mapa para facilitar os desafios mais complexos.
+- Para mais informações, clique no botão Tutorial ao executar o jogo 
 
 
 ## Referências
 - Biblioteca Allegro: https://liballeg.org  
 - Dungeons & Dragons (inspiração para o sistema de batalha): https://www.dndbeyond.com
 - CraftPix (assets gráficos): https://craftpix.net/  
-- Itch.io (mercado e comunidade de jogos independentes): https://itch.io  
+- Itch.io (mercado e comunidade de jogos independentes): https://itch.io
+  
 
 ## Contato
-Seu Nome - [LinkedIn](https://www.linkedin.com/in/seuperfil) 
+- Alexi Dias - [LinkedIn](https://www.linkedin.com/in/alexi-dias-amâncio-38a77b32b/) 
+- Riquelme Viana - [LinkedIn](https://www.linkedin.com/in/riquelme-viana/) 
+- Victor Gustavo - [LinkedIn](https://www.linkedin.com/in/victor-gustavo-jesus/) 
 
 
 
