@@ -3,7 +3,9 @@
 
 typedef enum{
     D_20,
-    D_8, 
+    D_10,
+    D_8,
+    D_6,
     D_4
 } Dice;
 

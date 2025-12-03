@@ -8,6 +8,21 @@
 
 #define QUANT_ANIMATIONS 5
 
+typedef enum {
+    PUZZLE_NONE = 0,
+    PUZZLE_BHASKARA,
+    PUZZLE_1GRAU,
+    PUZZLE_EQUATION_1GRAU,
+    PUZZLE_PITAGORAS,
+    PUZZLE_EQUATION_PITAGORAS,
+    PUZZLE_NEWTONS_LAWS,
+    PUZZLE_DOOR_BHASKARA,
+    PUZZLE_EQUATION_BHASKARA,
+    PUZZLE_DIAL_1,
+    PUZZLE_DIAL_2,
+    PUZZLE_DIAL_3
+} Puzzle_id;
+
 typedef enum{
     DOOR,
     KEY,
@@ -16,6 +31,9 @@ typedef enum{
     ENVIRONMENT_MOVE,
     INVENTORY,
     UI,
+    EDUCATIONAL,
+    PUZZLE_DIAL,
+    PUZZLE_LEVER,
     CHARACTER
 } Entity_type;
 
@@ -25,11 +43,16 @@ typedef struct {
     Box box;
     int x, y, vx, vy;
     int flip;
-    int hp;
+    int hp, base_max_hp,max_hp; 
     int offset_up, offset_down, offset_left, offset_right;
     float scale_factor;
     Entity_type entity_type;
     bool isActive;
+
+    Puzzle_id puzzle_id;
+    int puzzle_value;
+
+    bool is_locked_key, is_locked_puzzle;
 } Entity;
 
 void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_type type);

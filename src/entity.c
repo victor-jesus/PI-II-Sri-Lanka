@@ -12,10 +12,17 @@ void init_entity(Entity* entity, int x, int y, int vx, int vy, int hp, Entity_ty
     entity->vx = vx;
     entity->vy = vy;
     entity->hp = hp;
+    entity->max_hp = hp;
     entity->flip = 0;
     entity->isActive = true;
     entity->scale_factor = 1.0f; 
     entity->entity_type = entity_type;
+    entity->puzzle_value = 0;
+
+    entity->is_locked_key = false;
+    entity->is_locked_puzzle = false;
+    
+    entity->puzzle_id = PUZZLE_NONE;
 }
 
 void set_entity_pos(Entity* entity, int x, int y){
@@ -54,7 +61,7 @@ void set_entity_anim(Entity* entity, const char* path, AnimationState animation_
 }
 
 void update_entity(Entity* entity, float dt){
-    if(entity->entity_type == ENVIRONMENT_NO_MOVE) return;
+    if(entity->entity_type == ENVIRONMENT_NO_MOVE || entity->entity_type == EDUCATIONAL) return;
     Sprite* current = entity->sprite[entity->anim_state];
     
     if (!current) {

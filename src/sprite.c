@@ -51,7 +51,6 @@ void destroy_sprite(Sprite* sprite){
         if(sprite->bitmap){
             al_destroy_bitmap(sprite->bitmap);
         }
-        //free(sprite);
     }
 }
 

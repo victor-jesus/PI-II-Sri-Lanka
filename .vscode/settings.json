@@ -15,6 +15,11 @@
         "stdio.h": "c",
         "typeinfo": "c",
         "item_type.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "battle_states.h": "c",
+        "bit": "c",
+        "type_traits": "c",
+        "cmath": "c",
+        "door.h": "c"
     }
 }

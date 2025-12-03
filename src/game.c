@@ -11,6 +11,8 @@
 #include <stdlib.h> 
 #include "door.h"
 #include "box.h"
+#include <string.h>
+#include "game_state.h"
 
 /*
     Animações do player, como são unicas decidi coloca-las aqui de maneira manual
@@ -19,23 +21,35 @@ const char* path_idle = "assets/sprites/warrior_2/IDLE.png";
 const char* path_run = "assets/sprites/warrior_2/RUN.png";
 const char* path_attack = "assets/sprites/warrior_2/ATTACK_1.png";
 const char* path_hit = "assets/sprites/warrior_2/HURT.png";
+const char* path_death = "assets/sprites/warrior_2/DEATH.png";
 
 // Mesma coisa para o enemy, por enquanto
 const char* path_minotaur_idle = "assets/sprites/minotaur_1/idle.png";
 const char* path_minotaur_run = "assets/sprites/minotaur_1/walk.png";
 const char* path_minotaur_attack = "assets/sprites/minotaur_1/attack.png";
 const char* path_minotaur_hit = "assets/sprites/minotaur_1/hurt.png";
+const char* path_minotaur_death = "assets/sprites/minotaur_1/dead.png";
 
+const char* path_skeleton_idle = "assets/sprites/skeleton/idle.png";
+const char* path_skeleton_run = "assets/sprites/skeleton/walk.png";
+const char* path_skeleton_attack = "assets/sprites/skeleton/attack.png";
+const char* path_skeleton_hit = "assets/sprites/skeleton/hit.png";
+const char* path_skeleton_death = "assets/sprites/skeleton/dead.png";
 
 const char* path_medusa_idle = "assets/sprites/medusa_1/idle.png";
 const char* path_medusa_walk = "assets/sprites/medusa_1/walk.png";
 const char* path_medusa_attack = "assets/sprites/medusa_1/attack_1.png";
 const char* path_medusa_hit = "assets/sprites/medusa_1/hurt.png";
+const char* path_medusa_dead = "assets/sprites/medusa_1/dead.png";
 
-const char* path_arauto_idle = "assets/sprites/arauto_1/idle.png";
+const char* path_arauto_idle = "assets/sprites/arauto_1/Idle_2.png";
 const char* path_arauto_walk = "assets/sprites/arauto_1/walk.png";
-const char* path_arauto_attack = "assets/sprites/arauto_1/attack_1.png";
+const char* path_arauto_attack = "assets/sprites/arauto_1/Attack_2.png";
 const char* path_arauto_hit = "assets/sprites/arauto_1/hurt.png";
+const char* path_arauto_dead = "assets/sprites/arauto_1/dead.png";
+
+const char* path_portrait_arauto = "assets/sprites/arauto_1/Arauto.png";
+const char* path_hp_canva_arauto = "assets/sprites/arauto_1/dead.png";
 
 const char* path_map_tile = "assets/sprites/map/background-wall.png";
 const char* path_map_tile_floor = "assets/sprites/map/chao-4.png";
@@ -52,19 +66,42 @@ const char* path_torch = "assets/sprites/map/torch.png";
 const char* path_window_1 = "assets/sprites/map/window_1.png";
 const char* path_window_big = "assets/sprites/map/big_window.png";
 const char* path_bau = "assets/sprites/enviroment/bau.png";
-const char* path_quadro_bhakara = "assets/sprites/enviroment/quadro-bhaskara.png";
+
+const char* path_quadro_bhaskara = "assets/sprites/enviroment/quadro-bhaskara.png";
+const char* path_tabuleta_bhaskara = "assets/sprites/enviroment/tabuleta-bhaskara.png";
+
+const char* path_tabuleta_bhaskara_2 = "assets/sprites/enviroment/tabulete-bhaskara_2.png";
+
+const char* path_quadro_pitagoras = "assets/sprites/enviroment/quadro-pitagoras.png";
+const char* path_tabuleta_pitagoras = "assets/sprites/enviroment/tabuleta-pitagoras.png";
+
+const char* path_quadro_1grau = "assets/sprites/enviroment/quadro-equacao-1grau.png";
+const char* path_tabuleta_1grau = "assets/sprites/enviroment/tabuleta-equacao-1grau.png";
+
+
+const char* path_roda = "assets/sprites/enviroment/roda.png";
 const char* path_armadura_env = "assets/sprites/enviroment/armadura_1.png";
 
-const char* path_water = "assets/sprites/transparent/water-potion.png";
-const char* path_small_potion = "assets/sprites/transparent/small-potion.png";
-const char* path_big_potion = "assets/sprites/transparent/big-potion.png";
-
 const char* path_heart = "assets/sprites/transparent/heart.png";
+const char* path_shield = "assets/sprites/transparent/shield.png";
+const char* path_shield_enemy = "assets/sprites/transparent/shield_enemy.png";
+const char* path_sword_ui = "assets/sprites/transparent/sword.png";
+
+const char* path_hp_canva_minotaur = "assets/sprites/minotaur_1/minotaur_hp.png";
+const char* path_portrait_minotaur = "assets/sprites/minotaur_1/portrait_minotaur.jpeg";
+
+const char* path_hp_canva_medusa = "assets/sprites/minotaur_1/minotaur_hp.png";
+const char* path_portrait_medusa = "assets/sprites/medusa_1/portrait_medusa.png";
+
+const char* path_portrait_player = "assets/sprites/warrior_2/portrait_player.png";
+const char* path_player_sprite_hp = "assets/sprites/warrior_2/hp_player.png";
 
 const char* path_initial_background = "assets/background_level_01.jpg";
 const char* path_dialogue_box = "assets/sprites/ui/gui/dialogue_box.png";
+const char* path_dialogue_box_battle = "assets/sprites/ui/gui/dialogue_box_battle.png";
 
 const char* path_subtitle_8_font = "assets/fonts/pressStart2p.ttf";
+const char* path_log_font = "assets/fonts/fonte_titulo.ttf";
 
 const char* path_key_e = "assets/sprites/ui/controls/KEYBOARD/KEYS/E.png";
 
@@ -85,29 +122,46 @@ void reset_world_entities(Game* game){
     for(int i = 0; i < game->num_world_entities; i++){
 
         if(game->world_entities[i] != NULL){
-            
             free(game->world_entities[i]);
-            game->world_entities[i] = NULL;
+                game->world_entities[i] = NULL;
         }
     }
     game->num_world_entities = 0;
 }
 
-Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
+void initial_inventory(Game* game){
+    inventory_add_item(&game->player->inventory, BIG_POTION, 2);
+    inventory_add_item(&game->player->inventory, SMALL_POTION, 3);
+    inventory_add_item(&game->player->inventory, WATER, 1);
+}
+
+void change_game_state(Game* game, Game_state game_state){
+    game->state = game_state;
+}
+
+Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font, ALLEGRO_FONT* subtitle_font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_EVENT* event, int pos_x_player, int pos_y_player, int vx_player, int hp_player){
     Game* game = malloc(sizeof(Game));
     game->state = state;
     game->gameplay_state = GAMEPLAY_NONE;
     game->player = malloc(sizeof(Player));   
-
+    
     game->map = malloc(sizeof(Map));
     game->map->wall = NULL;
     game->map->floor = NULL;
     game->map->floor_2 = NULL;
-
+    
     game->num_world_entities = 0;
     game->init_dialogues = DIALOGUE_NONE;
 
-    init_player(game->player, 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 25, 22, 30, 30);
+    game->world_enemies = 0;
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        game->mobs[i] = NULL;
+    }
+    
+    init_player(game->player, "Estudante", 100, pos_x_player, (SCREEN_H / 2) + 60, vx_player, 5, 15, 15, 25, 22, 30, 30);
+    game->player->portrait = al_load_bitmap(path_portrait_player);
+    game->player->player_hp = al_load_bitmap(path_player_sprite_hp);
 
     Entity* hp = malloc(sizeof(Entity));
     init_entity(hp, 0, 0, 0, 0, 1, UI);
@@ -117,29 +171,86 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     set_entity_pos(hp, SCREEN_W - (hp->box.w) - 20, 10);
     add_world_entity(game, hp);
 
+    game->queue = queue;
+    game->event = event;
+
     set_entity_anim(&game->player->entity, path_idle, ANIM_IDLE, 7, 1, 0.12f);
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.07f);
     set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_death, ANIM_DEATH, 12, 1, 0.1f);
     set_entity_scale(&game->player->entity, 2.5);
-
+    
     game->enemy = NULL;
-    game->battle = NULL;
+
+    game->battle = malloc(sizeof(Battle));
+
+    game->battle->timer_end = al_create_timer(5.0);
+    game->battle->log_timer = al_create_timer(10.0);
+    game->battle->timer_enemy = al_create_timer(3.5);
+    game->timer_game_logs = al_create_timer(6.0);
+    game->timer_game_tips = al_create_timer(30.0);
+    game->battle->error_timer = al_create_timer(0.3);
+    game->timer_game_can_draw_tips = al_create_timer(2.0);
+    game->timer_death = al_create_timer(5.0);
+    game->battle->battle_font = subtitle_font;
+    al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->battle->log_timer));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_enemy));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_logs));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_tips));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_can_draw_tips));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_death));
+
+    al_register_event_source(queue, al_get_timer_event_source(game->battle->error_timer));
 
     game->game_font = font;
     game->title_font = title_font;
     game->subtitle_font = subtitle_font;
+    game->log_font = al_load_ttf_font(path_log_font, 32, 0);
+    game->log_font_20 = al_load_ttf_font(path_log_font, 20, 0);
     game->subtitle_8_font = al_load_ttf_font(path_subtitle_8_font, 8, 0);
+    game->subtitle_11_font = al_load_ttf_font(path_subtitle_8_font, 11, 0);
 
-    game->player->hp_heart = al_load_bitmap("assets/sprites/transparent/heart.png");
+    game->player->hp_heart = al_load_bitmap(path_heart);
+    game->player->shield = al_load_bitmap(path_shield);
+    game->player->sword_ui = al_load_bitmap(path_sword_ui);
+
     game->background = al_load_bitmap("assets/Menu_Design.png");
-
+    
     game->controls = al_load_bitmap(path_key_e);
+    game->puzzle_bhaskara_img = al_load_bitmap(path_quadro_bhaskara);
+    game->puzzle_bhaskara_paper = al_load_bitmap(path_tabuleta_bhaskara);
+    game->puzzle_bhaskara_paper_2 = al_load_bitmap(path_tabuleta_bhaskara_2);
 
+    game->puzzle_pitagoras_img = al_load_bitmap(path_quadro_pitagoras);
+    game->puzzle_pitagoras_paper_3 = al_load_bitmap(path_tabuleta_pitagoras);
+
+    game->puzzle_1grau_img = al_load_bitmap(path_quadro_1grau);
+    game->puzzle_1grau_paper = al_load_bitmap(path_tabuleta_1grau);
+
+    
     al_identity_transform(&game->camera_transform);
-   
+    
+    
+    game->log_ln1[0] = '\0';
+    game->log_ln2[0] = '\0';
+    game->log_ln3[0] = '\0';
+    game->log_ln4[0] = '\0';
+    game->log_ln5[0] = '\0';
 
-    initial_inventory(game);
+    game->can_draw = true;
+
+    game->is_minotaur_dead = false;
+    game->is_medusa_dead = false;
+    game->is_arauto_dead = false;
+
+    game->is_first_level_mobs_dead = false;
+    game->is_second_level_mobs_dead = false;
+    game->is_third_level_mobs_dead = false;
+
+    load_item_database();
+    initial_inventory(game); 
 
     // Item* HEAL_SMALL_POTION = create_item(2, "Poção Pequena", "Cura 10 HP.", 10, true, 3, ITEM_SMALL_HEAL);
     // add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
@@ -147,30 +258,14 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     // Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
     // add_item(&game->player->inventory, HEAL_WATER, 5);
 
+    player_equip_item(game->player, KEY_TO_MINOTAUR);
+    player_equip_item(game->player, KEY_TO_MEDUSA);
+    player_equip_item(game->player, KEY_TO_ARAUTO);
+    player_equip_item(game->player, KEY_TO_SECOND_MAP);
+    player_equip_item(game->player, KEY_TO_THIRD_MAP);
+
 
     return game;
-}
-
-void check_map_collision(Entity* entity, Map* map) {
-    for (int row = 0; row < MAP_HEIGHT; row++) {
-        for (int col = 0; col < MAP_WIDTH; col++) {
-            if (map->tiles[row][col] == TILE_WALL) {
-                Box tile_box = get_tile_box(row, col);
-
-                if (entity->box.x < tile_box.x + tile_box.w &&
-                    entity->box.x + entity->box.w > tile_box.x &&
-                    entity->box.y < tile_box.y + tile_box.h &&
-                    entity->box.y + entity->box.h > tile_box.y)
-                {
-                    resolve_collision_between_boxes(entity, &tile_box);
-                }
-            }
-        }
-    }
-
-    if(entity->y > 480) entity->y = 480;
-    if(entity->x < 10) entity->x = 10;
-    if(entity->x > (MAP_WIDTH * TILE_W) - 50) entity->x = (MAP_WIDTH * TILE_W) - 50;
 }
 
 void resolve_collision_between_boxes(Entity* b1, Box* b2){
@@ -200,6 +295,35 @@ void resolve_collision_between_boxes(Entity* b1, Box* b2){
     }
 
     update_hit_box(b1);
+}
+
+void check_map_collision(Entity* entity, Map* map) {
+    for (int row = 0; row < MAP_HEIGHT; row++) {
+        for (int col = 0; col < MAP_WIDTH; col++) {
+            if (map->tiles[row][col] == TILE_WALL) {
+                Box tile_box = get_tile_box(row, col);
+
+                if (entity->box.x < tile_box.x + tile_box.w &&
+                    entity->box.x + entity->box.w > tile_box.x &&
+                    entity->box.y < tile_box.y + tile_box.h &&
+                    entity->box.y + entity->box.h > tile_box.y)
+                {
+                    resolve_collision_between_boxes(entity, &tile_box);
+                }
+            }
+        }
+    }
+}
+
+void resolve_map_collision(Entity* entity, Map* map){
+    if(entity->x > (MAP_WIDTH * TILE_W) - 50) entity->x = (MAP_WIDTH * TILE_W) - 50;
+    if(entity->x < 0) entity->x = 0;
+    if(entity->y > 490) entity->y = 490;
+    else if(entity->y < 290) entity->y = 290;
+}
+
+void resolve_map_collision_battle(Entity* entity){
+    if(entity->x > 800) entity->x = 800;
 }
 
 Entity* create_entity(const char* path, float x, float y, float scale, float frame, int cols, int rows, float dt, Entity_type entity_type){
@@ -247,21 +371,6 @@ Entity* create_banner(const char* path, float x, float y, float scale, int frame
     set_hit_box(banner, 0, 0, 0, 0);
     return banner;
 }
-    
-
-void initial_inventory(Game* game){
-    Item* HEAL_POTION = create_item(path_big_potion, "H", "Poção Grande", "Cura 20 HP.", 20, true, 5, ITEM_HEAL);
-    add_item(&game->player->inventory, HEAL_POTION, 2);
-    set_entity_pos(HEAL_POTION->entity, 150, 680); 
-
-    Item* HEAL_SMALL_POTION = create_item(path_small_potion, "J", "Poção Pequena", "Cura 10 HP.", 10, true, 5, ITEM_SMALL_HEAL);
-    add_item(&game->player->inventory, HEAL_SMALL_POTION, 3);
-    set_entity_pos(HEAL_SMALL_POTION->entity, 200, 680);
-
-    Item* WATER_POTION = create_item(path_water, "K", "Garrafa de agua", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
-    add_item(&game->player->inventory, WATER_POTION, 1);
-    set_entity_pos(WATER_POTION->entity, 250, 680);
-}
 
 void render_initial_level(Game* game){
     reset_world_entities(game);
@@ -272,7 +381,7 @@ void render_initial_level(Game* game){
             game->background = NULL;
         }
 
-        game->state = GAME_INIT;
+        change_game_state(game, GAME_INIT);
         game->background = al_load_bitmap(path_initial_background);
         if (!game->background) {
             printf("ERRO: Nao foi possivel carregar background_level_01.jpg\n");
@@ -291,13 +400,74 @@ void render_initial_level(Game* game){
     game->init_dialogues = DIALOGUE_1;
 }
 
+void add_skeleton(Game* game, int x, int y, int attack, int defense){
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if(game->mobs[i] == NULL){
+            game->mobs[i] = malloc(sizeof(Enemy));
+
+            if (game->mobs[i] == NULL) {
+                printf("ERRO: Falha ao alocar memória para o esqueleto!\n");
+                return;
+            }
+            
+            init_enemy(game->mobs[i], "Esqueleto", MOB, x, y, 5, attack, defense, 100, 0,0,0,0);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_idle, ANIM_IDLE, 11, 1, 0.1f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_run, ANIM_RUN, 12, 1, 0.06f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_attack, ANIM_ATTACK, 18, 1, 0.1f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_hit, ANIM_HIT, 8, 1, 0.14f);
+            set_entity_anim(&game->mobs[i]->entity, path_skeleton_death, ANIM_DEATH, 15, 1, 0.25f);
+
+    
+            game->mobs[i]->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+            set_entity_scale(&game->mobs[i]->entity, 3.0);
+    
+            game->mobs[i]->hp_heart = al_load_bitmap(path_heart);
+            game->mobs[i]->shield_enemy = al_load_bitmap(path_shield_enemy);
+            
+            game->world_enemies++;
+            return;
+        }
+    }
+}
+
+void remove_all_mobs(Game* game){
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        free(game->mobs[i]);
+        game->mobs[i] = NULL;
+    }
+}
+
+const char* tip_1 = "Você pode interagir com alguns itens do cenário";
+const char* tip_2 = "Pressione ESC para pausar o jogo\nE ver suas estatisticas";
+void log_tips(Game* game){
+    if(game->can_draw == false) return;
+
+    int rand_num = rand() % 2 + 1;
+    
+    switch (rand_num){
+        case 1:
+            sprintf(game->log_ln1, tip_1);
+            break;
+        case 2:
+            sprintf(game->log_ln1, tip_2);
+            break;
+        default:
+            break;
+    }
+
+    al_start_timer(game->timer_game_tips);
+
+    game->can_draw = false;
+}
 
 /*
     Refatorar as funções de criar entidades e implementar posição relacionada ao eixo X (LEVEL_WIDTH * porcentagem)
 */
 void load_first_map(Game* game) {
+    game->world_enemies = 0;
+
     reset_world_entities(game);
-    game->state = GAME_FIRST_MISSION;
+    change_game_state(game, GAME_FIRST_MISSION);
     game->gameplay_state = GAMEPLAY_EXPLORING;
 
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -310,26 +480,53 @@ void load_first_map(Game* game) {
                 game->map->tiles[y][x] = TILE_WALL;
         }
     }
+
     init_map(game->map, path_map_tile, path_map_tile_floor, path_map_tile_floor_rock);
 
     const float LEVEL_WIDTH = 6000.0f;
     const float GROUND_Y = (SCREEN_H / 2.0f) - 96.0f;
     const float WALL_Y = (SCREEN_H / 2.0f) - 250.0f;
 
-    Entity* bhaskara_frame = malloc(sizeof(Entity));
-    init_entity(bhaskara_frame, LEVEL_WIDTH * 0.05f, WALL_Y, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(bhaskara_frame, path_quadro_bhakara, ANIM_IDLE, 1, 1, 0.1f);
-    set_entity_scale(bhaskara_frame, 1.5);
-    set_hit_box(bhaskara_frame, 0, 0, 0, 0);
+    Entity* grau1_frame = malloc(sizeof(Entity));
+    init_entity(grau1_frame, LEVEL_WIDTH * 0.05f, WALL_Y, 0, 0, 1, EDUCATIONAL);
+    set_entity_anim(grau1_frame, path_quadro_1grau, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(grau1_frame, 0.5);
+    set_hit_box(grau1_frame, 0, 0, 0, 0);
+    grau1_frame->puzzle_id = PUZZLE_1GRAU;
 
     Entity* first_small_window = create_window(path_window_1, LEVEL_WIDTH * 0.13f, WALL_Y + 50, 2.0f);
 
     Door* minotaur_door = create_door(LEVEL_WIDTH * 0.22f, GROUND_Y, DOOR_MINOTAUR);
-    Entity* central_large_window = create_window(path_window_big, LEVEL_WIDTH * 0.30f, -15, 1.0f);
-    Entity* pi_banner_1 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.26f, WALL_Y - 50, 0.5f, 1, 1);
+    minotaur_door->entity.is_locked_key = true;
+    minotaur_door->entity.is_locked_puzzle = true;
+
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, minotaur_door->entity.x + 120, minotaur_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
+    // Entity* central_large_window = create_window(path_window_big, LEVEL_WIDTH * 0.30f, -15, 1.0f);
+    // Entity* pi_banner_1 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.26f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* pi_banner_2 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.34f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* central_torch = create_torch(LEVEL_WIDTH * 0.40f, GROUND_Y);
-    Entity* knight_armor = create_entity(path_armadura_env, LEVEL_WIDTH * 0.19, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, ENVIRONMENT_NO_MOVE);
+    Entity* knight_armor_1 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.42, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_1->puzzle_id = PUZZLE_EQUATION_1GRAU;
+    
+    Entity* knight_armor_2 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.15, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    minotaur_door->entity.puzzle_id = PUZZLE_DOOR_BHASKARA;
+    
+    if(!game->is_first_level_mobs_dead){
+        add_skeleton(game, 1000, 500, 5, 5);
+        add_skeleton(game, 2000, 400, 5, 5);
+        add_skeleton(game, 3200, 450, 5, 5);
+    }
 
     Entity* euler_banner_1 = create_banner(path_banner_e, LEVEL_WIDTH * 0.47f, WALL_Y, 0.3f, 1, 1);
     Entity* second_small_window = create_window(path_window_1, LEVEL_WIDTH * 0.57f, WALL_Y + 50, 2.0f);
@@ -343,12 +540,15 @@ void load_first_map(Game* game) {
     Entity* final_banner_left = create_banner(path_banner, final_door->entity.x - 70, final_door->entity.y, 0.5f, 6, 1);
     Entity* final_banner_right = create_banner(path_banner, final_door->entity.x + 70, final_door->entity.y, 0.5f, 6, 1);
     
-    add_world_entity(game, bhaskara_frame);
-    add_world_entity(game, knight_armor);
+    add_world_entity(game, grau1_frame);
+    add_world_entity(game, knight_armor_1);
+    add_world_entity(game, knight_armor_2);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
     add_world_entity(game, first_small_window);
     add_world_entity(game, &minotaur_door->entity);
-    add_world_entity(game, central_large_window);
-    add_world_entity(game, pi_banner_1);
+    // add_world_entity(game, central_large_window);
+    // add_world_entity(game, pi_banner_1);
     add_world_entity(game, pi_banner_2);
     add_world_entity(game, central_torch);
     add_world_entity(game, euler_banner_1);
@@ -360,11 +560,19 @@ void load_first_map(Game* game) {
     add_world_entity(game, final_torch_right);
     add_world_entity(game, final_banner_left);
     add_world_entity(game, final_banner_right);
+
+    add_world_entity(game, dial_1);
 }
 
 void load_second_map(Game* game) {
+    game->world_enemies = 0;
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        game->mobs[i] = NULL;
+    }
+
     reset_world_entities(game);
-    game->state = GAME_SECOND_MISSION;
+    change_game_state(game, GAME_SECOND_MISSION);
     game->gameplay_state = GAMEPLAY_EXPLORING;
 
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -375,15 +583,42 @@ void load_second_map(Game* game) {
     init_map(game->map, path_map_tile_cave_wall, path_map_tile_cave_floor, path_map_tile_cave_floor);
 
     const float LEVEL_WIDTH = 6000.0f;
-    const float GROUND_Y = (SCREEN_H / 2.0f) - 98.0f; // Posição Y base para objetos no chão
-    const float WALL_Y = (SCREEN_H / 2.0f) - 200.0f; // Posição Y base para objetos na parede
+    const float GROUND_Y = (SCREEN_H / 2.0f) - 98.0f;
+    const float WALL_Y = (SCREEN_H / 2.0f) - 200.0f;
 
     Door* start_door = create_door(LEVEL_WIDTH * 0.1f, GROUND_Y, DOOR_RETURN);
     Door* medusa_door = create_door(LEVEL_WIDTH * 0.4f, GROUND_Y, DOOR_MEDUSA);
+    medusa_door->entity.is_locked_key = true;
+    medusa_door->entity.is_locked_puzzle = true;
+
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, medusa_door->entity.x + 120, medusa_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
     Door* end_door = create_door(LEVEL_WIDTH * 0.9f, GROUND_Y, DOOR_NEXT_LEVEL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_3->puzzle_id = PUZZLE_EQUATION_PITAGORAS;
+    
+    Entity* pitagoras_frame = malloc(sizeof(Entity));
+    init_entity(pitagoras_frame, LEVEL_WIDTH * 0.05f, WALL_Y - 75, 0, 0, 1, EDUCATIONAL);
+    set_entity_anim(pitagoras_frame, path_quadro_pitagoras, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(pitagoras_frame, 1.5);
+    set_hit_box(pitagoras_frame, 0, 0, 0, 0);
+    pitagoras_frame->puzzle_id = PUZZLE_PITAGORAS;
+    
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
 
     game->player->entity.x = start_door->entity.x;
 
+    if(!game->is_second_level_mobs_dead){
+        add_skeleton(game, 1300, 500, 10, 20);
+        add_skeleton(game, 2400, 500, 10, 20);
+    }
+    
     Entity* left_torch = create_torch(start_door->entity.x - 120, start_door->entity.y);
     Entity* right_torch = create_torch(start_door->entity.x + 120, start_door->entity.y);
     
@@ -399,11 +634,21 @@ void load_second_map(Game* game) {
     add_world_entity(game, window_1);
     add_world_entity(game, center_window);
     add_world_entity(game, window_2);
+    add_world_entity(game, dial_1);
+    add_world_entity(game, pitagoras_frame);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
 }
 
 void load_third_map(Game* game) {
+    game->world_enemies = 0;
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        game->mobs[i] = NULL;
+    }
+
     reset_world_entities(game);
-    game->state = GAME_THIRD_MISSION;
+    change_game_state(game, GAME_THIRD_MISSION);
     game->gameplay_state = GAMEPLAY_EXPLORING;
 
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -423,16 +668,22 @@ void load_third_map(Game* game) {
     const float WALL_Y = (SCREEN_H / 2.0f) - 250.0f;
 
     Door* start_door = create_door(LEVEL_WIDTH * 0.03f, GROUND_Y, DOOR_RETURN);
-    Door* arauto_door = create_door(LEVEL_WIDTH * 0.07f, GROUND_Y, DOOR_ARAUTO);
+    Door* easter_egg_door = create_door(LEVEL_WIDTH * 0.4f, GROUND_Y, DOOR_EASTER_EGG);
     game->player->entity.x = start_door->entity.x;
 
     Entity* entry_torch = create_torch(LEVEL_WIDTH * 0.06f, GROUND_Y);
+
+    // Carrega os esqueletos se já não tiverem sido mortos
+    if(!game->is_third_level_mobs_dead){
+        add_skeleton(game, 1220, 500, 50, 50);
+    }
     
     Entity* bhaskara_frame = malloc(sizeof(Entity));
-    init_entity(bhaskara_frame, LEVEL_WIDTH * 0.09f, WALL_Y, 0, 0, 1, ENVIRONMENT_NO_MOVE);
-    set_entity_anim(bhaskara_frame, path_quadro_bhakara, ANIM_IDLE, 1, 1, 0.1f);
+    init_entity(bhaskara_frame, LEVEL_WIDTH * 0.09f, WALL_Y + 50, 0, 0, 1, EDUCATIONAL);
+    set_entity_anim(bhaskara_frame, path_quadro_bhaskara, ANIM_IDLE, 1, 1, 0.1f);
     set_entity_scale(bhaskara_frame, 1.5);
     set_hit_box(bhaskara_frame, 0, 0, 0, 0);
+    bhaskara_frame->puzzle_id = PUZZLE_BHASKARA;
 
     Entity* corridor_window_1 = create_window(path_window_1, LEVEL_WIDTH * 0.15f, WALL_Y + 50, 2.0f);
     Entity* corridor_banner_1 = create_banner(path_banner_e, LEVEL_WIDTH * 0.25f, WALL_Y, 0.3f, 1, 1);
@@ -442,18 +693,46 @@ void load_third_map(Game* game) {
     Entity* hall_banner_1 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.55f, WALL_Y - 50, 0.5f, 1, 1);
     Entity* hall_large_window = create_window(path_window_big, LEVEL_WIDTH * 0.65f, -15, 1.0f);
     Entity* hall_banner_2 = create_banner(path_banner_pi, LEVEL_WIDTH * 0.75f, WALL_Y - 50, 0.5f, 1, 1);
-    Door* minotaur_door = create_door(LEVEL_WIDTH * 0.80f, GROUND_Y, DOOR_MINOTAUR);
-    Entity* hall_torch = create_torch(minotaur_door->entity.x - 70, GROUND_Y);
 
-    Door* final_door = create_door(LEVEL_WIDTH * 0.95f, GROUND_Y, DOOR_NEXT_LEVEL);
+    Door* final_door = create_door(LEVEL_WIDTH * 0.95f, GROUND_Y, DOOR_ARAUTO);
+    final_door->entity.is_locked_key = true;
+    final_door->entity.is_locked_puzzle = true;
 
-    Entity* final_banner_left = create_banner(path_banner, final_door->entity.x - 200, final_door->entity.y - 100, 0.5f, 6, 1);
+    Entity* dial_1 = malloc(sizeof(Entity));
+    init_entity(dial_1, final_door->entity.x + 120, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_1, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_1, 1.5);
+    set_hit_box(dial_1, 0,0,0,0);
+    dial_1->puzzle_id = PUZZLE_DIAL_1;
+
+    Entity* dial_2 = malloc(sizeof(Entity));
+    init_entity(dial_2, final_door->entity.x + 240, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_2, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_2, 1.5);
+    set_hit_box(dial_2, 0,0,0,0);
+    dial_2->puzzle_id = PUZZLE_DIAL_2;
+
+    Entity* dial_3 = malloc(sizeof(Entity));
+    init_entity(dial_3, final_door->entity.x + 360, final_door->entity.y, 0,0, 1, PUZZLE_DIAL);
+    set_entity_anim(dial_3, path_roda, ANIM_IDLE, 1, 1, 0.1f);
+    set_entity_scale(dial_3, 1.5);
+    set_hit_box(dial_3, 0,0,0,0);
+    dial_3->puzzle_id = PUZZLE_DIAL_3;
+
+    Entity* final_banner_left = create_banner(path_banner, final_door->entity.x - 200, final_door->entity.y, 0.5f, 6, 1);
     Entity* final_torch_left = create_torch(final_door->entity.x - 120, final_door->entity.y);
-    Entity* final_torch_right = create_torch(final_door->entity.x + 120, final_door->entity.y);
-    Entity* final_banner_right = create_banner(path_banner, final_door->entity.x + 200, final_door->entity.y - 100, 0.5f, 6, 1);
+
+    Entity* knight_armor_1 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.42, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    
+    Entity* knight_armor_2 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.15, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+
+    Entity* knight_armor_3 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.81, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
+    knight_armor_3->puzzle_id = PUZZLE_EQUATION_BHASKARA;
+
+    Entity* knight_armor_4 = create_entity(path_armadura_env, LEVEL_WIDTH * 0.11, WALL_Y + 50, 0.2f, 1, 1, 1, 0.1f, EDUCATIONAL);
 
     add_world_entity(game, &start_door->entity);
-    add_world_entity(game, &arauto_door->entity);
+    add_world_entity(game, &easter_egg_door->entity);
     add_world_entity(game, entry_torch);
     add_world_entity(game, bhaskara_frame);
     add_world_entity(game, corridor_window_1);
@@ -463,32 +742,54 @@ void load_third_map(Game* game) {
     add_world_entity(game, hall_banner_1);
     add_world_entity(game, hall_large_window);
     add_world_entity(game, hall_banner_2);
-    add_world_entity(game, &minotaur_door->entity);
-    add_world_entity(game, hall_torch);
     add_world_entity(game, &final_door->entity);
     add_world_entity(game, final_banner_left);
     add_world_entity(game, final_torch_left);
-    add_world_entity(game, final_torch_right);
-    add_world_entity(game, final_banner_right);
+    add_world_entity(game, dial_1);
+    add_world_entity(game, dial_2);
+    add_world_entity(game, dial_3);
+    add_world_entity(game, knight_armor_1);
+    add_world_entity(game, knight_armor_2);
+    add_world_entity(game, knight_armor_3);
+    add_world_entity(game, knight_armor_4);
 }
 
 void render_minotaur_level(Game* game){
-    game->background = al_load_bitmap("assets/sprites/map/minotaur/background-minotaur.png");
     reset_world_entities(game);
+
+    game->background = al_load_bitmap("assets/sprites/map/minotaur/background-minotaur.png");
+
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 700, 405, 5, 100);
+    init_enemy(game->enemy, "Minotauro de arquimedes", MINOTAUR, 700, 405, 5, 20, 25, 150, 30,0,0,0);
     set_entity_anim(&game->enemy->entity, path_minotaur_idle, ANIM_IDLE, 10, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_minotaur_run, ANIM_RUN, 12, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_minotaur_attack, ANIM_ATTACK, 5, 1, 0.1f);
-    set_entity_anim(&game->enemy->entity, path_minotaur_hit, ANIM_HIT, 3, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_minotaur_hit, ANIM_HIT, 3, 1, 0.14f);
+    set_entity_anim(&game->enemy->entity, path_minotaur_death, ANIM_DEATH, 5, 1, 0.25f);
+
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+    game->enemy->portrait = al_load_bitmap(path_portrait_minotaur);
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
-    
+
+    game->enemy->hp_heart = al_load_bitmap(path_heart);
+    game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
+    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
+
     game->player->entity.x = 200; 
+    game->player->entity.flip = 0;
 
     game->player->entity.y = 517; 
+
+    start_battle(game->battle, game->player, game->enemy);
+
+    game->enemy->entity.y = 405;
+
+    game->battle->state = BATTLE_DIALOGUE;
+
+    game->battle->dialogues = 0;
+
 }
 
 void render_medusa_level(Game* game){
@@ -497,20 +798,35 @@ void render_medusa_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 800, 400, 5, 100);
+    init_enemy(game->enemy, "Medusa de Hipátia", MEDUSA, 800, 400, 5, 50, 50, 200, 0,0,0,0);
     set_entity_anim(&game->enemy->entity, path_medusa_idle, ANIM_IDLE, 7, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_walk, ANIM_RUN, 13, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_medusa_attack, ANIM_ATTACK, 16, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_medusa_hit, ANIM_HIT, 3, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_medusa_dead, ANIM_DEATH, 3, 1, 0.25f);
+
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+    game->enemy->portrait = al_load_bitmap(path_portrait_medusa);
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
     
-    game->gameplay_state = GAMEPLAY_EXPLORING; 
+    game->enemy->hp_heart = al_load_bitmap(path_heart);
+    game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
+    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
-    game->player->entity.x = 50; 
+    game->player->entity.x = 200; 
+    game->player->entity.flip = 0;
 
-    game->player->entity.y = 505; 
+    game->player->entity.y = 517; 
+
+    start_battle(game->battle, game->player, game->enemy);
+
+    game->enemy->entity.y = game->player->entity.y - 100;
+
+    game->battle->state = BATTLE_DIALOGUE;
+
+    game->battle->dialogues = DIALOGUE_MEDUSA_1;
+
 }
 
 void render_arauto_level(Game* game){
@@ -519,23 +835,40 @@ void render_arauto_level(Game* game){
 
     game->enemy = malloc(sizeof(Enemy));
 
-    init_enemy(game->enemy, 800, 400, 5, 100);
-    set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 6, 1, 0.1f);
+    init_enemy(game->enemy, "Arauto", ARAUTO, 800, 400, 5, 90, 100, 500, 0,0,0,0);
+    set_entity_anim(&game->enemy->entity, path_arauto_idle, ANIM_IDLE, 5, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_walk, ANIM_RUN, 8, 1, 0.06f);
     set_entity_anim(&game->enemy->entity, path_arauto_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->enemy->entity, path_arauto_hit, ANIM_HIT, 3, 1, 0.1f);
+    set_entity_anim(&game->enemy->entity, path_arauto_dead, ANIM_DEATH, 6, 1, 0.1f);
+
     game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+    game->enemy->portrait = al_load_bitmap(path_portrait_arauto);
     set_entity_scale(&game->enemy->entity, 2.0);
-    set_hit_box(&game->enemy->entity, 0, 0, 0, 0);
     
-    game->gameplay_state = GAMEPLAY_EXPLORING; 
+    game->enemy->hp_heart = al_load_bitmap(path_heart);
+    game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
+    game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
-    game->player->entity.x = 50; 
+    game->player->entity.x = 200; 
+    game->player->entity.flip = 0;
 
-    game->player->entity.y = 505; 
+    game->player->entity.y = 517; 
+
+    start_battle(game->battle, game->player, game->enemy);
+
+    game->enemy->entity.y = game->player->entity.y - 200;
+
+    game->battle->state = BATTLE_DIALOGUE;
+
+    game->battle->dialogues = DIALOGUE_ARAUTO_1;
+
+
 }
 
 void draw_minotaur_level(Game* game){
+    
     al_draw_scaled_bitmap(
         game->background,
         0, 0,
@@ -544,11 +877,262 @@ void draw_minotaur_level(Game* game){
         SCREEN_W, SCREEN_H,
         0
     );
+    
 
     al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
+
+    if(game->battle->state == BATTLE_DIALOGUE){
+        switch (game->battle->dialogues)
+        {
+        case DIALOGUE_BATTLE_0:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Você ousa adentrar");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "o labirinto do conhecimento?");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Sou o Minotauro,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "forjado pelos cálculos");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "e sabedoria de Arquimedes.");
+            
+            
+            break;
+        case DIALOGUE_BATTLE_1:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->player->portrait,
+                0,0,
+                520, 596,
+                SCREEN_W - 660, 50,
+                215, 246,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Não busco confronto,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "mas sim entendimento.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Vim desvendar");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "os segredos da matemática.");
+            break;
+        case DIALOGUE_BATTLE_2:
+            
+
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Muitos tentaram o mesmo caminho");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "e o final foi trágico,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "não será você que vai conseguir.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Me responda, jovem! Está pronto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "para raciocinar sob pressão,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "ou será mais uma alma");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "perdida e insignificante?");
+
+            break;
+        case DIALOGUE_BATTLE_3:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->player->portrait,
+                0,0,
+                520, 596,
+                SCREEN_W - 660, 50,
+                215, 246,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Não temo desafios!");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Cada obstáculo que venço");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "me leva mais perto do que busco.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Se preciso provar meu valor,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "que assim seja. Estou pronto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "e será uma honra");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "enfrentar um grande gênio");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "como você Arquimedes.");
+            
+            break;
+        case DIALOGUE_BATTLE_4:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Então prepare-se!");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W -  400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Apenas quem domina");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "o equilíbrio entre força");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54,16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "e lógica merece avançar.");
+            
+            break;
+        case DIALOGUE_BATTLE_FINAL_INTRO:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para começar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_AFTER_TRASH_TALK:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para retomar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_BATTLE_5:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Você é fraco e sem conhecimento");
+            
+            break;
+        case DIALOGUE_BATTLE_6:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Sua lógica é tão pífia");
+            
+            break;
+
+        case DIALOGUE_BATTLE_7:
+            al_draw_scaled_bitmap(
+                game->battle->dialogue_sprite,
+                0,0,
+                177, 90,
+                SCREEN_W - 700, 0,
+                700, 350,
+                0
+            );
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Suas habilidades e seu conhecimento");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "é igual a zero!");
+
+            break;
+        default:
+            break;
+        }
+    }
+
 }
 
 void draw_medusa_level(Game* game){
+
     al_draw_scaled_bitmap(
         game->background,
         0, 0,
@@ -557,6 +1141,254 @@ void draw_medusa_level(Game* game){
         SCREEN_W, SCREEN_H,
         0
     );
+
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
+
+    if(game->battle->state == BATTLE_DIALOGUE){
+        switch (game->battle->dialogues)
+        {
+
+        case DIALOGUE_MEDUSA_1:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Bem-vindo, forasteiro. Não tema");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "meus olhos. Sou Medusa, a");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "manifestação do poder racional");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "de Hipátia. Aqui, a razão é tão");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "cortante quanto a lâmina de Atena.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_2:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0); 
+            
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Então você é minha próxima");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "adversária. Será uma honra");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "enfrentá-la, pois a batalha");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "contra o Minotauro de");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "Arquimedes me fez aprender muito.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_3:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Hum... Então você o derrotou?");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Mas comigo será diferente.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "Jamais perderia para alguém que");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "não tem o mínimo de inteligência.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_4:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0); // Retrato do Player
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Até agora, vocês se mostraram");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "muito arrogantes, mas vou");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "mostrar meu potencial e derrotá-la");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "assim como derrotei Arquimedes.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_5:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Então prepare-se, jovem.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Além de derrotá-lo e provar que");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "você não é capaz de obter o");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "conhecimento absoluto da");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "matemática, irei transformá-lo");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "em pedra com o meu olhar");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "hipnotizante.");
+
+            break;
+        case DIALOGUE_MEDUSA_FINAL_1:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Inacreditável... você me superou.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "Não pense, porém, que isso faz");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "de você alguém digno do saber");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "absoluto! A arrogância que percebo");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "em sua voz será sua ruína nos");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "próximos desafios.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_FINAL_2:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Eu fui derrotada aqui, mas o Arauto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "não tem piedade e nem hesitará");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "em esmagar quem subestima o seu");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "território.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_FINAL_3:
+
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Veremos o quanto essa determinação");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "resiste diante dos verdadeiros");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "horrores que o Arauto reserva.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Siga em frente, estudante ousado,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "mas lembre-se: o próximo erro");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "poderá ser o último nesse reino");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "de enigmas devoradores de");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "arrogantes e ignorantes!.");
+
+            break;
+        case DIALOGUE_MEDUSA_RANDOM_1:
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Nem te olhei ainda e já está");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "paralisado... deve ser medo!");
+            break;
+
+        case DIALOGUE_MEDUSA_RANDOM_2:
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Você me cansa com esse");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "conhecimento insignificante.");
+
+            break;
+
+        case DIALOGUE_MEDUSA_RANDOM_3:
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "Se quer conquistar conhecimento");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "absoluto, enfrente a dúvida");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "sem medo!");
+
+            break;
+        case DIALOGUE_BATTLE_FINAL_INTRO:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para começar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_AFTER_TRASH_TALK:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para retomar a batalha!");
+   
+            
+            break;
+        default:
+            break;
+        }
+
+    }
+
 }
 
 void draw_arauto_level(Game* game){
@@ -568,6 +1400,268 @@ void draw_arauto_level(Game* game){
         SCREEN_W, SCREEN_H,
         0
     );
+
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 100));
+
+    if(game->battle->state == BATTLE_DIALOGUE){
+        switch (game->battle->dialogues)
+        {
+        case DIALOGUE_ARAUTO_1:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Finalmente, você chegou ao centro");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "do conhecimento. Muitos tentaram");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "trilhar este caminho, mas poucos");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "possuem coragem e sabedoria");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "suficiente para encarar minha");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "essência. Está pronto para ser");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "testado como ninguém jamais foi?");
+            break;
+
+        case DIALOGUE_ARAUTO_2:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0);
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Cheguei até aqui porque não");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "temo desafios. Enfrentei mestres");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "lendários, resolvi enigmas, e");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "aprendi que a busca pelo saber");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "exige muito mais do que força,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "exige humildade e persistência.");
+            break;
+
+        case DIALOGUE_ARAUTO_3:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+            
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Você fala como quem aprendeu, mas");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "apenas provará seu valor ao");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "superar meus desafios supremos.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "O conhecimento absoluto não");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "pertence aos arrogantes ou");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "impulsivos. Cada resposta errada");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "terá consequências, cada acerto");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "te levará mais perto do verdadeiro");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 50, ALLEGRO_ALIGN_LEFT, "domínio da matemática.");
+            break;
+
+        case DIALOGUE_ARAUTO_4:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0);
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Como eu já disse, enfrentei");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "obstáculos inimagináveis e superei");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "cada desafio proposto por você e");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "os mestres matemáticos. Estou");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "preparado para enfrentar o maior");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "enigma de todos.");
+            break;
+
+        case DIALOGUE_ARAUTO_5:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Excelente. Que suas ações");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "revelem mais que palavras. No");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "território do conhecimento,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "lógica, criatividade e razão");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "serão suas únicas armas. Vença,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "e será digno de dominar a arte");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "matemática até o fim dos tempos.");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "Fraqueje, e suas dúvidas o");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 50, ALLEGRO_ALIGN_LEFT, "devorarão.");
+            break;
+        
+        case DIALOGUE_ARAUTO_FINAL_1:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Impressionante... Você superou");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "não só meus enigmas, mas me");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "derrotou por completo.");
+            break;
+        case DIALOGUE_ARAUTO_FINAL_2:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0);
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "A jornada foi árdua, com");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "intensos desafios. Mas entendi");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "que o saber absoluto não é um");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "destino, e sim um caminho que");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "se percorre com muita coragem");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "e persistência.");
+            break;
+        case DIALOGUE_ARAUTO_FINAL_3:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Está certo. Você aprendeu que");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "nem toda resposta é suficiente,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "muitas vezes, a grandeza está");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "em questionar. Siga em frente,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 150, ALLEGRO_ALIGN_LEFT, "jovem, levando não só o poder do");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 125, ALLEGRO_ALIGN_LEFT, "conhecimento, mas a sabedoria de");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_LEFT, "quem sabe que sempre há mais");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 75, ALLEGRO_ALIGN_LEFT, "a descobrir.");
+            break;
+        case DIALOGUE_ARAUTO_FINAL_4:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            al_draw_scaled_bitmap(game->player->portrait, 0,0, 520, 596, SCREEN_W - 660, 50, 215, 246, 0);
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->player->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Obrigado, Arauto. Agora que irei");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "obter todo o conhecimento da");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "matemática, eu sinto orgulho da");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 175, ALLEGRO_ALIGN_LEFT, "minha jornada.");
+            break;
+        case DIALOGUE_ARAUTO_FINAL_5:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Você não tem que agradecer,");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "você passou nos testes e fez");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "por merecer. Parabéns jovem!.");
+            break;
+        
+        case DIALOGUE_ARAUTO_RANDOM_1:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Você acha que chegou até aqui");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "por mérito, mas na verdade é");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "só sorte disfarçada de talento.");
+            break;
+        case DIALOGUE_ARAUTO_RANDOM_2:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "Tanta confiança... mas e se");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "tudo o que sabe estiver errado?");
+            break;
+        case DIALOGUE_ARAUTO_RANDOM_3:
+            al_draw_scaled_bitmap(game->battle->dialogue_sprite, 0,0, 177, 90, SCREEN_W - 700, 0, 700, 350, 0);
+            
+            al_draw_scaled_bitmap(
+                game->enemy->portrait,
+                0,0,
+                520, 500,
+                SCREEN_W - 660, 80,
+                215, 212,
+                0
+            );
+
+            al_draw_textf(game->subtitle_11_font, al_map_rgb(54, 16, 4),  SCREEN_W - 375, SCREEN_H / 2 - 300, ALLEGRO_ALIGN_LEFT, "%s:", game->enemy->name);
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 250, ALLEGRO_ALIGN_LEFT, "O conhecimento que você busca");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 225, ALLEGRO_ALIGN_LEFT, "pode ser a armadilha que");
+            al_draw_text(game->subtitle_11_font, al_map_rgb(54, 16, 4), SCREEN_W - 400, SCREEN_H / 2 - 200, ALLEGRO_ALIGN_LEFT, "finalmente o destruirá.");
+            break;
+
+        case DIALOGUE_BATTLE_FINAL_INTRO:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para começar a batalha!");
+   
+            
+            break;
+        case DIALOGUE_AFTER_TRASH_TALK:
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 70, 20, ALLEGRO_ALIGN_CENTER, "Pressione");
+            al_draw_scaled_bitmap(
+                    game->controls,
+                    0, 0,
+                    16, 16,
+                    130, 12,
+                    32, 32,
+                    0 
+                );   
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 0), 300, 20, ALLEGRO_ALIGN_CENTER, "para retomar a batalha!");
+   
+            
+            break;
+        default:
+            break;
+        }
+    }
+
+
 }
 
 void render_control(ALLEGRO_BITMAP* control, Entity* entity, Key_code key){
@@ -616,19 +1710,27 @@ Btn_state is_mouse_in_btn(Game* game){
 } 
 
 void check_battle(Game* game){
-    if (!game->enemy) {
-        return; 
-    }
-    if(!game->enemy->entity.isActive) return;
-    // Com mudança no game_state precisaremos refatorar todo o código de state do game
-    //if(game->state == GAMEPLAY_BATTLE && game->battle) return;
 
-    int dist = game->player->entity.x - game->enemy->entity.x;
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if (!game->mobs[i]) {
+            continue; 
+        }
+    
+        if(!game->mobs[i]->entity.isActive) {
+            continue;
+        }
 
-    if(dist >= -300 && dist <= 300){
-        if(dist < 0) game->enemy->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
-        //game->state = GAMEPLAY_BATTLE;
-        game->battle = start_battle(game->player, game->enemy);
+        //Com mudança no game_state precisaremos refatorar todo o código de state do game
+        if(game->gameplay_state == GAMEPLAY_BATTLE && game->battle) return;
+    
+        int dist = game->player->entity.x - game->mobs[i]->entity.x;
+    
+        if(dist >= -300 && dist <= 300){
+            
+            if(dist < 0) game->mobs[i]->entity.flip = ALLEGRO_FLIP_HORIZONTAL;
+            game->gameplay_state = GAMEPLAY_BATTLE;
+            start_battle(game->battle, game->player, game->mobs[i]);
+        }
     }
 }
 
@@ -643,17 +1745,19 @@ void menu_options(Game* game){
         }
 
         render_initial_level(game);
+    } else if(game->mouse.left && btn_state == BTN_OPTIONS){
+        change_game_state(game, GAME_TUTORIAL);
     } else if(game->mouse.left && btn_state == BTN_EXIT){
-        game->state = GAME_OVER;
+        change_game_state(game, GAME_CLOSE);
     }
 }
 
 bool check_interaction(ALLEGRO_BITMAP* control, Entity* entity_1, Entity* entity_2){
     if(entity_1->box.x + entity_1->box.w >= entity_2->box.x && entity_1->box.x <= entity_2->box.x + entity_2->box.w 
         && entity_1->box.y + entity_1->box.h >= entity_2->box.y && entity_1->box.y <= entity_2->box.y + entity_2->box.h){
-            if(entity_2->entity_type == DOOR){
+            if(entity_2->entity_type == DOOR || entity_2->entity_type == EDUCATIONAL || entity_2->entity_type == PUZZLE_DIAL || entity_2->entity_type == PUZZLE_LEVER){
                 render_control(control, entity_2, INTERACT_E);
-            }
+            } 
             return true;
     }
 
@@ -664,7 +1768,7 @@ void return_level(Game* game, Door* door_1){
     if(door_1->door_type != DOOR_RETURN) return;
 
     if(game->state == GAME_SECOND_MISSION){
-        game->state = GAME_FIRST_MISSION;
+        change_game_state(game, GAME_FIRST_MISSION);
         load_first_map(game);
 
         for(int i = 0; i < MAX_WORLD_ENTITIES; i++){
@@ -680,7 +1784,7 @@ void return_level(Game* game, Door* door_1){
             }
         }
     } else if(game->state == GAME_THIRD_MISSION){
-        game->state = GAME_SECOND_MISSION;
+        change_game_state(game, GAME_SECOND_MISSION);
         load_second_map(game);
 
         for(int i = 0; i < MAX_WORLD_ENTITIES; i++){
@@ -698,7 +1802,196 @@ void return_level(Game* game, Door* door_1){
     }
 }
 
-void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_2, unsigned char* key){
+void resolve_interaction_with_puzzle(Game* game, Player* player, Entity* current_entity, unsigned char* key){
+    if(key[ALLEGRO_KEY_E]){
+        switch (current_entity->puzzle_id)
+        {
+        case PUZZLE_BHASKARA:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_BHASKARA; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        case PUZZLE_PITAGORAS:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_PITAGORAS; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        case PUZZLE_1GRAU:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_1GRAU; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        case PUZZLE_EQUATION_BHASKARA:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_EQUATION_BHASKARA; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        case PUZZLE_EQUATION_PITAGORAS:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_EQUATION_PITAGORAS; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        case PUZZLE_EQUATION_1GRAU:
+            game->previous_game_state = game->state; 
+            game->active_puzzle_id = PUZZLE_EQUATION_1GRAU; 
+            game->gameplay_state = GAMEPLAY_PUZZLE;
+            change_game_state(game, GAME_PUZZLE_SCREEN);
+            break;
+        default:
+            break;
+        }
+
+
+        key[ALLEGRO_KEY_E] = 0;
+    }
+}
+
+void check_first_equation(Game* game, Door* door){
+    int result = 20;
+    int current_val = 0;
+
+    bool found_20 = false;
+
+     for (int i = 0; i < game->num_world_entities; i++) {
+        Entity* e = game->world_entities[i];
+        if (e && e->isActive) {
+            
+            if (e->entity_type == PUZZLE_DIAL) {
+                current_val = e->puzzle_value;
+            }
+        }
+    }
+
+    if (current_val == result) found_20 = true;
+    
+    if (found_20 && door != NULL) {
+        door->entity.is_locked_puzzle = false; 
+        sprintf(game->log_ln1, "Um mecanismo range!");
+    } else {
+        sprintf(game->log_ln1, "O número está incorreto... Nada acontece.");
+    }       
+}
+
+void check_second_equation(Game* game, Door* door){
+    int result = 12;
+    int current_val = 0;
+
+    bool found_12 = false;
+
+     for (int i = 0; i < game->num_world_entities; i++) {
+        Entity* e = game->world_entities[i];
+        if (e && e->isActive) {
+            if (e->entity_type == PUZZLE_DIAL) {
+                current_val = e->puzzle_value;
+            }
+        }
+    }
+
+    if (current_val == result) found_12 = true;
+
+    if (found_12 && door != NULL) {
+        door->entity.is_locked_puzzle = false; 
+        sprintf(game->log_ln1, "Um mecanismo range!");
+    } else {
+        sprintf(game->log_ln1, "O número está incorreto... Nada acontece.");
+    }       
+}
+
+void check_third_equation(Game* game, Door* door){
+    int values[3] = {0, 0, 0};
+    int current_val = 0;
+
+    for (int i = 0; i < game->num_world_entities; i++) {
+        Entity* e = game->world_entities[i];
+        if (e && e->isActive) {
+            
+            if (e->entity_type == PUZZLE_DIAL) {
+                if (current_val < 3) {
+                    values[current_val] = e->puzzle_value;
+                    current_val++;
+                }
+            }
+        }
+    }
+
+    bool found_16 = false;
+    bool found_6 = false;
+    bool found_2 = false;
+
+    for (int i = 0; i < 3; i++) {
+        if (values[i] == 16) found_16 = true;
+        else if (values[i] == 6) found_6 = true;
+        else if (values[i] == 2) found_2 = true;
+    }
+
+    if (found_16 && found_6 && found_2 && door != NULL) {
+        door->entity.is_locked_puzzle = false; 
+        sprintf(game->log_ln1, "Um mecanismo range e a porta se abre!");
+    } else {
+        sprintf(game->log_ln1, "Os números estão incorretos... Nada acontece.");
+    }
+}
+
+void check_puzzle_solution(Game* game, Door* door) {
+    switch(game->state){
+        case GAME_FIRST_MISSION:
+            check_first_equation(game, door);
+            break;
+        case GAME_SECOND_MISSION:
+            check_second_equation(game, door);
+            break;
+        case GAME_THIRD_MISSION:
+            check_third_equation(game, door);
+        default:
+            break;
+    }
+}
+
+void handle_player_interaction(Game* game, Player* player, Entity* entity, unsigned char* key){
+    
+    if(key[ALLEGRO_KEY_E]){
+        switch (entity->entity_type)
+        {
+            case PUZZLE_DIAL:
+                entity->puzzle_value++;
+                if (entity->puzzle_value > 20) {
+                    entity->puzzle_value = 0;
+                }
+                break;
+                
+            case PUZZLE_LEVER:
+                //check_puzzle_solution(game);
+                break;
+            break;
+        
+        default:
+            break;
+        }
+
+        key[ALLEGRO_KEY_E] = 0;
+    }
+
+}
+
+bool player_has_item(Player* player, const char* item_id) {
+    for (int i = 0; i < MAX_EQUIP_SLOTS; i++) {
+        if (player->equipment[i] != NULL) {
+            if (player->equipment[i]->type == ITEM_EQUIPMENT && 
+                strcmp(player->equipment[i]->id, item_id) == 0) 
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2, unsigned char* key){
     if (entity_2->entity_type != DOOR) return;
 
     Door* door = (Door*) entity_2;
@@ -709,26 +2002,196 @@ void resolve_interaction_with_door(Game* game, Entity* entity_1, Entity* entity_
                 return_level(game, door);
                 break;
             case DOOR_MINOTAUR:
-                game->state = GAME_MINOTAUR_LEVEL;
-                game->gameplay_state = GAMEPLAY_BATTLE;
-                render_minotaur_level(game);
-                break;
+                if(game->is_minotaur_dead){
+                    sprintf(game->log_ln1, "A porta foi selada quando você saiu da sala.");
+                    sprintf(game->log_ln2, "Todas as escritas que estavam na porta sumiram.");
+
+                    return;
+                }
+
+                if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "minotauro_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave do Minotauro.");
+                        sprintf(game->log_ln2, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
+
+                        door->entity.is_locked_key = false; 
+                    } else {
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta possui um emblema com um MINOTAURO.");
+                        sprintf(game->log_ln3, "\"Derrote meus servos.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+
+                    }
+                    return; 
+                }
+                    if (door->entity.is_locked_puzzle) { 
+                        al_start_timer(game->timer_game_logs);
+                        check_puzzle_solution(game, door); 
+
+                     
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
+                        change_game_state(game, GAME_MINOTAUR_LEVEL);
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_minotaur_level(game);
+                        return;
+                    }
+                    
+                    break;
             case DOOR_MEDUSA:
-                game->state = GAME_MEDUSA_LEVEL;
-                render_medusa_level(game);
-                break;
+                if(game->is_medusa_dead){
+                    sprintf(game->log_ln1, "A porta foi selada quando você saiu da sala.");
+                    sprintf(game->log_ln2, "Todas as escritas que estavam na porta sumiram.");
+
+                    return;
+                }
+
+                if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "medusa_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave da Medusa.");
+                        sprintf(game->log_ln2, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln3, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+                        
+                        door->entity.is_locked_key = false; 
+                    } else {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta possui um emblema com uma MEDUSA.");
+                        sprintf(game->log_ln4, "\"Hmm, Interessante.\"");
+                    }
+                    
+                    return; 
+                    }
+                    if (door->entity.is_locked_puzzle) { 
+                        al_start_timer(game->timer_game_logs);
+                        check_puzzle_solution(game, door); 
+                     
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
+                        change_game_state(game, GAME_MEDUSA_LEVEL);
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_medusa_level(game);
+                        return;
+                    }
+                    
+                    break;
             case DOOR_ARAUTO:
-                game->state = GAME_ARAUTO_LEVEL;
-                render_arauto_level(game);
-                break;
+                if(game->is_arauto_dead){
+                    sprintf(game->log_ln1, "A porta foi selada quando você saiu da sala.");
+                    sprintf(game->log_ln2, "Todas as escritas que estavam na porta sumiram.");
+
+                    return;
+                }
+
+               if (door->entity.is_locked_key) {
+                    if (player_has_item(player, "arauto_chave")) {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você usa a chave da Medusa.");
+                        sprintf(game->log_ln3, "(O mecanismo da chave destrancou, mas a porta continua selada.)");
+                        sprintf(game->log_ln2, "Onde jaz o para sempre imóvel, lá encontrará o que procura.");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+                        
+                        door->entity.is_locked_key = false; 
+                    } else {
+
+                        al_start_timer(game->timer_game_logs);
+                        sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta.");
+                        sprintf(game->log_ln2, "Essa porta não possui detalhes.");
+                    }
+                    
+                    return; 
+                    }
+                    if (door->entity.is_locked_puzzle) { 
+                        al_start_timer(game->timer_game_logs);
+                        check_puzzle_solution(game, door); 
+
+                        sprintf(game->log_ln3, "\"Onde jaz o para sempre imóvel, lá encontrará o que procura.\"");
+                        sprintf(game->log_ln4, "Está escrito na porta");
+                        sprintf(game->log_ln5, "Escondido em algum lugar do mapa, pode ter algo");
+
+                    }
+
+                    if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
+                        change_game_state(game, GAME_ARAUTO_LEVEL);
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_arauto_level(game);
+                        return;
+                    }
+                    
+                    break;
             case DOOR_NEXT_LEVEL:
                 if(game->state == GAME_FIRST_MISSION){
-                    game->state = GAME_SECOND_MISSION;
-                    load_second_map(game);
+                    for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
+                        if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "segundomapa_chave") == 0){
+                            change_game_state(game, GAME_SECOND_MISSION);
+                            game->gameplay_state = GAMEPLAY_EXPLORING;
+                            load_second_map(game);
+                            return;
+                        } 
+                    }
+                    al_start_timer(game->timer_game_logs);
+                    sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
+                    sprintf(game->log_ln2, "Está escrito na porta!");
+                    sprintf(game->log_ln3, "\"Volte!\"");
+
                 } else if(game->state == GAME_SECOND_MISSION){
-                    game->state = GAME_THIRD_MISSION;
-                    load_third_map(game);
+
+                     for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
+                        if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "terceiromapa_chave") == 0){
+                            change_game_state(game, GAME_THIRD_MISSION);
+                            game->gameplay_state = GAMEPLAY_EXPLORING;
+                            load_third_map(game);
+                            return;
+                        } 
+                    }
+                    al_start_timer(game->timer_game_logs);
+                    sprintf(game->log_ln1, "Você não possui a chave para abrir essa porta");
+                    sprintf(game->log_ln3, "Se conseguir, encontre-se comigo!");
                 }
+                break;
+            case DOOR_EASTER_EGG:
+                 for(int i = 0; i < MAX_EQUIP_SLOTS; i++){
+                    if(player->equipment[i] != NULL && player->equipment[i]->type == ITEM_EQUIPMENT && strcmp(player->equipment[i]->id, "easteregg_chave") == 0){
+                        change_game_state(game, GAME_ARAUTO_LEVEL);
+                        game->gameplay_state = GAMEPLAY_BATTLE;
+                        render_arauto_level(game);
+                        return;
+                    } 
+                    
+                }
+                al_start_timer(game->timer_game_logs);
+                sprintf(game->log_ln1, "Você não consegue abrir a porta, ela não tem fechadura.");
+                sprintf(game->log_ln2, "Essa porta não possui emblema.");
+                sprintf(game->log_ln3, "Só uma escritura direto na madeira: Aqui está a verdade...");
+
+                break;
         }
     }
 }
@@ -765,25 +2228,43 @@ void update_camera(Game* game) {
 }
 
 static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
-    update_player_battle(game->player, key, dt);
-
-    if (game->player->entity.x > SCREEN_W / 2) {
-        game->player->entity.x = SCREEN_W / 2;
+   if(game->battle->state == BATTLE_DIALOGUE){
+        return;
     }
 
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+    if(game->enemy->entity.hp <= 0 && game->is_minotaur_dead == false){
+        game->is_minotaur_dead = true;
     }
 
-    if (key[ALLEGRO_KEY_K]) {
-        if (game->enemy) {
-            destroy_enemy(game->enemy);
-            game->enemy = NULL;
+    if(game->battle->state == BATTLE_NONE){
+        change_game_state(game, GAME_FIRST_MISSION);
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_first_map(game);
+
+        for(int i = 0; i < game->num_world_entities; i++) {
+            Entity* current_entity = game->world_entities[i];
+            if(current_entity && current_entity->entity_type == DOOR) {
+                Door* door = (Door*) current_entity;
+                if(door->door_type == DOOR_MINOTAUR) {
+                    set_entity_pos(&game->player->entity, door->entity.x, door->entity.y);
+                    break; 
+                }
+            }
         }
-
-
-        load_first_map(game); 
-        game->state = GAME_FIRST_MISSION;
+        return;
+    }
+    if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
+        
+        if (game->battle->enemy) {
+            destroy_enemy(game->battle->enemy); 
+            game->enemy = NULL;
+            game->battle->enemy = NULL;
+        }
+        
+        game->battle->state = BATTLE_NONE;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_first_map(game);
+        change_game_state(game, GAME_FIRST_MISSION);
             
         for(int i = 0; i < game->num_world_entities; i++) {
             Entity* current_entity = game->world_entities[i];
@@ -795,27 +2276,47 @@ static void update_minotaur_level(Game* game, unsigned char* key, float dt) {
             }
         }
     }
+
 }
 
 static void update_medusa_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
-
-    if (game->player->entity.x > SCREEN_W / 2) {
-        game->player->entity.x = SCREEN_W / 2;
+    if(game->battle->state == BATTLE_DIALOGUE){
+        return;
     }
 
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+    if(game->enemy->entity.hp <= 0 && game->is_minotaur_dead == false){
+        game->is_medusa_dead = true;
     }
 
-    if (key[ALLEGRO_KEY_K]) {
-        if (game->enemy) {
-            destroy_enemy(game->enemy);
-            game->enemy = NULL; 
+    if(game->battle->state == BATTLE_NONE){
+        change_game_state(game, GAME_SECOND_MISSION);
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_second_map(game);
+
+        for(int i = 0; i < game->num_world_entities; i++) {
+            Entity* current_entity = game->world_entities[i];
+            if(current_entity && current_entity->entity_type == DOOR) {
+                Door* door = (Door*) current_entity;
+                if(door->door_type == DOOR_MEDUSA) {
+                    set_entity_pos(&game->player->entity, door->entity.x, door->entity.y);
+                    break; 
+                }
+            }
         }
-
-        load_second_map(game); 
-        game->state = GAME_SECOND_MISSION;
+        return;
+    }
+    if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
+        
+        if (game->battle->enemy) {
+            destroy_enemy(game->battle->enemy); 
+            game->enemy = NULL;
+            game->battle->enemy = NULL;
+        }
+        
+        game->battle->state = BATTLE_NONE;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_second_map(game);
+        change_game_state(game, GAME_SECOND_MISSION);
             
         for(int i = 0; i < game->num_world_entities; i++) {
             Entity* current_entity = game->world_entities[i];
@@ -830,24 +2331,45 @@ static void update_medusa_level(Game* game, unsigned char* key, float dt) {
 }
 
 static void update_arauto_level(Game* game, unsigned char* key, float dt) {
-    update_player(game->player, key, dt);
-
-    if (game->player->entity.x > SCREEN_W / 2) {
-        game->player->entity.x = SCREEN_W / 2;
+    if(game->battle->state == BATTLE_DIALOGUE){
+        return;
     }
 
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+    if(game->enemy->entity.hp <= 0 && game->is_arauto_dead == false){
+        game->is_arauto_dead = true;
     }
 
-    if (key[ALLEGRO_KEY_K]) {
-        if (game->enemy) {
-            destroy_enemy(game->enemy);
-            game->enemy = NULL; 
+    if(game->battle->state == BATTLE_NONE){
+        change_game_state(game, GAME_END);
+        return;
+        // game->gameplay_state = GAMEPLAY_EXPLORING;
+        // load_third_map(game);
+
+        // for(int i = 0; i < game->num_world_entities; i++) {
+        //     Entity* current_entity = game->world_entities[i];
+        //     if(current_entity && current_entity->entity_type == DOOR) {
+        //         Door* door = (Door*) current_entity;
+        //         if(door->door_type == DOOR_ARAUTO) {
+        //             set_entity_pos(&game->player->entity, door->entity.x, door->entity.y);
+        //             break; 
+        //         }
+        //     }
+        // }
+        // return;
+    }
+
+    if (key[ALLEGRO_KEY_K] || game->player->entity.box.x <= 0) {
+        
+        if (game->battle->enemy) {
+            destroy_enemy(game->battle->enemy); 
+            game->enemy = NULL;
+            game->battle->enemy = NULL;
         }
-
-        load_third_map(game); 
-        game->state = GAME_THIRD_MISSION;
+        
+        game->battle->state = BATTLE_NONE;
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+        load_third_map(game);
+        change_game_state(game, GAME_THIRD_MISSION);
             
         for(int i = 0; i < game->num_world_entities; i++) {
             Entity* current_entity = game->world_entities[i];
@@ -861,6 +2383,32 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
     }
 }
 
+static void update_puzzle_state(Game* game, unsigned char* key, float dt){
+    
+    if (key[ALLEGRO_KEY_E]) {
+        
+        key[ALLEGRO_KEY_E] = 0;
+
+        change_game_state(game, game->previous_game_state);
+        game->gameplay_state = GAMEPLAY_EXPLORING;
+
+        game->active_puzzle_id = PUZZLE_NONE;
+
+        game->log_ln1[0] = '\0';
+        game->log_ln2[0] = '\0';
+        game->log_ln3[0] = '\0';
+        game->log_ln4[0] = '\0';
+        game->log_ln5[0] = '\0';
+
+        game->log_ln_tip_1[0] = '\0';
+        game->log_ln_tip_2[0] = '\0';
+        game->log_ln_tip_3[0] = '\0';
+        
+        return;
+    }
+}
+
+
 static void update_exploring_state(Game* game, unsigned char* key, float dt) {
     update_camera(game);
     update_player(game->player, key, dt);
@@ -873,51 +2421,175 @@ static void update_exploring_state(Game* game, unsigned char* key, float dt) {
 
         if (current_entity && current_entity->entity_type == DOOR) {
             if (check_interaction(game->controls, &game->player->entity, current_entity)) {
-                resolve_interaction_with_door(game, &game->player->entity, current_entity, key);
+                resolve_interaction_with_door(game, game->player, current_entity, key);
             }
+        }
+
+        if (current_entity && current_entity->entity_type == EDUCATIONAL) {
+            if (check_interaction(game->controls, &game->player->entity, current_entity)) {
+                resolve_interaction_with_puzzle(game, game->player, current_entity, key);
+            }
+        }
+        
+        if(current_entity && current_entity->entity_type == PUZZLE_DIAL)
+            if (check_interaction(game->controls, &game->player->entity, current_entity)) {
+                handle_player_interaction(game, game->player, current_entity, key);
+            }
+        }
+
+    for(int i = 0; i < MAX_ENEMIES; i++){
+        if(game->mobs[i] && game->mobs[i]->entity.isActive){
+            update_enemy(game->mobs[i], dt);
+        }
+    }
+}
+
+bool is_player_dead(Player* player){
+    if(player->entity.hp <= 0) return true;
+
+    return false;
+}
+
+void reset_level(Game* game, Game_state game_state){
+    game->battle->state = BATTLE_NONE;
+    game->gameplay_state = GAMEPLAY_EXPLORING;
+    game->battle->turn_state = TURN_EMPTY;
+    game->player->entity.hp = game->player->entity.max_hp;
+    game->player->entity.x = 20;
+    game->battle->enemy->entity.isActive = false;
+
+    switch(game_state){
+        default:
+            game->state = game->previous_game_state;
+        case GAME_FIRST_MISSION:
+            game->is_first_level_mobs_dead = false;
+            load_first_map(game);
+            break;
+        case GAME_SECOND_MISSION:
+            game->is_second_level_mobs_dead = false;
+            load_second_map(game);
+            break;
+        case GAME_THIRD_MISSION:
+            game->is_third_level_mobs_dead = false;
+            load_third_map(game);
+            break;
+
+    }
+}
+
+static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* key, float dt) {
+    Enemy* enemy_in_battle = game->battle->enemy;
+
+    if(game->state == GAME_OVER){
+        if(key[ALLEGRO_KEY_ENTER]){
+            reset_level(game, game->previous_game_state);
         }
     }
 
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+    bool is_dead = is_player_dead(game->player);
+    if(is_dead == true) {
+        al_start_timer(game->timer_death);
     }
-}
 
-static void update_battle_state(Game* game, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, unsigned char* key, float dt) {
-    if (!game->battle) {
-        game->gameplay_state = GAMEPLAY_EXPLORING;
+    if(event.timer.source == game->timer_death && is_dead){        
+        change_game_state(game, GAME_OVER);
+
+        al_stop_timer(game->timer_death);
+        al_set_timer_count(game->timer_death, 0);
         return;
     }
 
-    if (game->battle->state == BATTLE_END) {
+    if (game->battle->state == BATTLE_NONE) {
         game->gameplay_state = GAMEPLAY_EXPLORING;
-        game->battle = NULL;
+
+        if(enemy_in_battle && !enemy_in_battle->entity.isActive && enemy_in_battle->enemy_type != MOB){
+            destroy_enemy(enemy_in_battle);
+            game->enemy = NULL;
+            game->battle->enemy = NULL;
+        }
         return;
     }
 
-    update_camera(game);
-
-    if (game->enemy && game->enemy->entity.isActive) {
-        update_entity(&game->enemy->entity, dt);
+    // if (game->battle->state == BATTLE_WIN) {
+    //     game->gameplay_state = GAMEPLAY_EXPLORING;
+    //     game->battle = NULL;
+    //     return;
+    // }
+    
+    if(enemy_in_battle && enemy_in_battle->entity.isActive == true){
+        update_enemy(enemy_in_battle, dt);
     }
     
-    manage_battle(game->battle, event, timer_enemy);
+    manage_battle(game->battle, event, game->timer_death, game->state, key, game->subtitle_font, &game->world_enemies);
     update_player_battle(game->player, key, dt);
 }
 
-void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_enemy, float dt) {
+void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) {
     read_mouse(game);
 
-    if(game->gameplay_state == GAMEPLAY_EXPLORING)  {
-        check_map_collision(&game->player->entity, game->map);
+    if(key[ALLEGRO_KEY_U]) game->player->entity.hp = 0;
+
+    // O player upou de nível?
+    bool is_up_level = buff_levels(game->player);
+
+    if(is_up_level){
+        sprintf(game->log_ln1, "Você upou para o nível %d", game->player->level);
+        sprintf(game->log_ln2, "Todas as suas estatisticas foram aumentadas");
+        al_start_timer(game->timer_game_logs);
     }
 
+    if(event.timer.source == game->timer_game_logs || event.timer.source == game->timer_game_tips){
+        game->log_ln1[0] = '\0';
+        game->log_ln2[0] = '\0';
+        game->log_ln3[0] = '\0';
+        game->log_ln4[0] = '\0';
+        game->log_ln5[0] = '\0';
+        game->log_ln_tip_1[0] = '\0';
+        game->log_ln_tip_2[0] = '\0';
+        game->log_ln_tip_3[0] = '\0';
+
+        al_stop_timer(game->timer_game_logs);
+        al_stop_timer(game->timer_game_tips);
+        al_set_timer_count(game->timer_game_logs, 0);
+        al_set_timer_count(game->timer_game_tips, 0);
+
+        al_start_timer(game->timer_game_can_draw_tips);
+    }
+
+    if(event.timer.source == game->timer_game_can_draw_tips){
+        game->log_ln1[0] = '\0';
+
+        al_stop_timer(game->timer_game_can_draw_tips);
+        al_set_timer_count(game->timer_game_can_draw_tips, 0);
+
+        game->can_draw = true;
+    }
+    
+    switch(game->gameplay_state){
+        case GAMEPLAY_EXPLORING:
+            player_recalculate_stats(game->player);
+            //check_map_collision(&game->player->entity, game->map);
+            resolve_map_collision(&game->player->entity, game->map);
+            log_tips(game);
+            break;
+        case GAMEPLAY_BATTLE:
+            //player_recalculate_stats(game->player);
+            update_battle_state(game, event, key, dt);
+
+            if(game->battle->enemy && game->battle->enemy->enemy_type != MOB)
+                resolve_map_collision_battle(&game->player->entity);
+            else 
+                resolve_map_collision(&game->player->entity, game->map);
+            break;
+        case GAMEPLAY_PUZZLE:
+
+            break;
+    }
 
     switch (game->state) {
         case GAME_MENU:
             menu_options(game);
             break;
-
         case GAME_MINOTAUR_LEVEL:
             update_minotaur_level(game, key, dt);
             break;
@@ -928,28 +2600,34 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             update_arauto_level(game, key, dt);
             break;
         case GAME_FIRST_MISSION:
+            if(game->world_enemies == 0) game->is_first_level_mobs_dead = true;
+            
             check_battle(game);
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
+                    break;
                 case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
                     break;
-            }
+                }
             break;
         case GAME_SECOND_MISSION:
+            if(game->world_enemies == 0) game->is_second_level_mobs_dead = true;
+
             check_battle(game);
             
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
-                case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
@@ -957,23 +2635,39 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, ALLEGRO_TI
             }
             break;
         case GAME_THIRD_MISSION:
+            if(game->world_enemies == 0) game->is_third_level_mobs_dead = true;
+
             check_battle(game);
             
             switch (game->gameplay_state) {
                 case GAMEPLAY_EXPLORING:
                     update_exploring_state(game, key, dt);
                     break;
-                case GAMEPLAY_BATTLE:
-                    update_battle_state(game, event, timer_enemy, key, dt);
+                case GAMEPLAY_PUZZLE:
+                    update_puzzle_state(game, key, dt);
                     break;
                 case GAMEPLAY_NONE:
                 default:
                     break;
             }
             break;
-        
+        case GAME_PUZZLE_SCREEN:
+            update_puzzle_state(game, key, dt);
+            break;
         case GAME_INIT:
         case GAME_OVER:
+            if(key[ALLEGRO_KEY_ENTER]){
+                game->state = game->previous_game_state;
+
+                key[ALLEGRO_KEY_ENTER] = 0;
+            }
+            break;
+        case GAME_END:
+            if(key[ALLEGRO_KEY_P]){
+
+                change_game_state(game, GAME_CLOSE);
+            }
+            break;
         default:
             break;
     }
@@ -1028,7 +2722,7 @@ void draw_level_01(Game* game){
     al_draw_scaled_bitmap(
         game->background,
         0, 0, 2624, 1472,
-        0, 0, 1280, 720,    
+        0, 0, SCREEN_W, SCREEN_H,    
         0
     );
 
@@ -1064,7 +2758,7 @@ void draw_level_01(Game* game){
                     current_entity->isActive = false;
                     load_first_map(game);
                     game->gameplay_state = GAMEPLAY_EXPLORING;
-                    game->state = GAME_FIRST_MISSION;
+                    change_game_state(game, GAME_FIRST_MISSION);
                     break;
             }
           
@@ -1124,13 +2818,14 @@ void draw_menu(Game* game){
     al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn1y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "INICIAR");
 
     al_draw_rectangle(btn2x - (btn_w / 2), btn2y, btn2x + (btn_w / 2), btn2y + btn_h, al_map_rgb(255, 255, 0), 2);
-    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "OPÇÕES");
+    al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn2y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "TUTORIAL");
 
     al_draw_rectangle(btn3x - (btn_w / 2), btn3y, btn3x + (btn_w / 2), btn3y + btn_h, al_map_rgb(255, 255, 0), 2);
     al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, (btn3y + btn_h) - (btn_h / 2) - 8, ALLEGRO_ALIGN_CENTER, "SAIR");
 
 }
 
+// LEGADO
 int calculate_hearts(int hp){
     if(hp >= 100) {return 5;}
     else if(hp >= 80) {return 4;}
@@ -1140,19 +2835,84 @@ int calculate_hearts(int hp){
     else {return 0;}
 }
 
-void draw_hp(ALLEGRO_BITMAP* heart, int hp){
-    int qt_heart = calculate_hearts(hp);
+void draw_hp_bar_scalable(ALLEGRO_FONT* font, int x, int y, int width, int height, int hp, int max_hp) {
+    
+    if (hp < 0) hp = 0;
 
-    for(int i = 0; i < qt_heart; i++){
-        al_draw_scaled_bitmap(
-            heart,
-            0, 0,
-            17, 17,
-            (10 * i) * 4, 5,
-            40, 40,
-            0
-        );
-    }
+    float hp_ratio = (float)hp / (float)max_hp;
+
+    int current_hp_width = (int)(hp_ratio * width);
+
+    al_draw_filled_rectangle(x, y, x + width, y + height, al_map_rgb(50, 50, 50));
+
+    al_draw_filled_rectangle(x, y, x + current_hp_width, y + height, al_map_rgb(255, 0, 0));
+
+    al_draw_rectangle(x, y, x + width, y + height, al_map_rgb(255, 255, 255), 2);
+
+    char hp_text[20];
+    sprintf(hp_text, "%d / %d", hp, max_hp);
+
+    int text_center_x = x + (width / 2);
+    int text_center_y = y + (height / 2) - (12 / 2);
+
+    al_draw_text(font, al_map_rgb(255, 255, 255), text_center_x, text_center_y, ALLEGRO_ALIGN_CENTER, hp_text);
+}
+
+void draw_attack(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int attack){
+    // Configurações do fundo
+    float padding = 6.0f;
+    float box_width = 65.0f;
+    float icon_size = 24.0f;
+
+    // Desenha o retângulo arredondado de fundo
+    al_draw_filled_rounded_rectangle(
+        x - padding, 
+        y - padding, 
+        x + box_width, 
+        y + icon_size + padding, 
+        20, 20, 
+        al_map_rgba(0, 0, 0, 150)
+    );
+
+    // Opcional: Borda fina para destacar
+    // al_draw_rounded_rectangle(x - padding, y - padding, x + box_width, y + icon_size + padding, 5, 5, al_map_rgb(255, 255, 255), 1);
+    al_draw_scaled_bitmap(
+        bitmap,
+        0, 0,
+        32, 32,
+        x, y,
+        icon_size, icon_size,
+        0
+    );
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x + 45, y + 8, ALLEGRO_ALIGN_CENTER, "%d", attack);
+}
+
+void draw_defense(ALLEGRO_BITMAP* bitmap, ALLEGRO_FONT* font, int x, int y, int defense){
+    float padding = 6.0f;
+    float box_width = 65.0f; 
+    float icon_size = 24.0f;
+
+    // Desenha o retângulo arredondado de fundo
+    al_draw_filled_rounded_rectangle(
+        x - padding, 
+        y - padding, 
+        x + box_width, 
+        y + icon_size + padding, 
+        20, 20, 
+        al_map_rgba(0, 0, 0, 150)
+    );
+
+    al_draw_scaled_bitmap(
+        bitmap,
+        0, 0,
+        32, 32,
+        x, y,
+        icon_size, icon_size,
+        0
+    );
+
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x + 45, y + 8, ALLEGRO_ALIGN_CENTER, "%d", defense);
 }
 
 void draw_inventory(Player* player, ALLEGRO_FONT* font){
@@ -1161,11 +2921,718 @@ void draw_inventory(Player* player, ALLEGRO_FONT* font){
         
         if(current_item == NULL) continue;
 
+        float x1 = current_item->entity->box.x - 10;
+        float y1 = current_item->entity->box.y;
+        float x2 = x1 + current_item->entity->box.w + 20; 
+        float y2 = y1 + current_item->entity->box.h + 10;  
+
+        al_draw_filled_rectangle(x1, y1, x2, y2, al_map_rgba(50, 50, 50, 200));
+        draw_entity(current_item->entity);
+
+
         al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%d", player->inventory.slots[i].quantity);
         al_draw_textf(font, al_map_rgb(255, 255, 255), current_item->entity->x + current_item->entity->box.w, current_item->entity->y + current_item->entity->box.h - 5, ALLEGRO_ALIGN_CENTER, "%s", current_item->id);
 
-        draw_entity(current_item->entity);
+        
+        al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 255, 255), 2);
     }
+
+}
+
+
+void draw_puzzle_state(Game* game) {
+    
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0, 0, 0, 150));
+
+    switch (game->active_puzzle_id) {
+        
+        case PUZZLE_BHASKARA:
+            if (game->puzzle_bhaskara_img) {
+                float x = SCREEN_W / 2.0 - 226;
+                float y = SCREEN_H / 2.0 - 250;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_bhaskara_img,
+                    0, 0,
+                    128, 141,
+                    x, y,
+                    453, 500,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê um quadro com a fórmula resolutiva.");
+                sprintf(game->log_ln2, "Quem sabe você precise usar mais para frente.");
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+
+        case PUZZLE_PITAGORAS:
+            if (game->puzzle_pitagoras_img) {
+                float x = SCREEN_W / 2.0 - 167;
+                float y = SCREEN_H / 2.0 - 250;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_pitagoras_img,
+                    0, 0,
+                    128, 191,
+                    x, y,
+                    335, 500,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê um quadro com a fórmula de Pitágoras.");
+                sprintf(game->log_ln2, "\"Acho que vou precisar usar essa fórmula\"");
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+        case PUZZLE_1GRAU:
+            if (game->puzzle_1grau_img) {
+                float x = SCREEN_W / 2.0 - 195;
+                float y = SCREEN_H / 2.0 - 250;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_1grau_img,
+                    0, 0,
+                    390, 500,
+                    x, y,
+                    390, 500,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê um quadro com uma equação do 1° grau.");
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+        case PUZZLE_EQUATION_1GRAU:
+            if (game->puzzle_1grau_paper) {
+                float x = SCREEN_W / 2.0 - 128;
+                float y = SCREEN_H / 2.0 - 169;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_1grau_paper,
+                    0, 0,
+                    256, 338,
+                    x, y,
+                    256, 338,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê uma tabuleta com uma equação do 1° Grau.");
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+        case PUZZLE_EQUATION_BHASKARA:
+            if (game->puzzle_bhaskara_paper) {
+                    float x = SCREEN_W / 2.0 - 128;
+                    float y = SCREEN_H / 2.0 - 169;
+                    
+                    al_draw_scaled_bitmap(
+                        game->puzzle_bhaskara_paper,
+                        0, 0,
+                        256, 338,
+                        x, y,
+                        256, 338,
+                        0
+                    );
+
+                    sprintf(game->log_ln1, "Você vê uma tabuleta sobre a fórmula resolutiva.");
+                    sprintf(game->log_ln2, "Talvez o resultado sirva para algo.");
+                    
+                } else {
+                    al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                                SCREEN_W / 2, SCREEN_H / 2, 
+                                ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+                }
+            break;
+
+        case PUZZLE_EQUATION_PITAGORAS:
+            if (game->puzzle_pitagoras_paper_3) {
+                float img_w = al_get_bitmap_width(game->puzzle_pitagoras_paper_3);
+                float img_h = al_get_bitmap_height(game->puzzle_pitagoras_paper_3);
+                float x = (SCREEN_W - img_w) / 2.0;
+                float y = (SCREEN_H - img_h) / 2.0;
+                
+                al_draw_scaled_bitmap(
+                    game->puzzle_pitagoras_paper_3,
+                    0, 0,
+                    256, 384,
+                    x, y,
+                    256, 384,
+                    0
+                );
+
+                sprintf(game->log_ln1, "Você vê uma tabuleta sobre Pitágoras.");
+                sprintf(game->log_ln2, "Acho que o resultado se encaixa em algum lugar.");
+                
+            } else {
+                al_draw_text(game->title_font, al_map_rgb(255, 0, 0), 
+                    SCREEN_W / 2, SCREEN_H / 2, 
+                    ALLEGRO_ALIGN_CENTER, "Erro: Imagem do puzzle não encontrada!");
+            }
+            break;
+        case PUZZLE_NONE:
+        default:
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), 
+                         SCREEN_W / 2, SCREEN_H / 2, 
+                         ALLEGRO_ALIGN_CENTER, "Nenhum puzzle ativo.");
+            break;
+    }
+
+    
+    int base_y = 20;
+    int bitmap_width = 32;
+    int bitmap_x_start = (SCREEN_W / 2) - (bitmap_width / 2);
+    int text1_x_center = bitmap_x_start - 50;
+    int text2_x_center = bitmap_x_start + 110;
+
+    al_draw_text(
+        game->subtitle_11_font,
+        al_map_rgb(255, 255, 255), 
+        text1_x_center,
+        base_y + 7, 
+        ALLEGRO_ALIGN_CENTER, 
+        "Pressione"
+    );
+
+    al_draw_scaled_bitmap(
+            game->controls,
+            0, 0,
+            16, 16,
+            bitmap_x_start,
+            base_y,     
+            bitmap_width, 32,
+            0 
+        );   
+
+    al_draw_text(
+        game->subtitle_11_font, 
+        al_map_rgb(255, 255, 255),
+        text2_x_center,
+        base_y + 7, 
+        ALLEGRO_ALIGN_CENTER, 
+        "para fechar."
+    );
+}
+
+void draw_logs(Game* game){
+    int log_x_pos = SCREEN_W - 20;
+
+    int exploring_line_height = al_get_font_line_height(game->subtitle_11_font);
+    int exploring_spacing = exploring_line_height + 6; 
+
+
+    int exploring_base_y = 100 - exploring_line_height;
+
+    ALLEGRO_COLOR log_color = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR log_color_highlighted = al_map_rgb(255,255,0);
+
+    al_draw_multiline_text(
+        game->subtitle_font,
+        log_color,
+        log_x_pos, 
+        exploring_base_y - (exploring_spacing * 4),
+        1000, 30,
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln1
+    );
+
+    al_draw_text(
+        game->subtitle_font,
+        log_color,
+        log_x_pos, 
+        exploring_base_y - (exploring_spacing * 3),
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln2
+    );
+
+    al_draw_text(
+        game->subtitle_font,
+        log_color_highlighted,
+        log_x_pos, 
+        exploring_base_y - (exploring_spacing * 2),
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln3
+    );
+
+        al_draw_text(
+        game->subtitle_font,
+        log_color,
+        log_x_pos, 
+        exploring_base_y - exploring_spacing,
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln4
+    );
+
+        al_draw_text(
+        game->subtitle_font,
+        log_color,
+        log_x_pos, 
+        exploring_base_y,
+        ALLEGRO_ALIGN_RIGHT, 
+        game->log_ln5
+    );
+}
+
+void draw_battle_menu(Game* game){
+    ALLEGRO_COLOR bg_color_normal = al_map_rgba(30, 30, 30, 230);     
+    ALLEGRO_COLOR border_color_normal = al_map_rgb(218, 165, 32);     
+    ALLEGRO_COLOR text_color_normal = al_map_rgb(255, 255, 255);
+    
+    ALLEGRO_COLOR bg_color_selected = al_map_rgba(80, 80, 80, 230); 
+    ALLEGRO_COLOR border_color_selected = al_map_rgb(255, 255, 255); 
+    ALLEGRO_COLOR text_color_selected = al_map_rgb(255, 255, 0); 
+
+    int top_pos_y = (SCREEN_H / 2) - 50;  
+    int bottom_pos_y = (SCREEN_H / 2) + 200;
+    int left_pos_x = 20;
+    int right_pos_x = 425;
+    
+    // SUBMENU DE ITENS
+    if (game->battle->is_selecting_item) {
+        
+        al_draw_filled_rectangle(left_pos_x, top_pos_y, right_pos_x, bottom_pos_y, bg_color_normal);
+        al_draw_rectangle(left_pos_x, top_pos_y, right_pos_x, bottom_pos_y, border_color_normal, 4);
+
+        al_draw_text(game->subtitle_font, text_color_selected, 
+            (left_pos_x + right_pos_x) / 2, top_pos_y + 10, ALLEGRO_ALIGN_CENTER, "--- ITENS ---");
+
+        int valid_count = 0;
+        int item_height = 40; 
+        int start_y = top_pos_y + 50;
+
+        for (int i = 0; i < MAX_ITENS; i++) {
+            Item* item = game->player->inventory.slots[i].item;
+            int qty = game->player->inventory.slots[i].quantity;
+
+            if (item != NULL && (item->type == ITEM_HEAL || item->type == ITEM_SMALL_HEAL || item->type == ITEM_WATER) && qty > 0) {
+                
+                int current_y = start_y + (valid_count * item_height);
+                
+                ALLEGRO_COLOR current_text;
+                bool is_selected = (valid_count == game->battle->item_selection_index);
+
+                if (is_selected) {
+                    // Desenha o fundo primeiro
+                    al_draw_filled_rectangle(left_pos_x + 5, current_y, right_pos_x - 5, current_y + item_height, bg_color_selected);
+                    al_draw_rectangle(left_pos_x + 5, current_y, right_pos_x - 5, current_y + item_height, border_color_selected, 2);
+                    current_text = text_color_selected;
+                } else {
+                    current_text = text_color_normal;
+                }
+
+                char buffer[64];
+                sprintf(buffer, "%s (x%d)", item->name, qty);
+                
+                al_draw_text(game->subtitle_font, current_text, 
+                    (left_pos_x + right_pos_x) / 2, 
+                    current_y + 10,
+                    ALLEGRO_ALIGN_CENTER, buffer);
+
+                // Desenha o ícone POR ÚLTIMO se estiver selecionado
+                if (is_selected) {
+                    al_draw_scaled_bitmap(
+                        game->controls, 0, 0, 16, 16,
+                        left_pos_x + 15, current_y + 8, 24, 24, 0
+                    );
+                }
+
+                valid_count++;
+            }
+        }
+
+        int voltar_y = start_y + (valid_count * item_height);
+        ALLEGRO_COLOR voltar_text;
+        bool is_voltar_selected = (valid_count == game->battle->item_selection_index);
+
+        if (is_voltar_selected) {
+            al_draw_filled_rectangle(left_pos_x + 5, voltar_y, right_pos_x - 5, voltar_y + item_height, bg_color_selected);
+            al_draw_rectangle(left_pos_x + 5, voltar_y, right_pos_x - 5, voltar_y + item_height, border_color_selected, 2);
+            voltar_text = text_color_selected;
+        } else {
+            voltar_text = text_color_normal;
+        }
+
+        al_draw_text(game->subtitle_font, voltar_text, 
+            (left_pos_x + right_pos_x) / 2, 
+            voltar_y + 10, 
+            ALLEGRO_ALIGN_CENTER, "VOLTAR");
+
+        // Desenha o ícone POR ÚLTIMO se estiver selecionado
+        if (is_voltar_selected) {
+            al_draw_scaled_bitmap(
+                game->controls, 0, 0, 16, 16,
+                left_pos_x + 15, voltar_y + 8, 24, 24, 0
+            );
+        }
+
+        return;
+    }
+    
+    // --- MENU PRINCIPAL ---
+
+    int button_height = (bottom_pos_y - top_pos_y) / 3;
+    int font_h = al_get_font_line_height(game->subtitle_font);
+    int text_offset_y = (button_height / 2) - (font_h / 2);
+
+    int current_y;
+    ALLEGRO_COLOR current_bg, current_border, current_text;
+
+    // 1. ATACAR
+    current_y = top_pos_y;
+    if (game->battle->opt_player == 1) { 
+        current_bg = bg_color_selected; 
+        current_border = border_color_selected; 
+        current_text = text_color_selected; 
+    } else { 
+        current_bg = bg_color_normal; 
+        current_border = border_color_normal; 
+        current_text = text_color_normal; 
+    }
+    // Desenha Fundo -> Borda -> Texto
+    al_draw_filled_rectangle(left_pos_x, current_y, right_pos_x, current_y + button_height, current_bg);
+    al_draw_rectangle(left_pos_x, current_y, right_pos_x, current_y + button_height, current_border, 3);
+    al_draw_text(game->subtitle_font, current_text, (left_pos_x + right_pos_x) / 2, current_y + text_offset_y, ALLEGRO_ALIGN_CENTER, "ATACAR");
+    
+    // Desenha Ícone POR CIMA de tudo se selecionado
+    if (game->battle->opt_player == 1) {
+        al_draw_scaled_bitmap(
+            game->controls, 0, 0, 16, 16,
+            left_pos_x + 20, current_y + (button_height / 2) - 16, 32, 32, 0
+        );
+    }
+
+    // 2. DEFENDER
+    current_y = top_pos_y + button_height;
+    if (game->battle->opt_player == 2) { 
+        current_bg = bg_color_selected; 
+        current_border = border_color_selected; 
+        current_text = text_color_selected; 
+    } else { 
+        current_bg = bg_color_normal; 
+        current_border = border_color_normal; 
+        current_text = text_color_normal; 
+    }
+    al_draw_filled_rectangle(left_pos_x, current_y, right_pos_x, current_y + button_height, current_bg);
+    al_draw_rectangle(left_pos_x, current_y, right_pos_x, current_y + button_height, current_border, 3);
+    al_draw_text(game->subtitle_font, current_text, (left_pos_x + right_pos_x) / 2, current_y + text_offset_y, ALLEGRO_ALIGN_CENTER, "DEFENDER");
+
+    // Desenha Ícone POR CIMA de tudo se selecionado
+    if (game->battle->opt_player == 2) {
+        al_draw_scaled_bitmap(
+            game->controls, 0, 0, 16, 16,
+            left_pos_x + 20, current_y + (button_height / 2) - 16, 32, 32, 0
+        );
+    }
+
+    // 3. USAR ITEM
+    current_y = top_pos_y + (button_height * 2);
+    
+    int draw_x = left_pos_x;
+    int draw_y = current_y;
+    
+    // (Erro)
+    if (al_get_timer_started(game->battle->error_timer)) {
+        current_bg = al_map_rgb(150, 0, 0); 
+        current_border = al_map_rgb(255, 0, 0);
+        current_text = al_map_rgb(255, 255, 255);
+        
+        draw_x += (rand() % 10) - 5;
+        draw_y += (rand() % 10) - 5;
+    } else {
+        if (game->battle->opt_player == 3) { 
+            current_bg = bg_color_selected; 
+            current_border = border_color_selected; 
+            current_text = text_color_selected; 
+        } else { 
+            current_bg = bg_color_normal; 
+            current_border = border_color_normal; 
+            current_text = text_color_normal; 
+        }
+    }
+
+    al_draw_filled_rectangle(draw_x, draw_y, right_pos_x + (draw_x - left_pos_x), draw_y + button_height, current_bg);
+    al_draw_rectangle(draw_x, draw_y, right_pos_x + (draw_x - left_pos_x), draw_y + button_height, current_border, 3);
+    al_draw_text(game->subtitle_font, current_text, (draw_x + right_pos_x + (draw_x - left_pos_x)) / 2, draw_y + text_offset_y, ALLEGRO_ALIGN_CENTER, "USAR ITEM");
+
+    // Desenha Ícone POR CIMA de tudo se selecionado
+    // Nota: Usamos draw_x e draw_y para que o ícone trema junto com o botão
+    if (game->battle->opt_player == 3) { 
+        al_draw_scaled_bitmap(
+            game->controls, 0, 0, 16, 16,
+            draw_x + 20, draw_y + (button_height / 2) - 16, 32, 32, 0
+        );
+    }
+}
+
+void draw_battle(Game* game){
+    Enemy* enemy_in_battle = game->battle->enemy;
+    draw_inventory(game->player, game->subtitle_8_font);
+
+   // Configuração do fundo dos textos de status
+    ALLEGRO_COLOR status_bg_color = al_map_rgba(50, 50, 50, 200);
+    float status_box_w = 300;
+    float status_box_h = 30; 
+    float status_y = (SCREEN_H / 2) - 50; 
+    
+    float rx1 = (SCREEN_W / 2) - (status_box_w / 2);
+    float ry1 = status_y - 5;
+    float rx2 = (SCREEN_W / 2) + (status_box_w / 2);
+    float ry2 = status_y + 20;
+
+    if(game->battle->turn_state == TURN_PLAYER && game->battle->state == BATTLE_START){
+        al_draw_filled_rounded_rectangle(rx1, ry1, rx2, ry2, 5, 5, status_bg_color);
+        
+        al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, status_y, ALLEGRO_ALIGN_CENTER, "Seu turno");
+
+        draw_battle_menu(game);
+    } 
+    else if (game->battle->turn_state == TURN_ENEMY && game->battle->state == BATTLE_START){
+        al_draw_filled_rounded_rectangle(rx1, ry1, rx2, ry2, 5, 5, status_bg_color);
+
+        al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, status_y, ALLEGRO_ALIGN_CENTER, "Turno do inimigo");
+    }
+    else if (game->battle->turn_state == TURN_EMPTY && game->battle->state == BATTLE_START){
+         al_draw_filled_rounded_rectangle(rx1, ry1, rx2, ry2, 5, 5, status_bg_color);
+
+         al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, status_y, ALLEGRO_ALIGN_CENTER, "FIM!");
+    }
+        
+        
+    if(game->battle->state == BATTLE_WIN) {
+        
+        al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você ganhou!");
+
+        int base_y = (SCREEN_H / 2) - 120;
+        
+        int bitmap_width = 32;
+
+        int bitmap_x_start = (SCREEN_W / 2) - (bitmap_width / 2);
+
+        int text1_x_center = bitmap_x_start - 50; 
+        int text2_x_center = bitmap_x_start + 180;
+
+        al_draw_text(
+            game->subtitle_font,
+            al_map_rgb(255, 255, 0),
+            SCREEN_W - 240,
+            SCREEN_H - 80,
+            ALLEGRO_ALIGN_CENTER, 
+            "Pressione ENTER para continuar"
+        );
+
+
+    }else if(game->battle->state == BATTLE_LOST)
+        al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você perdeu!");
+
+    if(game->battle->state != BATTLE_DIALOGUE){
+        al_draw_scaled_bitmap(
+            game->player->player_hp,
+            0, 0,
+            922, 432,
+            20, 20,
+            213, 100,
+            0
+        );
+
+        draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
+        draw_hp_bar_scalable(game->subtitle_font, SCREEN_W - 250, 70, 235, 35, enemy_in_battle->entity.hp, enemy_in_battle->entity.max_hp);
+
+        draw_defense(game->player->shield, game->subtitle_11_font, 30, 125, game->player->defense);
+        draw_attack(game->player->sword_ui, game->subtitle_11_font, 100, 125, game->player->attack);
+
+        draw_defense(game->player->shield, game->subtitle_11_font, SCREEN_W - 95, 125, enemy_in_battle->defense);
+        draw_attack(game->player->sword_ui, game->subtitle_11_font, SCREEN_W - 165, 125, enemy_in_battle->attack);
+        
+        
+    }
+
+    if(game->battle->turn_state == TURN_PLAYER || game->battle->turn_state == TURN_ENEMY || game->battle->state == BATTLE_WIN) {
+        if(game->event->timer.source == game->battle->timer_enemy)
+            al_start_timer(game->battle->log_timer);
+
+        int battle_log_x = (SCREEN_W / 2);
+        int battle_line_height = al_get_font_line_height(game->subtitle_11_font);
+        int battle_line_spacing = battle_line_height + 10; 
+
+
+        int battle_base_y = (SCREEN_H / 2) - 100 - battle_line_height;
+
+        ALLEGRO_COLOR battle_log_color = al_map_rgb(255, 255, 255);
+        ALLEGRO_COLOR battle_log_color_highlighted = al_map_rgb(255,255,0);
+
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 9),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln1
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 8),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln2
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 7),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln3
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 6),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln4
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 5),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln5
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 4),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln6
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 3),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln7
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - (battle_line_spacing * 2),
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln8
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y - battle_line_spacing,
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln9
+        );
+        al_draw_text(
+            game->subtitle_font, battle_log_color, battle_log_x, 
+            battle_base_y,
+            ALLEGRO_ALIGN_CENTER, game->battle->log_ln10
+        );
+    }
+    
+        
+}
+
+void draw_tutorial(Game* game){
+    // --- CORES ---
+    ALLEGRO_COLOR color_border = al_map_rgb(255, 0, 0);
+    ALLEGRO_COLOR color_bg = al_map_rgba(10, 10, 10, 245);
+    ALLEGRO_COLOR color_text = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR color_title = al_map_rgb(255, 255, 0);
+
+    float pad = 40.0f;
+    float x1 = pad;
+    float y1 = pad;
+    float x2 = SCREEN_W - pad;
+    float y2 = SCREEN_H - pad;
+
+    // Divisória Vertical
+    float mid_x = SCREEN_W / 2.0f; 
+    
+    // Divisória Horizontal
+    float mid_y = (SCREEN_H / 2.0f) + 50.0f; 
+
+    // Altura da linha
+    int line_h = al_get_font_line_height(game->subtitle_font) + 4;
+ 
+    // Fundo Geral
+    al_draw_filled_rectangle(x1, y1, x2, y2, color_bg);
+    // Borda Externa Vermelha
+    al_draw_rectangle(x1, y1, x2, y2, color_border, 4);
+    // Linha Vertical
+    al_draw_line(mid_x, y1, mid_x, y2, color_border, 3);
+    // Linha Horizontal
+    al_draw_line(mid_x, mid_y, x2, mid_y, color_border, 3);
+
+
+    // TEXTO: LADO ESQUERDO
+    float text_x = x1 + 20;
+    float text_y = y1 + 20;
+    float text_w = (mid_x - x1) - 40; // Largura disponível
+
+    al_draw_text(game->title_font, color_title, text_x + (text_w/2), text_y, ALLEGRO_ALIGN_CENTER, "CONTEXTO");
+    text_y += 50;
+
+    const char* texto_lore = 
+        "Você é um estudante curioso em busca de conhecimento no domínio do "
+        "Arauto da Matemática. Para obter o saber supremo, você deve superar "
+        "desafios rigorosos e provar seu valor.\n\n"
+        "Derrote mestres lendários como o Minotauro de Arquimedes e a Medusa de Hipátia, "
+        "figuras que guardam os segredos matemáticos.\n\n"
+        "DICA: O território é perigoso, mas seu raciocínio pode revelar pistas "
+        "ocultas. Fortaleça-se a cada passo para o desafio final contra o Arauto.";
+
+    al_draw_multiline_text(game->subtitle_font, color_text, text_x, text_y, text_w, line_h, ALLEGRO_ALIGN_LEFT, texto_lore);
+
+
+    // TEXTO: LADO DIREITO SUPERIOR
+    text_x = mid_x + 20;
+    text_y = y1 + 20;
+    text_w = (x2 - mid_x) - 40;
+
+    al_draw_text(game->subtitle_font, color_title, text_x + (text_w/2), text_y, ALLEGRO_ALIGN_CENTER, "SISTEMA DE BATALHA");
+    text_y += 30;
+
+    const char* texto_batalha = 
+        "- Batalhas por Turnos.\n"
+        "- Iniciativa: D20 + Atributo de Iniciativa.\n\n"
+        "TURNO DO PLAYER:\n"
+        "1. Atacar  2. Defender  3. Usar Item\n\n"
+        "MECÂNICA DE ACERTO:\n"
+        "D20 + Seu Ataque >= Defesa Inimigo = ACERTO\n"
+        "Caso contrário = ERRO (Miss)";
+
+    al_draw_multiline_text(game->subtitle_font, color_text, text_x, text_y, text_w, line_h, ALLEGRO_ALIGN_LEFT, texto_batalha);
+
+
+    // TEXTO: LADO DIREITO INFERIOR
+    text_y = mid_y + 20; // Pula para a parte de baixo
+
+    al_draw_text(game->subtitle_font, color_title, text_x + (text_w/2), text_y, ALLEGRO_ALIGN_CENTER, "CÁLCULO DE DANO");
+    text_y += 30;
+
+    const char* texto_dano = 
+        "Dano = Dado Aleatório + Atributo de Ataque\n\n"
+        "DADOS DE DANO:\n"
+        "- Player: Dado de 6 lados (D6)\n"
+        "- Bosses: Dado de 8 lados (D8)\n"
+        "- Mobs:   Dado de 4 lados (D4)\n\n"
+        "Exemplo: 10 (Dado) + 10 (Atq) = 20 de Dano.";
+
+    al_draw_multiline_text(game->subtitle_font, color_text, text_x, text_y, text_w, line_h, ALLEGRO_ALIGN_LEFT, texto_dano);
+
+    // Instrução para sair
+    al_draw_text(game->subtitle_8_font, al_map_rgb(200, 200, 200), SCREEN_W/2, y2 + 10, ALLEGRO_ALIGN_CENTER, "Pressione ESC ou B para voltar");
+}
+
+void draw_player_level(ALLEGRO_FONT* font, int level, int xp, int xp_for_next_level, int x, int y){
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x, y, ALLEGRO_ALIGN_LEFT, "Nível atual: %d", level);
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x, y + 40, ALLEGRO_ALIGN_LEFT, "XP atual: %d", xp);
+    al_draw_textf(font, al_map_rgb(255, 255, 255), x, y + 80, ALLEGRO_ALIGN_LEFT, "XP restante para próximo nível: %d", xp_for_next_level - xp);
+}
+
+void draw_pause(Game* game){
+    al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(20, 20, 20, 200));
+
+    al_draw_textf(game->title_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Jogo pausado.");
+
+    al_draw_textf(game->subtitle_font,  al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H - 20, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar.");
+
+    draw_player_level(game->subtitle_font, game->player->level, game->player->xp, game->player->xp_for_next_level, 50, 50);
 
 }
 
@@ -1176,6 +3643,12 @@ void draw_game(Game* game){
         case GAME_MENU:
             draw_menu(game);
             break;
+        case GAME_TUTORIAL:
+            draw_tutorial(game);
+            break;
+        case GAME_PAUSE:
+            draw_pause(game);
+            return;
         case GAME_INIT:
             draw_level_01(game);
             break;
@@ -1233,16 +3706,36 @@ void draw_game(Game* game){
                     draw_entity(current_entity);
                 }
 
-                
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
                 if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
                     bool check = check_interaction(game->controls, &game->player->entity, current_entity);
                 }
             }
             
             draw_entity(&game->player->entity);
             
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
             }
 
             al_identity_transform(&identity_transform);
@@ -1260,25 +3753,29 @@ void draw_game(Game* game){
                     draw_entity(current_entity);
                 }
 
-                
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
                 if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
                     bool check = check_interaction(game->controls, &game->player->entity, current_entity);
                 }
             }
-            
-            draw_entity(&game->player->entity);
-            
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
-            }
-
-            al_identity_transform(&identity_transform);
-            al_use_transform(&identity_transform);
-            break;
-        case GAME_THIRD_MISSION:
-            al_use_transform(&game->camera_transform);
-
-            draw_map(game->map);
 
             for(int i = 0; i < game->num_world_entities; i++){
                 Entity* current_entity = game->world_entities[i];
@@ -1294,75 +3791,175 @@ void draw_game(Game* game){
             
             draw_entity(&game->player->entity);
             
-            if(game->enemy && game->enemy->entity.isActive){
-                draw_entity(&game->enemy->entity);
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
             }
 
             al_identity_transform(&identity_transform);
             al_use_transform(&identity_transform);
             break;
+        case GAME_THIRD_MISSION:
+            al_use_transform(&game->camera_transform);
+
+            draw_map(game->map);
+
+             for(int i = 0; i < game->num_world_entities; i++){
+                Entity* current_entity = game->world_entities[i];
+                if(current_entity && current_entity->isActive){
+                    draw_entity(current_entity);
+                }
+
+                if (current_entity->entity_type == PUZZLE_DIAL) {
+                    al_draw_textf(
+                        game->subtitle_font,
+                        al_map_rgb(255, 255, 255),
+                        current_entity->x,
+                        current_entity->y - 20,
+                        ALLEGRO_ALIGN_CENTER,
+                        "%d",
+                        current_entity->puzzle_value
+                    );
+                }
+
+                /*
+                AQUI SE FAZ CHECKAGEM DE INTERAÇÃO PARA DESENHO, REFATORAR ----------------------
+                */
+                if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == EDUCATIONAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                } else if(current_entity && current_entity->entity_type == PUZZLE_DIAL){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                }
+            }
+
+            for(int i = 0; i < game->num_world_entities; i++){
+                Entity* current_entity = game->world_entities[i];
+                if(current_entity && current_entity->isActive){
+                    draw_entity(current_entity);
+                }
+
+                
+                if(current_entity && current_entity->entity_type == DOOR){
+                    bool check = check_interaction(game->controls, &game->player->entity, current_entity);
+                }
+            }
+            
+            draw_entity(&game->player->entity);
+            
+            for(int i = 0; i < MAX_ENEMIES; i++){
+                if(game->mobs[i] && game->mobs[i]->entity.isActive){
+                   draw_entity(&game->mobs[i]->entity);
+                }    
+            }
+
+            al_identity_transform(&identity_transform);
+            al_use_transform(&identity_transform);
+            break;
+        case GAME_PUZZLE_SCREEN:
+            draw_puzzle_state(game);
+            break;
         case GAME_OVER:
             reset_world_entities(game);
 
             al_draw_text(game->title_font, al_map_rgb(255, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Você morreu!");
+
+            al_draw_text(game->title_font, al_map_rgb(255, 0, 0), SCREEN_W / 2, SCREEN_H - 100, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para tentar novamente!");
             break;
+        case GAME_END:
+            reset_world_entities(game);
+
+            al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0,0,0, 255));
+
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_CENTER, "Fim!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Muito obrigado por jogar!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 50, ALLEGRO_ALIGN_CENTER, "Você adquiriu todo o conhecimento!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "Pressione P para fechar o jogo!");
+
+
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H - 50, ALLEGRO_ALIGN_CENTER, "Desenvolvido pelos caras!");
+            return;
     }
 
     switch (game->gameplay_state){
-        case GAMEPLAY_EXPLORING:
+
+        case GAMEPLAY_PUZZLE:
+            int log_x_pos_0 = SCREEN_W - 20;
+
+            int exploring_line_height_0 = al_get_font_line_height(game->subtitle_11_font);
+            int exploring_spacing_0 = exploring_line_height_0 + 10; 
+
+            int exploring_base_y_0 = SCREEN_H - 20 - exploring_line_height_0;
+
+            ALLEGRO_COLOR log_color_0 = al_map_rgb(255, 255, 255);
+
+            al_draw_text(
+                game->subtitle_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0 - (exploring_spacing_0 * 2),
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln1
+            );
+
+            al_draw_text(
+                game->subtitle_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0 - exploring_spacing_0,
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln2
+            );
+
+            al_draw_text(
+                game->subtitle_font,
+                log_color_0,
+                log_x_pos_0, 
+                exploring_base_y_0,
+                ALLEGRO_ALIGN_RIGHT, 
+                game->log_ln3
+            );
+            break;
+        case GAMEPLAY_EXPLORING:        
+           
+            draw_logs(game);
             
-            draw_inventory(game->player, game->subtitle_8_font);
+            draw_inventory(game->player, game->subtitle_11_font);
 
             al_draw_scaled_bitmap(
-                game->player->hp_heart, 
+                game->player->player_hp,
                 0, 0,
-                17, 17, 
-                20, 695, 24, 24,
+                922, 432,
+                20, 20,
+                213, 100,
                 0
-            );  
-
-            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
-
-            draw_hp(game->player->hp_heart, game->player->entity.hp);
+            );
 
 
-            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
-            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
-            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
+            draw_hp_bar_scalable(game->subtitle_font, 42, 57, 165, 30, game->player->entity.hp, game->player->entity.max_hp);
 
+            draw_defense(game->player->shield, game->subtitle_11_font, 30, 125, game->player->defense);
+            draw_attack(game->player->sword_ui, game->subtitle_11_font, 100, 125,game->player->attack);
 
+            break;
+        case GAMEPLAY_PAUSE:
+            draw_pause(game);
             break;
         case GAMEPLAY_BATTLE:
-            draw_inventory(game->player, game->subtitle_8_font);
-
-            al_draw_scaled_bitmap(
-                game->player->hp_heart, 
-                0, 0,
-                17, 17, 
-                20, 695, 24, 24,
-                0
-            );  
-
-            al_draw_textf(game->subtitle_8_font, al_map_rgb(255, 255, 255), 60, 700, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
-
-            draw_hp(game->player->hp_heart, game->player->entity.hp);
-
-
-            al_draw_filled_rectangle(298, 8, 402, 32, al_map_rgb(255, 255, 255));
-            al_draw_filled_rectangle(300, 10, 300 + game->player->entity.hp, 30, al_map_rgb(255, 0, 0));
-            al_draw_textf(game->subtitle_font, al_map_rgb(0, 0, 0), 350, 13, ALLEGRO_ALIGN_CENTER, "%d", game->player->entity.hp);
-            break;
+            if(game->state != GAME_OVER){
+                draw_battle(game);
+            }
     }
 }
 
 void destroy_game(Game* game) {
-     if (!game) return;
+    if (!game) return;
 
-    reset_world_entities(game);
-
-    if (game->battle) {
-        destroy_battle(game->battle);
-        game->battle = NULL;
+    if (game->player) {
+        destroy_player(game->player);
+        game->player = NULL;
     }
 
     if (game->enemy) {
@@ -1370,31 +3967,48 @@ void destroy_game(Game* game) {
         game->enemy = NULL;
     }
 
-    if (game->player) {
-        destroy_player(game->player);
-        game->player = NULL;
+    if (game->battle) {
+        destroy_battle(game->battle);
+        game->battle = NULL;
     }
 
     if (game->map) {
-        destroy_map(game->map); 
+        destroy_map(game->map);
         game->map = NULL;
     }
 
-    if (game->background) {
-        al_destroy_bitmap(game->background);
-        game->background = NULL;
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (game->mobs[i]) {
+            destroy_enemy(game->mobs[i]);
+            game->mobs[i] = NULL;
+        }
     }
     
-    if (game->controls) {
-        al_destroy_bitmap(game->controls);
-        game->controls = NULL;
-    }
+    reset_world_entities(game);
 
-    if (game->subtitle_8_font) {
-        al_destroy_font(game->subtitle_8_font);
-        game->subtitle_8_font = NULL;
-    }
+    if (game->background) al_destroy_bitmap(game->background);
+    if (game->controls) al_destroy_bitmap(game->controls);
+
+    if (game->puzzle_bhaskara_img) al_destroy_bitmap(game->puzzle_bhaskara_img);
+    if (game->puzzle_pitagoras_img) al_destroy_bitmap(game->puzzle_pitagoras_img);
+    if (game->puzzle_bhaskara_paper) al_destroy_bitmap(game->puzzle_bhaskara_paper);
+    if (game->puzzle_bhaskara_paper_2) al_destroy_bitmap(game->puzzle_bhaskara_paper_2);
+    if (game->puzzle_pitagoras_paper_3) al_destroy_bitmap(game->puzzle_pitagoras_paper_3);
+    if (game->puzzle_1grau_img) al_destroy_bitmap(game->puzzle_1grau_img);
+    if (game->puzzle_1grau_paper) al_destroy_bitmap(game->puzzle_1grau_paper);
+
+    if (game->game_font) al_destroy_font(game->game_font);
+    if (game->title_font) al_destroy_font(game->title_font);
+    if (game->subtitle_font) al_destroy_font(game->subtitle_font);
+    if (game->subtitle_8_font) al_destroy_font(game->subtitle_8_font);
+    if (game->subtitle_11_font) al_destroy_font(game->subtitle_11_font);
+    if (game->log_font) al_destroy_font(game->log_font);
+    if (game->log_font_20) al_destroy_font(game->log_font_20);
+
+    if (game->timer_game_logs) al_destroy_timer(game->timer_game_logs);
+    if (game->timer_game_tips) al_destroy_timer(game->timer_game_tips);
+    if (game->timer_game_can_draw_tips) al_destroy_timer(game->timer_game_can_draw_tips);
+    if (game->timer_death) al_destroy_timer(game->timer_death);
 
     free(game);
 }
-
