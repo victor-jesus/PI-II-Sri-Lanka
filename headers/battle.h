@@ -58,7 +58,7 @@ typedef struct Battle{
 } Battle;
 
 void start_battle(Battle* battle, Player* player, Enemy* enemy);
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies);
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_death, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies);
 void destroy_battle(Battle* battle);
 
 #endif

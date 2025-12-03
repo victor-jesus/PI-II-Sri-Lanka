@@ -65,6 +65,8 @@ void start_battle(Battle* battle, Player* player, Enemy* enemy){
 
     battle->player->turn_choice = TURN_NONE;
     battle->enemy->turn_choice = TURN_NONE;
+
+    battle->player->original_defense = battle->player->defense;
 }
 
 void end_battle(Battle* battle, Player* player, Enemy* enemy){
@@ -213,16 +215,18 @@ void deal_choice(Battle* battle, ALLEGRO_EVENT event, Turn_choice choice){
 
     if (choice == TURN_NONE) return;
 
-    if (battle->player->is_defending) {
-        battle->player->defense = battle->enemy->original_defense;
-        battle->player->is_defending = false;
-    }
+
 
     // Depois separar cada elemnto em função, inclusive o uso de itens passando o tipo do item
     // REFATORAR ESSE CÓDIGO
     switch (battle->turn_state)
     {
     case TURN_PLAYER:
+        if (battle->player->is_defending) {
+            battle->player->defense = battle->enemy->original_defense;
+            battle->player->is_defending = false;
+        }
+
         if(choice == TURN_ATTACK && battle->can_act == true){
             attack_state(battle, event, battle->battle_font, battle->player, battle->enemy, battle->turn_state);
             battle->can_act = false;
@@ -513,7 +517,7 @@ void enemy_action(Battle* battle, ALLEGRO_EVENT event){
 bool talk_minus_than_75 = false;
 bool talk_minus_than_50 = false;
 bool talk_minus_than_25 = false;
-void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies){
+void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_death, Game_state game_state, unsigned char* key, ALLEGRO_FONT* font, int* world_enemies){
     if(battle->player->entity.hp <= 75 && talk_minus_than_75 == false && battle->enemy->enemy_type == MINOTAUR){
         battle->state = BATTLE_DIALOGUE;
         battle->dialogues = DIALOGUE_BATTLE_6;
@@ -539,6 +543,29 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, Game_state game_state, u
     } else if (event.timer.source == battle->error_timer){
         al_stop_timer(battle->error_timer);
         al_set_timer_count(battle->error_timer, 0);   
+    }
+
+    if(battle->player->entity.hp <= 0){
+        
+        battle->turn_state = TURN_EMPTY;
+       
+
+        battle->player->entity.anim_state = ANIM_DEATH;    
+        battle->state = BATTLE_LOST;
+        if(key[ALLEGRO_KEY_ENTER]){
+            battle->state = BATTLE_NONE;
+            battle->log_ln1[0] = '\0';
+            battle->log_ln2[0] = '\0';
+            battle->log_ln3[0] = '\0';
+            battle->log_ln4[0] = '\0';
+            battle->log_ln5[0] = '\0';
+            battle->log_ln6[0] = '\0';
+            battle->log_ln7[0] = '\0';
+            battle->log_ln8[0] = '\0';
+            battle->log_ln9[0] = '\0';
+            battle->log_ln10[0] = '\0';
+        }
+        return;
     }
 
     if(battle->enemy->entity.hp <= 0){

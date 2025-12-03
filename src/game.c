@@ -21,6 +21,7 @@ const char* path_idle = "assets/sprites/warrior_2/IDLE.png";
 const char* path_run = "assets/sprites/warrior_2/RUN.png";
 const char* path_attack = "assets/sprites/warrior_2/ATTACK_1.png";
 const char* path_hit = "assets/sprites/warrior_2/HURT.png";
+const char* path_death = "assets/sprites/warrior_2/DEATH.png";
 
 // Mesma coisa para o enemy, por enquanto
 const char* path_minotaur_idle = "assets/sprites/minotaur_1/idle.png";
@@ -47,7 +48,7 @@ const char* path_arauto_attack = "assets/sprites/arauto_1/Attack_2.png";
 const char* path_arauto_hit = "assets/sprites/arauto_1/hurt.png";
 const char* path_arauto_dead = "assets/sprites/arauto_1/dead.png";
 
-const char* path_portrait_arauto = "assets/sprites/arauto_1/arauto.png";
+const char* path_portrait_arauto = "assets/sprites/arauto_1/Arauto.png";
 const char* path_hp_canva_arauto = "assets/sprites/arauto_1/dead.png";
 
 const char* path_map_tile = "assets/sprites/map/background-wall.png";
@@ -177,6 +178,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     set_entity_anim(&game->player->entity, path_run, ANIM_RUN, 8, 1, 0.07f);
     set_entity_anim(&game->player->entity, path_attack, ANIM_ATTACK, 6, 1, 0.1f);
     set_entity_anim(&game->player->entity, path_hit, ANIM_HIT, 4, 1, 0.1f);
+    set_entity_anim(&game->player->entity, path_death, ANIM_DEATH, 12, 1, 0.1f);
     set_entity_scale(&game->player->entity, 2.5);
     
     game->enemy = NULL;
@@ -187,15 +189,19 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     game->battle->log_timer = al_create_timer(10.0);
     game->battle->timer_enemy = al_create_timer(3.5);
     game->timer_game_logs = al_create_timer(6.0);
-    game->timer_game_tips = al_create_timer(12.0);
+    game->timer_game_tips = al_create_timer(30.0);
     game->battle->error_timer = al_create_timer(0.3);
     game->timer_game_can_draw_tips = al_create_timer(2.0);
+    game->timer_death = al_create_timer(5.0);
     game->battle->battle_font = subtitle_font;
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_end));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->log_timer));
     al_register_event_source(game->queue, al_get_timer_event_source(game->battle->timer_enemy));
     al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_logs));
     al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_tips));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_game_can_draw_tips));
+    al_register_event_source(game->queue, al_get_timer_event_source(game->timer_death));
+
     al_register_event_source(queue, al_get_timer_event_source(game->battle->error_timer));
 
     game->game_font = font;
@@ -252,11 +258,11 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     // Item* HEAL_WATER = create_item(2, "Garrafa D'água", "Cura 5 HP.", 5, true, 5, ITEM_WATER);
     // add_item(&game->player->inventory, HEAL_WATER, 5);
 
-    // player_equip_item(game->player, KEY_TO_MINOTAUR);
-    // player_equip_item(game->player, KEY_TO_MEDUSA);
-    // player_equip_item(game->player, KEY_TO_ARAUTO);
-    // player_equip_item(game->player, KEY_TO_SECOND_MAP);
-    // player_equip_item(game->player, KEY_TO_THIRD_MAP);
+    player_equip_item(game->player, KEY_TO_MINOTAUR);
+    player_equip_item(game->player, KEY_TO_MEDUSA);
+    player_equip_item(game->player, KEY_TO_ARAUTO);
+    player_equip_item(game->player, KEY_TO_SECOND_MAP);
+    player_equip_item(game->player, KEY_TO_THIRD_MAP);
 
 
     return game;
@@ -841,7 +847,7 @@ void render_arauto_level(Game* game){
     
     game->enemy->hp_heart = al_load_bitmap(path_heart);
     game->enemy->shield_enemy = al_load_bitmap(path_shield_enemy);
-    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_arauto);
+    game->enemy->hp_canva = al_load_bitmap(path_hp_canva_minotaur);
     game->battle->dialogue_sprite = al_load_bitmap(path_dialogue_box_battle);
 
     game->player->entity.x = 200; 
@@ -2036,6 +2042,7 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
                         change_game_state(game, GAME_MINOTAUR_LEVEL);
                         game->gameplay_state = GAMEPLAY_BATTLE;
                         render_minotaur_level(game);
@@ -2083,6 +2090,7 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
                         change_game_state(game, GAME_MEDUSA_LEVEL);
                         game->gameplay_state = GAMEPLAY_BATTLE;
                         render_medusa_level(game);
@@ -2129,6 +2137,7 @@ void resolve_interaction_with_door(Game* game, Player* player, Entity* entity_2,
                     }
 
                     if (door->entity.is_locked_key == false && door->entity.is_locked_puzzle == false) {
+                        game->previous_game_state = game->state;
                         change_game_state(game, GAME_ARAUTO_LEVEL);
                         game->gameplay_state = GAMEPLAY_BATTLE;
                         render_arauto_level(game);
@@ -2325,7 +2334,7 @@ static void update_arauto_level(Game* game, unsigned char* key, float dt) {
         return;
     }
 
-    if(game->enemy->entity.hp <= 0 && game->is_minotaur_dead == false){
+    if(game->enemy->entity.hp <= 0 && game->is_arauto_dead == false){
         game->is_arauto_dead = true;
     }
 
@@ -2451,15 +2460,15 @@ void reset_level(Game* game, Game_state game_state){
     switch(game_state){
         default:
             game->state = game->previous_game_state;
-        case GAME_MINOTAUR_LEVEL:
+        case GAME_FIRST_MISSION:
             game->is_first_level_mobs_dead = false;
             load_first_map(game);
             break;
-        case GAME_MEDUSA_LEVEL:
+        case GAME_SECOND_MISSION:
             game->is_second_level_mobs_dead = false;
             load_second_map(game);
             break;
-        case GAME_ARAUTO_LEVEL:
+        case GAME_THIRD_MISSION:
             game->is_third_level_mobs_dead = false;
             load_third_map(game);
             break;
@@ -2477,13 +2486,15 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* 
     }
 
     bool is_dead = is_player_dead(game->player);
-    if(is_dead) al_start_timer(game->timer_death);
+    if(is_dead == true) {
+        al_start_timer(game->timer_death);
+    }
 
-    if(event.timer.source == game->timer_death){
-        if(game->state != GAME_OVER) game->previous_game_state = game->state;
-
-        
+    if(event.timer.source == game->timer_death && is_dead){        
         change_game_state(game, GAME_OVER);
+
+        al_stop_timer(game->timer_death);
+        al_set_timer_count(game->timer_death, 0);
         return;
     }
 
@@ -2508,7 +2519,7 @@ static void update_battle_state(Game* game, ALLEGRO_EVENT event, unsigned char* 
         update_enemy(enemy_in_battle, dt);
     }
     
-    manage_battle(game->battle, event, game->state, key, game->subtitle_font, &game->world_enemies);
+    manage_battle(game->battle, event, game->timer_death, game->state, key, game->subtitle_font, &game->world_enemies);
     update_player_battle(game->player, key, dt);
 }
 
@@ -2651,7 +2662,7 @@ void update_game(Game* game, unsigned char* key, ALLEGRO_EVENT event, float dt) 
             }
             break;
         case GAME_END:
-            if(key[ALLEGRO_KEY_ENTER]){
+            if(key[ALLEGRO_KEY_P]){
 
                 change_game_state(game, GAME_CLOSE);
             }
@@ -3861,10 +3872,13 @@ void draw_game(Game* game){
 
             al_draw_filled_rectangle(0, 0, SCREEN_W, SCREEN_H, al_map_rgba(0,0,0, 255));
 
-            al_draw_text(game->subtitle_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_CENTER, "Fim!");
-            al_draw_text(game->subtitle_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Muito obrigado por jogar!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2 - 100, ALLEGRO_ALIGN_CENTER, "Fim!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H / 2, ALLEGRO_ALIGN_CENTER, "Muito obrigado por jogar!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, SCREEN_H / 2 + 50, ALLEGRO_ALIGN_CENTER, "Você adquiriu todo o conhecimento!");
+            al_draw_text(game->subtitle_font, al_map_rgb(255, 255, 0), SCREEN_W / 2, 50, ALLEGRO_ALIGN_CENTER, "Pressione P para fechar o jogo!");
 
-            al_draw_text(game->subtitle_11_font, al_map_rgb(0, 0, 0), SCREEN_W / 2, - 50, ALLEGRO_ALIGN_CENTER, "Desenvolvido pelos caras!");
+
+            al_draw_text(game->subtitle_11_font, al_map_rgb(255, 255, 255), SCREEN_W / 2, SCREEN_H - 50, ALLEGRO_ALIGN_CENTER, "Desenvolvido pelos caras!");
             return;
     }
 
