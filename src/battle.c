@@ -606,10 +606,6 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_dea
     }
 }
 
-
-void destroy_battle(Battle* battle){
-    free(battle);
-
 void destroy_battle(Battle* battle) {
     if (!battle) return;
 
@@ -644,5 +640,4 @@ void destroy_battle(Battle* battle) {
     }
 
     free(battle);
-}
 }
