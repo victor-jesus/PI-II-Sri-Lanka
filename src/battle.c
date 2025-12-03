@@ -609,39 +609,6 @@ void manage_battle(Battle* battle, ALLEGRO_EVENT event, ALLEGRO_TIMER* timer_dea
 }
 
 
-void destroy_battle(Battle* battle) {
-    if (!battle) return;
-
-    if (battle->timer_dialogue) {
-        al_destroy_timer(battle->timer_dialogue);
-        battle->timer_dialogue = NULL;
-    }
-
-    if (battle->timer_enemy) {
-        al_destroy_timer(battle->timer_enemy);
-        battle->timer_enemy = NULL;
-    }
-
-    if (battle->timer_end) {
-        al_destroy_timer(battle->timer_end);
-        battle->timer_end = NULL;
-    }
-
-    if (battle->log_timer) {
-        al_destroy_timer(battle->log_timer);
-        battle->log_timer = NULL;
-    }
-
-    if (battle->error_timer) {
-        al_destroy_timer(battle->error_timer);
-        battle->error_timer = NULL;
-    }
-
-    if (battle->dialogue_sprite) {
-        al_destroy_bitmap(battle->dialogue_sprite);
-        battle->dialogue_sprite = NULL;
-    }
-
+void destroy_battle(Battle* battle){
     free(battle);
-
 }

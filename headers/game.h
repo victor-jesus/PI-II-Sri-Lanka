@@ -15,6 +15,9 @@
 #include "game_state.h"
 
 typedef enum{
+    FIRST_SCREEN,
+    SECOND_SCREEN,
+	THIRD_SCREEN,
     DIALOGUE_1,
     DIALOGUE_2,
     DIALOGUE_3,
