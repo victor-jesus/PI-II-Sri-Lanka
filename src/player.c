@@ -308,5 +308,7 @@ void destroy_sprite_from_player(Player* player){
 }
 
 void destroy_player(Player* player){
+    destroy_sprite_from_player(player);
+
     free(player);
 }

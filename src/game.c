@@ -673,6 +673,7 @@ void load_third_map(Game* game) {
 
     Entity* entry_torch = create_torch(LEVEL_WIDTH * 0.06f, GROUND_Y);
 
+    // Carrega os esqueletos se já não tiverem sido mortos
     if(!game->is_third_level_mobs_dead){
         add_skeleton(game, 1220, 500, 50, 50);
     }
@@ -3954,13 +3955,11 @@ void draw_game(Game* game){
 }
 
 void destroy_game(Game* game) {
-     if (!game) return;
+    if (!game) return;
 
-    reset_world_entities(game);
-
-    if (game->battle) {
-        destroy_battle(game->battle);
-        game->battle = NULL;
+    if (game->player) {
+        destroy_player(game->player);
+        game->player = NULL;
     }
 
     if (game->enemy) {
@@ -3968,39 +3967,48 @@ void destroy_game(Game* game) {
         game->enemy = NULL;
     }
 
-    for(int i = 0; i < MAX_ENEMIES; i++){
-        if(game->mobs[i]){
-            destroy_enemy(game->mobs[i]);
-            game->mobs[i] = NULL;
-        }
-
-    }
-
-    if (game->player) {
-        destroy_player(game->player);
-        game->player = NULL;
+    if (game->battle) {
+        destroy_battle(game->battle);
+        game->battle = NULL;
     }
 
     if (game->map) {
-        destroy_map(game->map); 
+        destroy_map(game->map);
         game->map = NULL;
     }
 
-    if (game->background) {
-        al_destroy_bitmap(game->background);
-        game->background = NULL;
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (game->mobs[i]) {
+            destroy_enemy(game->mobs[i]);
+            game->mobs[i] = NULL;
+        }
     }
     
-    if (game->controls) {
-        al_destroy_bitmap(game->controls);
-        game->controls = NULL;
-    }
+    reset_world_entities(game);
 
-    if (game->subtitle_8_font) {
-        al_destroy_font(game->subtitle_8_font);
-        game->subtitle_8_font = NULL;
-    }
+    if (game->background) al_destroy_bitmap(game->background);
+    if (game->controls) al_destroy_bitmap(game->controls);
+
+    if (game->puzzle_bhaskara_img) al_destroy_bitmap(game->puzzle_bhaskara_img);
+    if (game->puzzle_pitagoras_img) al_destroy_bitmap(game->puzzle_pitagoras_img);
+    if (game->puzzle_bhaskara_paper) al_destroy_bitmap(game->puzzle_bhaskara_paper);
+    if (game->puzzle_bhaskara_paper_2) al_destroy_bitmap(game->puzzle_bhaskara_paper_2);
+    if (game->puzzle_pitagoras_paper_3) al_destroy_bitmap(game->puzzle_pitagoras_paper_3);
+    if (game->puzzle_1grau_img) al_destroy_bitmap(game->puzzle_1grau_img);
+    if (game->puzzle_1grau_paper) al_destroy_bitmap(game->puzzle_1grau_paper);
+
+    if (game->game_font) al_destroy_font(game->game_font);
+    if (game->title_font) al_destroy_font(game->title_font);
+    if (game->subtitle_font) al_destroy_font(game->subtitle_font);
+    if (game->subtitle_8_font) al_destroy_font(game->subtitle_8_font);
+    if (game->subtitle_11_font) al_destroy_font(game->subtitle_11_font);
+    if (game->log_font) al_destroy_font(game->log_font);
+    if (game->log_font_20) al_destroy_font(game->log_font_20);
+
+    if (game->timer_game_logs) al_destroy_timer(game->timer_game_logs);
+    if (game->timer_game_tips) al_destroy_timer(game->timer_game_tips);
+    if (game->timer_game_can_draw_tips) al_destroy_timer(game->timer_game_can_draw_tips);
+    if (game->timer_death) al_destroy_timer(game->timer_death);
 
     free(game);
 }
-
