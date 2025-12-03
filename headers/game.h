@@ -77,6 +77,7 @@ typedef struct {
 
     ALLEGRO_TIMER* timer_game_logs;
     ALLEGRO_TIMER* timer_game_tips;
+    ALLEGRO_TIMER* timer_game_can_draw_tips;
     char log_ln1[256];
     char log_ln2[256];
     char log_ln3[256];
@@ -92,10 +93,13 @@ typedef struct {
     Puzzle_id active_puzzle_id;
 
     ALLEGRO_BITMAP* puzzle_bhaskara_img;
-    ALLEGRO_BITMAP* puzzle_pythagoras_img;
+    ALLEGRO_BITMAP* puzzle_pitagoras_img;
     ALLEGRO_BITMAP* puzzle_bhaskara_paper;
     ALLEGRO_BITMAP* puzzle_bhaskara_paper_2;
     ALLEGRO_BITMAP* puzzle_pitagoras_paper_3;
+
+    ALLEGRO_BITMAP* puzzle_1grau_img;
+    ALLEGRO_BITMAP* puzzle_1grau_paper;
 
     ALLEGRO_FONT* log_font;
     ALLEGRO_FONT* log_font_20;

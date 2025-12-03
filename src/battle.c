@@ -328,7 +328,7 @@ void mob_death(Battle* battle, int* world_enemies, Game_state game_state){
 
     rand_chance = rand() % 10 + 1;
     printf("rand_chance: %d\n", rand_chance);
-    if(rand_chance >= 6){
+    if(rand_chance >= 4){
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, SMALL_POTION, qtd);
 
@@ -357,21 +357,20 @@ void minotaur_death(Battle* battle){
         sprintf(battle->log_ln1, "Você ganhou %d XP", qtd_xp);
 
         player_equip_item(battle->player, KEY_TO_SECOND_MAP);
-        
         sprintf(battle->log_ln2, "%s dropou %s", battle->enemy->name, KEY_TO_SECOND_MAP->name);
         
         int qtd = rand() % 4 + 1;
         inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-        sprintf(battle->log_ln2, "%s dropou %s", battle->enemy->name, BIG_POTION->name);
-        sprintf(battle->log_ln6, "Quantidade: %d", qtd);
+        sprintf(battle->log_ln3, "%s dropou %s", battle->enemy->name, BIG_POTION->name);
+        sprintf(battle->log_ln4, "Quantidade: %d", qtd);
 
         player_equip_item(battle->player, AMULET_OF_MINOTAUR);
-        sprintf(battle->log_ln7, "%s dropou %s", battle->enemy->name, AMULET_OF_MINOTAUR->name);
+        sprintf(battle->log_ln6, "%s dropou %s", battle->enemy->name, AMULET_OF_MINOTAUR->name);
 
-        sprintf(battle->log_ln8, "Buffs/Debuffs:");
+        sprintf(battle->log_ln7, "Buffs/Debuffs:");
 
-        sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
+        sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MINOTAUR->attack_buff, AMULET_OF_MINOTAUR->defense_buff, AMULET_OF_MINOTAUR->iniciative_buff, AMULET_OF_MINOTAUR->max_hp_buff);
 }
 
 void medusa_death(Battle* battle){
@@ -388,15 +387,15 @@ void medusa_death(Battle* battle){
     int qtd = rand() % 6 + 1;
     inventory_add_item(&battle->player->inventory, BIG_POTION, qtd);
 
-    sprintf(battle->log_ln5, "%s dropou um item.", battle->enemy->name);
-    sprintf(battle->log_ln6, "Quantidade: %d", qtd);
+    sprintf(battle->log_ln4, "%s dropou um item.", battle->enemy->name);
+    sprintf(battle->log_ln5, "Quantidade: %d", qtd);
 
     player_equip_item(battle->player, AMULET_OF_MEDUSA);
-    sprintf(battle->log_ln2, "%s dropou um %s", battle->enemy->name, AMULET_OF_MEDUSA->name);
+    sprintf(battle->log_ln6, "%s dropou um %s", battle->enemy->name, AMULET_OF_MEDUSA->name);
 
-    sprintf(battle->log_ln8, "Buffs/Debuffs:");
+    sprintf(battle->log_ln7, "Buffs/Debuffs:");
 
-    sprintf(battle->log_ln9, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MEDUSA->attack_buff, AMULET_OF_MEDUSA->defense_buff, AMULET_OF_MEDUSA->iniciative_buff, AMULET_OF_MEDUSA->max_hp_buff);
+    sprintf(battle->log_ln8, " Atk: %d Def: %d Ini: %d Max hp: %d", AMULET_OF_MEDUSA->attack_buff, AMULET_OF_MEDUSA->defense_buff, AMULET_OF_MEDUSA->iniciative_buff, AMULET_OF_MEDUSA->max_hp_buff);
 }
 
 void drop_itens(Battle* battle, int* world_enemies, Game_state game_state){
