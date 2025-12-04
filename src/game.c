@@ -263,7 +263,7 @@ Game* create_game(Game_state state, ALLEGRO_FONT* font, ALLEGRO_FONT* title_font
     player_equip_item(game->player, KEY_TO_MEDUSA);
     player_equip_item(game->player, KEY_TO_ARAUTO);
     player_equip_item(game->player, KEY_TO_SECOND_MAP);
-    player_equip_item(game->player, KEY_TO_THIRD_MAP);
+    player_equip_item(game->player, KEY_TO_THIRD_MAP);'
     */
 
 
